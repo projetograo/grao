@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#F0F4EC">
+<title>GRÃO — Parceiros</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Musgo Claro — Verde Névoa · Areia · Terracota Suave */
+  --red: #B8522A;
+  --red-soft: #CC6638;
+  --red-pale: #FAF0EB;
+  --cream: #F0EDE4;
+  --earth: #8C7A60;
+  --earth-dark: #5C4E38;
+  --green: #4E7050;
+  --green-pale: #EBF1E8;
+  --bg: #F0F4EC;
+  --bg2: #E6EDE2;
+  --bg3: #DCE6D8;
+  --card: #FAFCF8;
+  --card2: #F0F4EC;
+  --border: rgba(80,100,70,0.12);
+  --border2: rgba(80,100,70,0.22);
+  --text: #2A3020;
+  --text2: #6A7A58;
+  --text3: #9AAA86;
+  --gold: #9A7A2A;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { height:100%; overflow:hidden; font-family:'DM Sans',sans-serif; background:var(--bg); color:var(--text); }
+
+/* ── SCREENS ── */
+.screen { position:fixed; inset:0; display:none; flex-direction:column; background:var(--bg); overflow:hidden; }
+.screen.active { display:flex; }
+
+/* ── LOGIN ── */
+#loginScreen {
+  align-items:center; justify-content:center;
+  background: radial-gradient(ellipse at 30% 20%, rgba(184,82,42,0.08) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 80%, rgba(78,112,80,0.08) 0%, transparent 60%),
+              var(--bg);
+}
+.login-wrap { width:100%; max-width:400px; padding:40px 32px; }
+.login-logo {
+  text-align:center; margin-bottom:48px;
+}
+.login-logo .logo-text {
+  font-family:'Playfair Display',serif;
+  font-size:3.5rem; color:var(--text); letter-spacing:0.05em;
+}
+.login-logo .logo-text span { color:var(--red); font-style:italic; }
+.login-logo .logo-sub {
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.95rem; color:var(--text2); font-style:italic;
+  letter-spacing:0.08em; margin-top:4px;
+}
+.login-logo .logo-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(184,82,42,0.08); border:1px solid rgba(184,82,42,0.18);
+  color:var(--red-soft); font-size:0.7rem; letter-spacing:0.12em;
+  text-transform:uppercase; padding:5px 14px; border-radius:50px; margin-top:16px;
+}
+.login-form { display:flex; flex-direction:column; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:7px; }
+.form-group label { font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text2); font-weight:500; }
+.form-input {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:12px; padding:14px 16px;
+  font-size:0.95rem; color:var(--text); font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color 0.2s;
+}
+.form-input:focus { border-color:var(--red); }
+.form-input::placeholder { color:var(--text3); }
+.btn-login {
+  background:var(--red); color:white; border:none;
+  border-radius:12px; padding:15px; font-size:0.95rem;
+  font-weight:600; font-family:'DM Sans',sans-serif;
+  cursor:pointer; margin-top:8px;
+  transition:all 0.2s; box-shadow:0 4px 20px rgba(184,82,42,0.2);
+}
+.btn-login:hover { background:var(--red-soft); transform:translateY(-1px); }
+.btn-login:active { transform:translateY(0); }
+.login-error {
+  background:rgba(184,82,42,0.08); border:1px solid rgba(184,82,42,0.22);
+  border-radius:10px; padding:12px 16px;
+  font-size:0.85rem; color:var(--red-soft); text-align:center;
+  display:none;
+}
+.login-hint { text-align:center; font-size:0.78rem; color:var(--text3); margin-top:20px; line-height:1.6; }
+
+/* ── APP SHELL ── */
+#appScreen { background:var(--bg); }
+.app-header {
+  padding:54px 20px 16px;
+  background:linear-gradient(180deg, var(--bg2) 0%, transparent 100%);
+  flex-shrink:0; z-index:10;
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid var(--border);
+}
+.app-header-logo {
+  font-family:'Playfair Display',serif;
+  font-size:1.6rem; color:var(--text); letter-spacing:0.05em;
+}
+.app-header-logo span { color:var(--red); font-style:italic; }
+.app-header-right { display:flex; align-items:center; gap:12px; }
+.header-btn {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:8px 14px;
+  font-size:0.75rem; color:var(--text2);
+  cursor:pointer; font-family:'DM Sans',sans-serif;
+  transition:all 0.2s; display:flex; align-items:center; gap:6px;
+}
+.header-btn:hover { border-color:var(--border2); color:var(--text); }
+.admin-dot { width:6px; height:6px; background:var(--gold); border-radius:50%; }
+
+/* ── CONTENT AREA ── */
+.app-content {
+  flex:1; overflow-y:auto; overflow-x:hidden;
+  scroll-behavior:smooth; padding-bottom:90px;
+}
+.app-content::-webkit-scrollbar { width:3px; }
+.app-content::-webkit-scrollbar-track { background:transparent; }
+.app-content::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* ── TAB BAR ── */
+.tab-bar {
+  position:fixed; bottom:0; left:0; right:0;
+  background:rgba(240,244,236,0.97);
+  backdrop-filter:blur(20px);
+  border-top:1px solid var(--border);
+  display:flex; padding:8px 0 20px;
+  z-index:20;
+}
+.tab-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; gap:4px; padding:6px 4px;
+  cursor:pointer; transition:all 0.2s;
+  border:none; background:transparent;
+}
+.tab-icon { font-size:1.3rem; transition:transform 0.2s; }
+.tab-label { font-size:0.62rem; letter-spacing:0.06em; text-transform:uppercase; color:var(--text3); font-weight:500; transition:color 0.2s; }
+.tab-item.active .tab-label { color:var(--red); }
+.tab-item.active .tab-icon { transform:scale(1.15); }
+
+/* ── VIEWS ── */
+.view { display:none; animation:fadeIn 0.3s ease; }
+.view.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── HOME VIEW ── */
+.home-hero {
+  padding:24px 20px 32px;
+  background:linear-gradient(160deg, var(--bg2) 0%, var(--bg) 100%);
+  position:relative; overflow:hidden;
+}
+.home-hero::before {
+  content:''; position:absolute;
+  top:-60px; right:-40px;
+  width:200px; height:200px;
+  background:radial-gradient(circle, rgba(184,82,42,0.08) 0%, transparent 70%);
+}
+.home-greeting { font-size:0.78rem; color:var(--text2); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:8px; }
+.home-title {
+  font-family:'Playfair Display',serif;
+  font-size:1.7rem; color:var(--text); line-height:1.2; margin-bottom:12px;
+}
+.home-title em { color:var(--red); font-style:italic; }
+.home-verse {
+  font-family:'Cormorant Garamond',serif;
+  font-size:1rem; color:var(--text2); font-style:italic;
+  line-height:1.6; padding-left:12px;
+  border-left:2px solid var(--red);
+  margin-bottom:24px;
+}
+.home-status-bar {
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+.status-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:50px; padding:6px 14px;
+  font-size:0.75rem; color:var(--text2);
+}
+.status-pill .dot { width:6px; height:6px; border-radius:50%; }
+.dot-green { background:var(--green); animation:pulse 2s infinite; }
+.dot-gold { background:var(--gold); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+.section-pad { padding:0 20px; }
+.section-title-sm {
+  font-size:0.7rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--text3); font-weight:600; margin:28px 0 14px;
+  display:flex; align-items:center; gap:8px;
+}
+.section-title-sm::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* Quick Cards */
+.quick-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.quick-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; padding:18px 16px; cursor:pointer;
+  transition:all 0.2s; position:relative; overflow:hidden;
+}
+.quick-card:hover { border-color:var(--border2); transform:translateY(-2px); }
+.quick-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+}
+.quick-card.red::before { background:var(--red); }
+.quick-card.green::before { background:var(--green); }
+.quick-card.gold::before { background:var(--gold); }
+.quick-card.earth::before { background:var(--earth-dark); }
+.quick-card .qc-icon { font-size:1.5rem; margin-bottom:10px; display:block; }
+.quick-card .qc-label { font-size:0.8rem; font-weight:600; color:var(--text); margin-bottom:4px; }
+.quick-card .qc-sub { font-size:0.72rem; color:var(--text3); line-height:1.4; }
+
+/* Latest update banner */
+.latest-banner {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; padding:20px; margin:0 20px;
+  display:flex; gap:14px; align-items:center; cursor:pointer;
+  transition:all 0.2s;
+}
+.latest-banner:hover { border-color:var(--border2); }
+.latest-icon {
+  width:48px; height:48px; border-radius:14px;
+  background:var(--red-pale); display:flex; align-items:center;
+  justify-content:center; font-size:1.4rem; flex-shrink:0;
+}
+.latest-info { flex:1; }
+.latest-new { font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); font-weight:600; margin-bottom:4px; }
+.latest-title { font-size:0.92rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+.latest-sub { font-size:0.78rem; color:var(--text2); line-height:1.4; }
+.latest-arrow { color:var(--text3); font-size:1rem; }
+
+/* ── UPDATES VIEW ── */
+.update-list { padding:0 20px; display:flex; flex-direction:column; gap:12px; }
+.update-item {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; overflow:hidden; cursor:pointer;
+  transition:all 0.2s;
+}
+.update-item:hover { border-color:var(--border2); }
+.update-item-header {
+  padding:18px 18px 14px;
+  display:flex; justify-content:space-between; align-items:flex-start;
+}
+.update-meta { display:flex; flex-direction:column; gap:4px; }
+.update-edition { font-size:0.65rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); font-weight:600; }
+.update-item-title { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text); line-height:1.3; }
+.update-badge-new { background:var(--red); color:white; font-size:0.62rem; padding:3px 9px; border-radius:50px; font-weight:600; flex-shrink:0; }
+.update-item-body { padding:0 18px 18px; }
+.update-item-text { font-size:0.87rem; color:var(--text2); line-height:1.7; margin-bottom:14px; }
+.update-item-text p { margin-bottom:10px; }
+.update-item-text strong { color:var(--text); font-weight:500; }
+.update-expand-btn {
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:10px; padding:10px 16px;
+  font-size:0.8rem; color:var(--text2); font-family:'DM Sans',sans-serif;
+  cursor:pointer; width:100%; text-align:left; transition:all 0.2s;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.update-expand-btn:hover { color:var(--text); border-color:var(--border2); }
+.update-full { display:none; padding:14px 0 0; }
+.update-full.open { display:block; }
+
+/* ── TIMELINE VIEW ── */
+.timeline-wrap { padding:20px 20px 0; }
+.tl-header { margin-bottom:28px; }
+.tl-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--text); margin-bottom:8px; }
+.tl-header p { font-size:0.87rem; color:var(--text2); line-height:1.7; }
+.timeline { position:relative; padding-left:32px; }
+.timeline::before { content:''; position:absolute; left:7px; top:0; bottom:0; width:1px; background:var(--border); }
+.tl-item { position:relative; margin-bottom:28px; }
+.tl-dot {
+  position:absolute; left:-32px; top:4px;
+  width:15px; height:15px; border-radius:50%;
+  border:2px solid var(--bg); z-index:1;
+}
+.tl-dot.red { background:var(--red); box-shadow:0 0 0 3px rgba(184,82,42,0.18); }
+.tl-dot.green { background:var(--green); box-shadow:0 0 0 3px rgba(107,140,106,0.2); }
+.tl-dot.gold { background:var(--gold); box-shadow:0 0 0 3px rgba(212,168,67,0.2); }
+.tl-dot.gray { background:var(--text3); }
+.tl-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:16px;
+}
+.tl-date { font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--text3); margin-bottom:6px; }
+.tl-title { font-size:0.95rem; font-weight:600; color:var(--text); margin-bottom:6px; }
+.tl-body { font-size:0.83rem; color:var(--text2); line-height:1.65; margin-bottom:10px; }
+.tl-status {
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:0.68rem; letter-spacing:0.08em; text-transform:uppercase;
+  padding:4px 10px; border-radius:50px; font-weight:600;
+}
+.ts-done { background:rgba(107,140,106,0.15); color:var(--green); }
+.ts-active { background:rgba(232,97,74,0.12); color:var(--red-soft); }
+.ts-next { background:rgba(196,169,138,0.1); color:var(--earth); }
+
+/* ── PRAYER VIEW ── */
+.prayer-wrap { padding:20px; }
+.prayer-header { margin-bottom:24px; }
+.prayer-header h2 { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--text); margin-bottom:8px; }
+.prayer-header p { font-size:0.87rem; color:var(--text2); line-height:1.7; }
+.prayer-list { display:flex; flex-direction:column; gap:10px; margin-bottom:28px; }
+.prayer-item {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:16px 18px;
+  display:flex; gap:12px; align-items:flex-start;
+}
+.prayer-emoji { font-size:1.2rem; flex-shrink:0; margin-top:1px; }
+.prayer-text-wrap { flex:1; }
+.prayer-item-title { font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:4px; }
+.prayer-item-body { font-size:0.82rem; color:var(--text2); line-height:1.6; }
+.prayer-cta {
+  background:linear-gradient(135deg, #4E7050 0%, #365438 100%);
+  border-radius:18px; padding:24px; text-align:center;
+}
+.prayer-cta h3 { font-family:'Playfair Display',serif; font-size:1.15rem; color:white; margin-bottom:8px; }
+.prayer-cta p { font-size:0.83rem; color:rgba(255,255,255,0.75); line-height:1.6; margin-bottom:16px; }
+.btn-wa {
+  background:white; color:var(--green);
+  border:none; border-radius:12px; padding:12px 24px;
+  font-size:0.88rem; font-weight:700; font-family:'DM Sans',sans-serif;
+  cursor:pointer; display:inline-flex; align-items:center; gap:8px;
+  text-decoration:none; transition:all 0.2s;
+}
+.btn-wa:hover { transform:translateY(-2px); }
+
+/* ── ABOUT VIEW ── */
+.about-wrap { padding:20px; }
+.family-hero {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:20px; padding:24px; margin-bottom:20px; text-align:center;
+}
+.family-photo-placeholder {
+  width:120px; height:120px; border-radius:50%;
+  background:linear-gradient(135deg, #C4A882 0%, #A08860 100%);
+  margin:0 auto 16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:2.5rem; border:3px solid var(--border2);
+}
+.family-name { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text); margin-bottom:4px; }
+.family-sub { font-size:0.82rem; color:var(--text2); margin-bottom:16px; }
+.family-tags { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.ftag {
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:50px; padding:4px 12px;
+  font-size:0.72rem; color:var(--text2);
+}
+.members-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+.member-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:18px 14px;
+}
+.member-avatar { font-size:1.8rem; margin-bottom:10px; display:block; }
+.member-name { font-size:0.9rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+.member-role { font-size:0.7rem; color:var(--red-soft); text-transform:uppercase; letter-spacing:0.06em; font-weight:600; margin-bottom:8px; }
+.member-desc { font-size:0.78rem; color:var(--text2); line-height:1.55; }
+.about-section {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; padding:20px; margin-bottom:12px;
+}
+.about-section h3 { font-family:'Playfair Display',serif; font-size:1.05rem; color:var(--text); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.about-section p { font-size:0.85rem; color:var(--text2); line-height:1.75; }
+.about-section p + p { margin-top:10px; }
+.about-section strong { color:var(--text); font-weight:500; }
+
+/* ── PARTICIPATE VIEW ── */
+.participate-wrap { padding:20px; }
+.participate-hero {
+  background:linear-gradient(135deg, rgba(184,82,42,0.08) 0%, transparent 100%);
+  border:1px solid rgba(184,82,42,0.16);
+  border-radius:20px; padding:24px; margin-bottom:20px; text-align:center;
+}
+.participate-hero h2 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--text); margin-bottom:8px; }
+.participate-hero p { font-size:0.85rem; color:var(--text2); line-height:1.7; }
+.participate-cards { display:flex; flex-direction:column; gap:12px; }
+.p-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:18px; overflow:hidden;
+}
+.p-card-header {
+  padding:18px 18px 14px;
+  display:flex; gap:14px; align-items:center;
+}
+.p-card-icon {
+  width:44px; height:44px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; font-size:1.3rem;
+  flex-shrink:0;
+}
+.p-icon-green { background:var(--green-pale); }
+.p-icon-red { background:var(--red-pale); }
+.p-icon-gold { background:rgba(154,122,42,0.12); }
+.p-card-info { flex:1; }
+.p-card-title { font-size:1rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+.p-card-sub { font-size:0.78rem; color:var(--text2); }
+.p-card-body { padding:0 18px 18px; }
+.p-list { list-style:none; margin-bottom:14px; }
+.p-list li {
+  font-size:0.83rem; color:var(--text2); padding:7px 0;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:8px;
+}
+.p-list li:last-child { border-bottom:none; }
+.p-list li::before { content:'—'; color:var(--earth); }
+.btn-action {
+  width:100%; padding:12px; border-radius:12px;
+  font-size:0.85rem; font-weight:600; font-family:'DM Sans',sans-serif;
+  cursor:pointer; border:none; transition:all 0.2s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  text-decoration:none;
+}
+.btn-action-green { background:rgba(107,140,106,0.15); color:var(--green); }
+.btn-action-green:hover { background:var(--green); color:white; }
+.btn-action-red { background:var(--red-pale); color:var(--red-soft); }
+.btn-action-red:hover { background:var(--red); color:white; }
+.btn-action-gold { background:rgba(154,122,42,0.12); color:var(--gold); }
+.btn-action-gold:hover { background:var(--gold); color:white; }
+
+/* ── ADMIN PANEL ── */
+#adminScreen {
+  background:var(--bg);
+  overflow-y:auto;
+}
+.admin-header {
+  padding:54px 20px 20px;
+  background:linear-gradient(180deg, var(--bg2) 0%, transparent 100%);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.admin-title { font-family:'Playfair Display',serif; font-size:1.4rem; color:var(--text); }
+.admin-title span { color:var(--gold); font-style:italic; }
+.btn-back {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:8px 14px;
+  font-size:0.78rem; color:var(--text2); cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-back:hover { color:var(--text); }
+.admin-content { padding:0 20px 40px; }
+.admin-section { margin-bottom:32px; }
+.admin-section-title {
+  font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
+  color:var(--gold); font-weight:600; margin-bottom:14px;
+  display:flex; align-items:center; gap:8px;
+}
+.admin-section-title::after { content:''; flex:1; height:1px; background:rgba(154,122,42,0.18); }
+.admin-card {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:16px; padding:20px; margin-bottom:10px;
+}
+.admin-form { display:flex; flex-direction:column; gap:12px; }
+.admin-label { font-size:0.75rem; letter-spacing:0.08em; text-transform:uppercase; color:var(--text2); margin-bottom:5px; display:block; }
+.admin-input, .admin-textarea, .admin-select {
+  background:var(--card2); border:1px solid var(--border2);
+  border-radius:10px; padding:12px 14px;
+  font-size:0.9rem; color:var(--text); font-family:'DM Sans',sans-serif;
+  outline:none; transition:border-color 0.2s; width:100%;
+}
+.admin-input:focus, .admin-textarea:focus, .admin-select:focus { border-color:var(--gold); }
+.admin-textarea { min-height:100px; resize:vertical; line-height:1.6; }
+.admin-select { appearance:none; cursor:pointer; }
+.btn-publish {
+  background:var(--gold); color:var(--bg); border:none;
+  border-radius:12px; padding:13px; font-size:0.9rem;
+  font-weight:700; font-family:'DM Sans',sans-serif;
+  cursor:pointer; transition:all 0.2s; width:100%;
+}
+.btn-publish:hover { background:#AA8830; transform:translateY(-1px); }
+.admin-existing-item {
+  background:var(--card2); border:1px solid var(--border);
+  border-radius:12px; padding:14px; margin-bottom:8px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.admin-item-info { flex:1; }
+.admin-item-title { font-size:0.88rem; font-weight:600; color:var(--text); margin-bottom:3px; }
+.admin-item-meta { font-size:0.74rem; color:var(--text3); }
+.btn-delete {
+  background:var(--red-pale); border:none; color:var(--red);
+  border-radius:8px; padding:6px 12px; font-size:0.75rem;
+  cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-delete:hover { background:var(--red); color:white; }
+.admin-prayer-list { display:flex; flex-direction:column; gap:8px; }
+.toast {
+  position:fixed; bottom:100px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--green); color:white;
+  padding:12px 24px; border-radius:50px;
+  font-size:0.85rem; font-weight:600;
+  opacity:0; transition:all 0.3s; z-index:100; white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="screen active" id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="logo-text">GR<span>ÃO</span></div>
+      <div class="logo-sub">semeando o evangelho, vida a vida</div>
+      <div class="logo-badge">🔒 Área de Parceiros</div>
+    </div>
+    <div class="login-form">
+      <div class="form-group">
+        <label>E-mail</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="seu@email.com">
+      </div>
+      <div class="form-group">
+        <label>Senha</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••">
+      </div>
+      <div class="login-error" id="loginError">E-mail ou senha incorretos. Tente novamente.</div>
+      <button class="btn-login" onclick="doLogin()">Entrar no GRÃO →</button>
+    </div>
+    <p class="login-hint">Acesso exclusivo para parceiros do Projeto GRÃO.<br>Não tem acesso? Entre em contato com a família.</p>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="screen" id="appScreen">
+  <div class="app-header">
+    <div class="app-header-logo">GR<span>ÃO</span></div>
+    <div class="app-header-right">
+      <button class="header-btn" id="adminBtn" onclick="openAdmin()" style="display:none">
+        <span class="admin-dot"></span> Admin
+      </button>
+      <button class="header-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="app-content" id="appContent">
+
+    <!-- HOME -->
+    <div class="view active" id="view-home">
+      <div class="home-hero">
+        <div class="home-greeting">Bem-vindo(a), parceiro(a) 🌱</div>
+        <h1 class="home-title">Você faz parte<br>dessa <em>missão</em></h1>
+        <p class="home-verse">"Se o grão de trigo, caindo na terra, não morrer, fica ele só."<br>— João 12.24</p>
+        <div class="home-status-bar">
+          <div class="status-pill"><span class="dot dot-green"></span> Em preparação</div>
+          <div class="status-pill"><span class="dot dot-gold"></span> APMT & Pioneiros</div>
+          <div class="status-pill">🌍 Sudeste Asiático</div>
+        </div>
+      </div>
+      <div class="section-pad">
+        <div class="section-title-sm">Última atualização</div>
+      </div>
+      <div class="latest-banner" onclick="navTo('updates')">
+        <div class="latest-icon">🌱</div>
+        <div class="latest-info">
+          <div class="latest-new">Novo · Jan 2026</div>
+          <div class="latest-title">Informativo 1/2026</div>
+          <div class="latest-sub">Formação, agências e Cauê a caminho</div>
+        </div>
+        <div class="latest-arrow">›</div>
+      </div>
+      <div class="section-pad">
+        <div class="section-title-sm">Acesso rápido</div>
+        <div class="quick-grid">
+          <div class="quick-card red" onclick="navTo('prayer')">
+            <span class="qc-icon">🙏</span>
+            <div class="qc-label">Oração</div>
+            <div class="qc-sub">4 pedidos esta semana</div>
+          </div>
+          <div class="quick-card green" onclick="navTo('timeline')">
+            <span class="qc-icon">🗺️</span>
+            <div class="qc-label">Caminhada</div>
+            <div class="qc-sub">Ver linha do tempo</div>
+          </div>
+          <div class="quick-card gold" onclick="navTo('participate')">
+            <span class="qc-icon">💛</span>
+            <div class="qc-label">Parceria</div>
+            <div class="qc-sub">Como participar</div>
+          </div>
+          <div class="quick-card earth" onclick="navTo('about')">
+            <span class="qc-icon">👨‍👩‍👦</span>
+            <div class="qc-label">A família</div>
+            <div class="qc-sub">Bruno, Malu & Tom</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPDATES -->
+    <div class="view" id="view-updates">
+      <div class="section-pad" style="padding-top:12px">
+        <div class="section-title-sm" style="margin-top:12px">Informativos</div>
+      </div>
+      <div class="update-list" id="updateList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="view" id="view-timeline">
+      <div class="timeline-wrap">
+        <div class="tl-header">
+          <h2>Nossa Caminhada</h2>
+          <p>A jornada missionária é feita de passos, esperas e decisões. Acompanhe cada momento conosco.</p>
+        </div>
+        <div class="timeline" id="timelineList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PRAYER -->
+    <div class="view" id="view-prayer">
+      <div class="prayer-wrap">
+        <div class="prayer-header">
+          <h2>Pedidos de Oração</h2>
+          <p>A intercessão de vocês sustenta cada passo que damos. Estes são nossos pedidos mais presentes agora.</p>
+        </div>
+        <div class="prayer-list" id="prayerList">
+          <!-- Populated by JS -->
+        </div>
+        <div class="prayer-cta">
+          <h3>Grupo de Oração 🙏</h3>
+          <p>Entre no nosso grupo de WhatsApp para receber atualizações de oração em tempo real.</p>
+          <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="btn-wa">💬 Entrar no grupo</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="view" id="view-about">
+      <div class="about-wrap">
+        <div class="family-hero">
+          <div class="family-photo-placeholder">👨‍👩‍👦</div>
+          <div class="family-name">Família Kassar</div>
+          <div class="family-sub">Bruno · Malu · Tom · Cauê (a caminho 🌱)</div>
+          <div class="family-tags">
+            <span class="ftag">Maceió-AL</span>
+            <span class="ftag">IPT</span>
+            <span class="ftag">APMT & Pioneiros</span>
+            <span class="ftag">Sudeste Asiático</span>
+          </div>
+        </div>
+        <div class="members-grid">
+          <div class="member-card">
+            <span class="member-avatar">👨‍💼</span>
+            <div class="member-name">Bruno</div>
+            <div class="member-role">Vocação pastoral</div>
+            <div class="member-desc">Ensino bíblico, pregação, esportes, café, teatro. Pregando em Marcos na IPT.</div>
+          </div>
+          <div class="member-card">
+            <span class="member-avatar">👩‍🎨</span>
+            <div class="member-name">Malu</div>
+            <div class="member-role">Arquiteta & Educadora</div>
+            <div class="member-desc">Pedagoga, prof. de inglês, hospitalidade e cuidado. Coord. de missões na SAF.</div>
+          </div>
+          <div class="member-card">
+            <span class="member-avatar">👦</span>
+            <div class="member-name">Tom</div>
+            <div class="member-role">1 ano e 9 meses</div>
+            <div class="member-desc">A coisa mais engraçada e fofa do mundo. 🌱</div>
+          </div>
+          <div class="member-card">
+            <span class="member-avatar">🤰</span>
+            <div class="member-name">Cauê</div>
+            <div class="member-role">Chegando jul/2025</div>
+            <div class="member-desc">Mais um grão sendo plantado nessa família missionária.</div>
+          </div>
+        </div>
+        <div class="about-section">
+          <h3>🌱 Nosso chamado</h3>
+          <p>Há povos no mundo que nunca ouviram o nome de Jesus — não por rejeição, mas por ausência. Foi olhando para essa realidade que Deus começou a mover nossos corações.</p>
+          <p>O GRÃO é o nome desse projeto porque acreditamos que um <strong>pequeno grão lançado na terra, ao morrer, gera muito fruto.</strong></p>
+        </div>
+        <div class="about-section">
+          <h3>⛪ Nossa base</h3>
+          <p>Servimos na <strong>Primeira Igreja Presbiteriana do Tabuleiro</strong>, em Maceió-AL. É nossa casa, nossa comunidade, nosso ponto de envio.</p>
+          <p>Bruno prega na série "O Caminho do Senhor Servo" em Marcos. Malu coordena a secretaria de missões da SAF e ensina as crianças na EBD.</p>
+        </div>
+        <div class="about-section">
+          <h3>🌍 Para onde vamos</h3>
+          <p>Estamos em processo com <strong>APMT</strong> (Agência Presbiteriana de Missões Transculturais) e <strong>Pioneiros</strong>. O foco está em <strong>povos não alcançados no Sudeste Asiático</strong> — grupos com menos de 2% de cristãos e sem acesso ao Evangelho na própria língua.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PARTICIPATE -->
+    <div class="view" id="view-participate">
+      <div class="participate-wrap">
+        <div class="participate-hero">
+          <h2>Caminhe com a gente</h2>
+          <p>A missão é obra de todo o corpo de Cristo. Você não precisa ir para fazer parte. Há formas reais de caminhar conosco a partir de onde você está.</p>
+        </div>
+        <div class="participate-cards">
+          <div class="p-card">
+            <div class="p-card-header">
+              <div class="p-card-icon p-icon-green">🙏</div>
+              <div class="p-card-info">
+                <div class="p-card-title">Orando</div>
+                <div class="p-card-sub">A oração é o primeiro passo</div>
+              </div>
+            </div>
+            <div class="p-card-body">
+              <ul class="p-list">
+                <li>Pela preparação da nossa família</li>
+                <li>Pelo processo com APMT e Pioneiros</li>
+                <li>Pela chegada do Cauê</li>
+                <li>Pelos povos não alcançados</li>
+              </ul>
+              <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="btn-action btn-action-green">Entrar no grupo de oração →</a>
+            </div>
+          </div>
+          <div class="p-card">
+            <div class="p-card-header">
+              <div class="p-card-icon p-icon-red">💛</div>
+              <div class="p-card-info">
+                <div class="p-card-title">Contribuindo</div>
+                <div class="p-card-sub">Parceria financeira mensal</div>
+              </div>
+            </div>
+            <div class="p-card-body">
+              <ul class="p-list">
+                <li>Contribuições mensais recorrentes</li>
+                <li>Qualquer valor faz diferença</li>
+                <li>Transparência e prestação de contas</li>
+                <li>Apoio a necessidades específicas</li>
+              </ul>
+              <a href="https://wa.me/5582999256252?text=Oi!+Quero+apoiar+o+Projeto+Gr%C3%A3o" target="_blank" class="btn-action btn-action-red">Quero ser parceiro financeiro →</a>
+            </div>
+          </div>
+          <div class="p-card">
+            <div class="p-card-header">
+              <div class="p-card-icon p-icon-gold">📲</div>
+              <div class="p-card-info">
+                <div class="p-card-title">Acompanhando</div>
+                <div class="p-card-sub">Compartilhe e multiplique</div>
+              </div>
+            </div>
+            <div class="p-card-body">
+              <ul class="p-list">
+                <li>Receba informativos trimestrais</li>
+                <li>Compartilhe com amigos e igrejas</li>
+                <li>Conecte outras pessoas à missão</li>
+              </ul>
+              <a href="https://linktr.ee/nossoprojetograo" target="_blank" class="btn-action btn-action-gold">Ver informativos anteriores →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="navTo('home')" data-tab="home">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Início</span>
+    </button>
+    <button class="tab-item" onclick="navTo('updates')" data-tab="updates">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">Informes</span>
+    </button>
+    <button class="tab-item" onclick="navTo('timeline')" data-tab="timeline">
+      <span class="tab-icon">🗺️</span>
+      <span class="tab-label">Caminhada</span>
+    </button>
+    <button class="tab-item" onclick="navTo('prayer')" data-tab="prayer">
+      <span class="tab-icon">🙏</span>
+      <span class="tab-label">Oração</span>
+    </button>
+    <button class="tab-item" onclick="navTo('about')" data-tab="about">
+      <span class="tab-icon">👨‍👩‍👦</span>
+      <span class="tab-label">Família</span>
+    </button>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="screen" id="adminScreen">
+  <div class="admin-header">
+    <div class="admin-title">Painel <span>Admin</span></div>
+    <button class="btn-back" onclick="closeAdmin()">← Voltar</button>
+  </div>
+  <div class="admin-content">
+
+    <!-- NEW UPDATE -->
+    <div class="admin-section">
+      <div class="admin-section-title">Novo Informativo</div>
+      <div class="admin-card">
+        <div class="admin-form">
+          <div>
+            <label class="admin-label">Título</label>
+            <input type="text" class="admin-input" id="newUpdateTitle" placeholder="Ex: Informativo 2/2026">
+          </div>
+          <div>
+            <label class="admin-label">Período / Data</label>
+            <input type="text" class="admin-input" id="newUpdateDate" placeholder="Ex: Abril 2026">
+          </div>
+          <div>
+            <label class="admin-label">Resumo (aparece na lista)</label>
+            <input type="text" class="admin-input" id="newUpdateSummary" placeholder="Uma linha resumindo o informativo...">
+          </div>
+          <div>
+            <label class="admin-label">Conteúdo completo</label>
+            <textarea class="admin-textarea" id="newUpdateContent" placeholder="Escreva o informativo completo aqui. Use ** para negrito: **texto**"></textarea>
+          </div>
+          <button class="btn-publish" onclick="addUpdate()">✓ Publicar Informativo</button>
+        </div>
+      </div>
+      <div id="existingUpdates"></div>
+    </div>
+
+    <!-- PRAYER REQUESTS -->
+    <div class="admin-section">
+      <div class="admin-section-title">Pedidos de Oração</div>
+      <div class="admin-card">
+        <div class="admin-form">
+          <div>
+            <label class="admin-label">Título do pedido</label>
+            <input type="text" class="admin-input" id="newPrayerTitle" placeholder="Ex: Pela chegada do Cauê">
+          </div>
+          <div>
+            <label class="admin-label">Descrição</label>
+            <textarea class="admin-textarea" id="newPrayerBody" placeholder="Contexto e detalhes do pedido..." style="min-height:70px"></textarea>
+          </div>
+          <div>
+            <label class="admin-label">Emoji</label>
+            <input type="text" class="admin-input" id="newPrayerEmoji" placeholder="🙏" style="max-width:80px">
+          </div>
+          <button class="btn-publish" onclick="addPrayer()">✓ Adicionar Pedido</button>
+        </div>
+      </div>
+      <div class="admin-prayer-list" id="existingPrayers"></div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="admin-section">
+      <div class="admin-section-title">Linha do Tempo</div>
+      <div class="admin-card">
+        <div class="admin-form">
+          <div>
+            <label class="admin-label">Data / Período</label>
+            <input type="text" class="admin-input" id="newTlDate" placeholder="Ex: 2026 · Março">
+          </div>
+          <div>
+            <label class="admin-label">Título</label>
+            <input type="text" class="admin-input" id="newTlTitle" placeholder="Ex: Primeira entrevista APMT">
+          </div>
+          <div>
+            <label class="admin-label">Descrição</label>
+            <textarea class="admin-textarea" id="newTlBody" placeholder="O que aconteceu..." style="min-height:70px"></textarea>
+          </div>
+          <div>
+            <label class="admin-label">Status</label>
+            <select class="admin-select admin-input" id="newTlStatus">
+              <option value="done">✓ Concluído</option>
+              <option value="active">⟳ Em andamento</option>
+              <option value="next">→ Próximo passo</option>
+            </select>
+          </div>
+          <button class="btn-publish" onclick="addTimeline()">✓ Adicionar à Timeline</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREDENTIALS -->
+    <div class="admin-section">
+      <div class="admin-section-title">Gerenciar Acesso</div>
+      <div class="admin-card">
+        <p style="font-size:0.85rem;color:var(--text2);margin-bottom:16px;line-height:1.6">Parceiros cadastrados com acesso ao app. Adicione ou remova conforme necessário.</p>
+        <div id="userList" style="margin-bottom:16px"></div>
+        <div class="admin-form">
+          <div>
+            <label class="admin-label">Novo parceiro — e-mail</label>
+            <input type="email" class="admin-input" id="newUserEmail" placeholder="parceiro@email.com">
+          </div>
+          <div>
+            <label class="admin-label">Senha</label>
+            <input type="text" class="admin-input" id="newUserPass" placeholder="Crie uma senha para este parceiro">
+          </div>
+          <button class="btn-publish" onclick="addUser()">✓ Adicionar Parceiro</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA STORE ───
+const STORE = {
+  users: [
+    { email: 'admin@grao.com', password: 'grao2025', isAdmin: true },
+    { email: 'parceiro@grao.com', password: 'parceiro123', isAdmin: false }
+  ],
+  updates: [
+    {
+      id: 1, edition: 'Informativo 1/2026', date: 'Janeiro 2026',
+      title: 'Formação, agências e família crescendo',
+      summary: 'Concluímos o Perspectivas, avançamos na APMT e esperamos o Cauê para julho.',
+      content: `Nossa gente,\n\nEstamos muito felizes com o que Deus tem feito em nossas vidas, e queremos compartilhar com você essas boas novidades.\n\n**Formação e preparo**\nConclui o Perspectivas, um tempo muito significativo para fortalecer minha visão missionária. Também avancei na formação com a APMT, concluindo as disciplinas de Vida e Caráter do Missionário e Captação de Recursos no CFM.\n\n**Caminho com as agências**\nCom a APMT, concluímos a avaliação psicológica e agora aguardamos a primeira entrevista. Com a Pioneiros, enviamos o Basic Profile e seguimos avançando. O próximo passo será entrar em contato com duas equipes com as quais nos identificamos.\n\n**Nossa família**\nEstamos esperando o Cauê, nosso segundo filho, com chegada prevista para a segunda semana de julho. Tom está com 1 ano e 9 meses. É um tempo intenso, mas cheio de graça.`,
+      isNew: true
+    },
+    {
+      id: 2, edition: 'Informativo 2/2025', date: 'Segundo trimestre 2025',
+      title: 'No caminho — servindo e fortalecendo raízes',
+      summary: 'Evangelização, nova Igreja parceira em Cuiabá e avanços com as agências.',
+      content: `Nossa gente,\n\nO segundo trimestre passou e estamos aqui para compartilhar o que aconteceu.\n\n**Servindo na igreja local**\nTemos sido uma alegria servir na IPT. Bruno pregou na série "O Caminho do Senhor Servo" em Marcos. Evangelizamos com UPH e SAF, alcançando famílias e compartilhando o Evangelho.\n\n**Fortalecendo nossas raízes**\nRecebemos uma oferta missionária da Igreja Presbiteriana de Areão, em Cuiabá — nova parceira que caminha conosco em oração e generosidade. Participamos de um workshop de comunicação e missão promovido pelo PMCZ.\n\n**No caminho com as agências**\nDecidimos adiar o estágio com a APMT para este ano — Malu começou um novo trabalho e não seria o momento certo. Seguimos avançando com fé e direção.`,
+      isNew: false
+    }
+  ],
+  prayers: [
+    { id: 1, emoji: '👶', title: 'Chegada do Cauê', body: 'Pela saúde de Malu e do bebê, e pela graça de Deus neste tempo de espera e preparação para o segundo filho.' },
+    { id: 2, emoji: '🚪', title: 'Processo com as agências', body: 'Pela primeira entrevista com a APMT e pelo próximo contato com as equipes dos Pioneiros. Pedimos direção clara e confirmação do Senhor.' },
+    { id: 3, emoji: '⛪', title: 'Nossa família e a IPT', body: 'Pela vida da nossa igreja local, pela reforma do templo e pela vida espiritual da congregação.' },
+    { id: 4, emoji: '🌍', title: 'Povos não alcançados', body: 'Que Deus levante obreiros para cada povo — e que o Evangelho chegue onde ainda não chegou.' }
+  ],
+  timeline: [
+    { id: 1, date: '2024 · Início', title: 'Perspectivas — visão missionária', body: 'Bruno concluiu o Perspectivas, tempo fundamental para alinhar o coração com a missão de Deus.', status: 'done', color: 'green' },
+    { id: 2, date: '2025 · Janeiro', title: 'Formação CFM — APMT', body: 'Concluídas as disciplinas de Vida e Caráter do Missionário e Captação de Recursos.', status: 'done', color: 'green' },
+    { id: 3, date: '2025 · Fevereiro', title: 'Avaliação psicológica — APMT', body: 'Avaliação concluída. Aguardando a primeira entrevista — momento importante do processo.', status: 'active', color: 'red' },
+    { id: 4, date: '2025 · Março', title: 'Basic Profile — Pioneiros', body: 'Enviamos o Basic Profile. Próximo passo: contato com duas equipes com as quais nos identificamos.', status: 'active', color: 'red' },
+    { id: 5, date: '2025 · Julho', title: 'Chegada do Cauê 🌱', body: 'Nosso segundo filho está chegando. Deus tem cuidado de nós em cada detalhe.', status: 'active', color: 'gold' },
+    { id: 6, date: '2025–2026', title: 'Construção da base de parceiros', body: 'Levantando uma rede de apoiadores em oração e parceria financeira para o envio.', status: 'next', color: 'gray' },
+    { id: 7, date: 'Meta · 2027', title: 'Envio ao campo missionário', body: 'Chegar ao campo entre povos não alcançados no Sudeste Asiático.', status: 'next', color: 'gray' }
+  ]
+};
+
+let currentUser = null;
+
+// ─── AUTH ───
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass = document.getElementById('loginPassword').value;
+  const user = STORE.users.find(u => u.email.toLowerCase() === email && u.password === pass);
+  if (user) {
+    currentUser = user;
+    document.getElementById('loginError').style.display = 'none';
+    document.getElementById('loginScreen').classList.remove('active');
+    document.getElementById('appScreen').classList.add('active');
+    if (user.isAdmin) document.getElementById('adminBtn').style.display = 'flex';
+    renderAll();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('loginEmail').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+function doLogout() {
+  currentUser = null;
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('loginScreen').classList.add('active');
+  document.getElementById('loginEmail').value = '';
+  document.getElementById('loginPassword').value = '';
+}
+
+// ─── NAVIGATION ───
+function navTo(tab) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+  document.getElementById('appContent').scrollTop = 0;
+}
+
+// ─── RENDER ───
+function renderAll() { renderUpdates(); renderTimeline(); renderPrayers(); renderAdmin(); }
+
+function formatContent(text) {
+  return text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+}
+
+function renderUpdates() {
+  const el = document.getElementById('updateList');
+  el.innerHTML = STORE.updates.map(u => `
+    <div class="update-item">
+      <div class="update-item-header">
+        <div class="update-meta">
+          <div class="update-edition">${u.edition}</div>
+          <div class="update-item-title">${u.title}</div>
+        </div>
+        ${u.isNew ? '<span class="update-badge-new">Novo</span>' : ''}
+      </div>
+      <div class="update-item-body">
+        <div class="update-item-text"><p>${u.summary}</p></div>
+        <button class="update-expand-btn" onclick="toggleUpdate(${u.id}, this)">
+          <span>Ler informativo completo</span> <span>↓</span>
+        </button>
+        <div class="update-full" id="uf-${u.id}">
+          <div class="update-item-text" style="padding-top:14px;border-top:1px solid var(--border);margin-top:14px">${formatContent(u.content)}</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleUpdate(id, btn) {
+  const el = document.getElementById('uf-' + id);
+  const isOpen = el.classList.toggle('open');
+  btn.querySelector('span:last-child').textContent = isOpen ? '↑' : '↓';
+  btn.querySelector('span:first-child').textContent = isOpen ? 'Fechar' : 'Ler informativo completo';
+}
+
+function renderTimeline() {
+  const colors = { done:'green', active:'red', next:'gold', gray:'gray' };
+  const statusClass = { done:'ts-done', active:'ts-active', next:'ts-next' };
+  const statusLabel = { done:'✓ Concluído', active:'⟳ Em andamento', next:'→ Próximo passo' };
+  document.getElementById('timelineList').innerHTML = STORE.timeline.map(t => `
+    <div class="tl-item">
+      <div class="tl-dot ${t.color}"></div>
+      <div class="tl-card">
+        <div class="tl-date">${t.date}</div>
+        <div class="tl-title">${t.title}</div>
+        <div class="tl-body">${t.body}</div>
+        <span class="tl-status ${statusClass[t.status]}">${statusLabel[t.status]}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPrayers() {
+  document.getElementById('prayerList').innerHTML = STORE.prayers.map(p => `
+    <div class="prayer-item">
+      <span class="prayer-emoji">${p.emoji}</span>
+      <div class="prayer-text-wrap">
+        <div class="prayer-item-title">${p.title}</div>
+        <div class="prayer-item-body">${p.body}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAdmin() {
+  // Existing updates
+  document.getElementById('existingUpdates').innerHTML = STORE.updates.map(u => `
+    <div class="admin-existing-item">
+      <div class="admin-item-info">
+        <div class="admin-item-title">${u.title}</div>
+        <div class="admin-item-meta">${u.edition} · ${u.date}</div>
+      </div>
+      <button class="btn-delete" onclick="deleteUpdate(${u.id})">Remover</button>
+    </div>
+  `).join('');
+  // Existing prayers
+  document.getElementById('existingPrayers').innerHTML = STORE.prayers.map(p => `
+    <div class="admin-existing-item">
+      <div class="admin-item-info">
+        <div class="admin-item-title">${p.emoji} ${p.title}</div>
+      </div>
+      <button class="btn-delete" onclick="deletePrayer(${p.id})">Remover</button>
+    </div>
+  `).join('');
+  // Users
+  document.getElementById('userList').innerHTML = STORE.users.map((u,i) => `
+    <div class="admin-existing-item">
+      <div class="admin-item-info">
+        <div class="admin-item-title">${u.email}</div>
+        <div class="admin-item-meta">${u.isAdmin ? '👑 Admin' : '👤 Parceiro'}</div>
+      </div>
+      ${!u.isAdmin ? `<button class="btn-delete" onclick="deleteUser(${i})">Remover</button>` : '<span style="font-size:0.75rem;color:var(--text3)">Protegido</span>'}
+    </div>
+  `).join('');
+}
+
+// ─── ADMIN ACTIONS ───
+function addUpdate() {
+  const title = document.getElementById('newUpdateTitle').value.trim();
+  const date = document.getElementById('newUpdateDate').value.trim();
+  const summary = document.getElementById('newUpdateSummary').value.trim();
+  const content = document.getElementById('newUpdateContent').value.trim();
+  if (!title || !content) return showToast('Preencha título e conteúdo!');
+  STORE.updates.unshift({ id: Date.now(), edition: title, date, title, summary, content, isNew: true });
+  document.getElementById('newUpdateTitle').value = '';
+  document.getElementById('newUpdateDate').value = '';
+  document.getElementById('newUpdateSummary').value = '';
+  document.getElementById('newUpdateContent').value = '';
+  renderAll(); showToast('✓ Informativo publicado!');
+}
+
+function deleteUpdate(id) {
+  STORE.updates = STORE.updates.filter(u => u.id !== id);
+  renderAll(); showToast('Informativo removido.');
+}
+
+function addPrayer() {
+  const title = document.getElementById('newPrayerTitle').value.trim();
+  const body = document.getElementById('newPrayerBody').value.trim();
+  const emoji = document.getElementById('newPrayerEmoji').value.trim() || '🙏';
+  if (!title) return showToast('Preencha o título!');
+  STORE.prayers.push({ id: Date.now(), emoji, title, body });
+  document.getElementById('newPrayerTitle').value = '';
+  document.getElementById('newPrayerBody').value = '';
+  document.getElementById('newPrayerEmoji').value = '';
+  renderAll(); showToast('✓ Pedido adicionado!');
+}
+
+function deletePrayer(id) {
+  STORE.prayers = STORE.prayers.filter(p => p.id !== id);
+  renderAll(); showToast('Pedido removido.');
+}
+
+function addTimeline() {
+  const date = document.getElementById('newTlDate').value.trim();
+  const title = document.getElementById('newTlTitle').value.trim();
+  const body = document.getElementById('newTlBody').value.trim();
+  const status = document.getElementById('newTlStatus').value;
+  if (!title) return showToast('Preencha o título!');
+  const colorMap = { done:'green', active:'red', next:'gold' };
+  STORE.timeline.push({ id: Date.now(), date, title, body, status, color: colorMap[status] });
+  document.getElementById('newTlDate').value = '';
+  document.getElementById('newTlTitle').value = '';
+  document.getElementById('newTlBody').value = '';
+  renderAll(); showToast('✓ Adicionado à timeline!');
+}
+
+function addUser() {
+  const email = document.getElementById('newUserEmail').value.trim();
+  const pass = document.getElementById('newUserPass').value.trim();
+  if (!email || !pass) return showToast('Preencha e-mail e senha!');
+  if (STORE.users.find(u => u.email.toLowerCase() === email.toLowerCase())) return showToast('E-mail já cadastrado!');
+  STORE.users.push({ email, password: pass, isAdmin: false });
+  document.getElementById('newUserEmail').value = '';
+  document.getElementById('newUserPass').value = '';
+  renderAdmin(); showToast('✓ Parceiro adicionado!');
+}
+
+function deleteUser(index) {
+  STORE.users.splice(index, 1);
+  renderAdmin(); showToast('Acesso removido.');
+}
+
+function openAdmin() {
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('adminScreen').classList.add('active');
+  renderAdmin();
+}
+
+function closeAdmin() {
+  document.getElementById('adminScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
