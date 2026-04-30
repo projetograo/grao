@@ -6,6 +6,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#4A2E20">
 <link rel="manifest" href="manifest.json">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("KntRzGvrjbRuUiVZn");</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GRÃO">
@@ -546,9 +548,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
       <div class="adform">
-        <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE"></div>
-        <div><label class="adlbl">Senha</label><input type="text" class="adinp" id="nUP"></div>
-        <button class="adbtn" onclick="addUser()">Adicionar parceiro</button>
+        <div><label class="adlbl">Nome do parceiro</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
+        <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE" placeholder="parceiro@email.com"></div>
+        <div><label class="adlbl">Senha</label><input type="text" class="adinp" id="nUP" placeholder="Crie uma senha"></div>
+        <button class="adbtn" onclick="addUser()">Adicionar parceiro & enviar e-mail</button>
       </div>
     </div>
   </div>
@@ -622,6 +625,28 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 const MID='c0VO-WfnW0k';
 let mPlaying=false,me=null;
 
+// ── PERSISTENCE ──
+function saveUsers(){ localStorage.setItem('grao_users', JSON.stringify(D.users)); }
+function loadUsers(){
+  const saved = localStorage.getItem('grao_users');
+  if(saved){ try{ D.users = JSON.parse(saved); }catch(e){} }
+}
+function saveNews(){ localStorage.setItem('grao_news', JSON.stringify(D.news)); }
+function loadNews(){
+  const saved = localStorage.getItem('grao_news');
+  if(saved){ try{ const n=JSON.parse(saved); if(n.length) D.news=n; }catch(e){} }
+}
+function savePrayers(){ localStorage.setItem('grao_prayers', JSON.stringify(D.prayers)); }
+function loadPrayers(){
+  const saved = localStorage.getItem('grao_prayers');
+  if(saved){ try{ const p=JSON.parse(saved); if(p.length) D.prayers=p; }catch(e){} }
+}
+function saveTimeline(){ localStorage.setItem('grao_timeline', JSON.stringify(D.timeline)); }
+function loadTimeline(){
+  const saved = localStorage.getItem('grao_timeline');
+  if(saved){ try{ const t=JSON.parse(saved); if(t.length) D.timeline=t; }catch(e){} }
+}
+
 const D={
   users:[{email:'admin@grao.com',pass:'grao2026',admin:true},{email:'parceiro@grao.com',pass:'parceiro123',admin:false}],
   news:[
@@ -677,6 +702,15 @@ const D={
   ]
 };
 
+// Load all persisted data on startup
+(function initData(){
+  loadUsers(); loadNews(); loadPrayers(); loadTimeline();
+  // Load settings
+  const gaId=localStorage.getItem('grao_ga_id');
+  const mName=localStorage.getItem('grao_music_name');
+  if(gaId) window._gaId=gaId;
+})();
+
 function doLogin(){
   const email=g('lE').toLowerCase(),pass=g('lP');
   const user=D.users.find(u=>u.email.toLowerCase()===email&&u.pass===pass);
@@ -692,76 +726,48 @@ function doLogout(){me=null;pauseMusic();document.getElementById('appScreen').cl
 
 function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;}
 
-let ytPlayer = null;
-let ytReady = false;
-
-// Load YouTube IFrame API
-function loadYTApi(){
-  if(window.YT) { onYTReady(); return; }
-  const tag = document.createElement('script');
-  tag.src = 'https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
-}
+let ytPlayer=null;
 
 function onYouTubeIframeAPIReady(){
-  ytReady = true;
-  onYTReady();
-}
-
-function onYTReady(){
-  const savedId = localStorage.getItem('grao_music_id') || MID;
-  const savedName = localStorage.getItem('grao_music_name');
-  if(savedName) document.querySelector('.mname').textContent = savedName;
-
-  ytPlayer = new YT.Player('ytFr', {
-    height:'1', width:'1',
-    videoId: savedId,
-    playerVars:{
-      autoplay: 1,
-      loop: 1,
-      playlist: savedId,
-      controls: 0,
-      mute: 0,
-      rel: 0,
-      playsinline: 1
-    },
+  const vid=localStorage.getItem('grao_music_id')||MID;
+  ytPlayer=new YT.Player('ytFr',{
+    height:'1',width:'1',videoId:vid,
+    playerVars:{autoplay:1,loop:1,playlist:vid,controls:0,rel:0,playsinline:1},
     events:{
-      onReady: function(e){
-        e.target.setVolume(70);
+      onReady:function(e){
+        e.target.setVolume(60);
         e.target.playVideo();
-        mPlaying = true;
+        mPlaying=true;
         document.getElementById('mbar').classList.add('on');
         document.getElementById('micon').setAttribute('href','#ipause');
       },
-      onStateChange: function(e){
-        // -1=unstarted, 0=ended, 1=playing, 2=paused, 3=buffering
-        if(e.data === 0){ e.target.playVideo(); } // loop
+      onStateChange:function(e){
+        if(e.data===YT.PlayerState.ENDED) e.target.playVideo();
       }
     }
   });
 }
 
 function initMusic(){
+  const savedName=localStorage.getItem('grao_music_name');
+  if(savedName) document.querySelector('.mname').textContent=savedName;
   document.getElementById('mbar').classList.add('on');
-  loadYTApi();
+  // Load YouTube API
+  if(window.YT&&window.YT.Player){ onYouTubeIframeAPIReady(); return; }
+  const tag=document.createElement('script');
+  tag.src='https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
 }
 
 function toggleMusic(){
-  if(!ytPlayer) return;
-  if(mPlaying){
-    ytPlayer.pauseVideo();
-    mPlaying = false;
-    document.getElementById('micon').setAttribute('href','#iplay');
-  } else {
-    ytPlayer.playVideo();
-    mPlaying = true;
-    document.getElementById('micon').setAttribute('href','#ipause');
-  }
+  if(!ytPlayer||!ytPlayer.pauseVideo) return;
+  if(mPlaying){ ytPlayer.pauseVideo(); mPlaying=false; document.getElementById('micon').setAttribute('href','#iplay'); }
+  else{ ytPlayer.playVideo(); mPlaying=true; document.getElementById('micon').setAttribute('href','#ipause'); }
 }
 
 function pauseMusic(){
-  if(ytPlayer) ytPlayer.pauseVideo();
-  mPlaying = false;
+  if(ytPlayer&&ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+  mPlaying=false;
 }
 
 function track(a){const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');const d=new Date().toISOString().split('T')[0];m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);localStorage.setItem(k,JSON.stringify(m));}
@@ -885,18 +891,15 @@ function clearMetrics(){localStorage.removeItem('gm');renderAdmin();toast('Métr
 
 function saveGA(){
   const id=document.getElementById('gaId').value.trim();
-  if(!id)return toast('Informe o ID do Google Analytics.');
+  if(!id)return toast('Informe o ID.');
   localStorage.setItem('grao_ga_id', id);
-  // Load GA script dynamically
+  window._gaId=id;
   const s=document.createElement('script');
-  s.async=true;
-  s.src='https://www.googletagmanager.com/gtag/js?id='+id;
+  s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+id;
   document.head.appendChild(s);
   window.dataLayer=window.dataLayer||[];
   function gtag(){dataLayer.push(arguments);}
-  gtag('js',new Date());
-  gtag('config',id);
-  window._gaId=id;
+  gtag('js',new Date()); gtag('config',id);
   toast('Google Analytics ativado!');
 }
 
@@ -906,11 +909,11 @@ function saveMusic(){
   if(!url)return toast('Informe a URL do YouTube.');
   const vid=ytId(url);
   if(!vid)return toast('URL inválida. Use um link do YouTube.');
-  localStorage.setItem('grao_music_name', name||'Música');
-  localStorage.setItem('grao_music_id', vid);
+  localStorage.setItem('grao_music_name',name||'Música');
+  localStorage.setItem('grao_music_id',vid);
   document.querySelector('.mname').textContent=name||'Música';
-  if(ytPlayer){
-    ytPlayer.loadVideoById({videoId:vid,startSeconds:0});
+  if(ytPlayer&&ytPlayer.loadVideoById){
+    ytPlayer.loadVideoById({videoId:vid});
     ytPlayer.playVideo();
     mPlaying=true;
     document.getElementById('micon').setAttribute('href','#ipause');
@@ -919,24 +922,12 @@ function saveMusic(){
 }
 
 function loadSavedSettings(){
-  // Load GA
   const gaId=localStorage.getItem('grao_ga_id');
-  if(gaId){
-    document.getElementById('gaId').value=gaId;
-    const s=document.createElement('script');
-    s.async=true;
-    s.src='https://www.googletagmanager.com/gtag/js?id='+gaId;
-    document.head.appendChild(s);
-    window._gaId=gaId;
-  }
-  // Load music name
+  if(gaId){ document.getElementById('gaId').value=gaId; }
   const mName=localStorage.getItem('grao_music_name');
   const mId=localStorage.getItem('grao_music_id');
-  if(mName) document.querySelector('.mname').textContent=mName;
-  if(mId){
-    document.getElementById('musicName').value=mName||'';
-    document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+mId;
-  }
+  if(mName){ document.querySelector('.mname').textContent=mName; document.getElementById('musicName').value=mName; }
+  if(mId){ document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+mId; }
 }
 function addNews(){
   const name=g('nIT'),date=g('nID'),summary=g('nIS'),content=g('nIC');
@@ -947,14 +938,29 @@ function addNews(){
   const sign=g('nISg');
   D.news.unshift({id:Date.now(),name,date,summary,content,photos,photoCaps:[],video,videoLabel,video2,video2Label,prayers,sign,isNew:true});
   ['nIT','nID','nIS','nIC','nIFo','nIV','nIVL','nIV2','nIV2L','nIPr','nISg'].forEach(id=>document.getElementById(id).value='');
-  renderAll();toast('Publicado!');
+  saveNews();renderAll();toast('Publicado!');
 }
-function delNews(id){D.news=D.news.filter(n=>n.id!==id);renderAll();toast('Removido.');}
-function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
-function delPr(id){D.prayers=D.prayers.filter(p=>p.id!==id);renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');}
-function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');renderTimeline();toast('Adicionado!');}
-function addUser(){const email=g('nUE'),pass=g('nUP');if(!email||!pass)return toast('Preencha e-mail e senha.');if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase()))return toast('E-mail já existe.');D.users.push({email,pass,admin:false});['nUE','nUP'].forEach(id=>document.getElementById(id).value='');renderAdmin();toast('Parceiro adicionado!');}
-function delUser(i){D.users.splice(i,1);renderAdmin();toast('Removido.');}
+function delNews(id){D.news=D.news.filter(n=>n.id!==id);saveNews();renderAll();toast('Removido.');}
+function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
+function delPr(id){D.prayers=D.prayers.filter(p=>p.id!==id);savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');}
+function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');saveTimeline();renderTimeline();toast('Adicionado!');}
+function addUser(){
+  const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
+  if(!email||!pass) return toast('Preencha e-mail e senha.');
+  if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
+  D.users.push({email,pass,admin:false,nome});
+  saveUsers();
+  // Send welcome email via EmailJS
+  emailjs.send('service_grao','template_grao_1',{
+    nome: nome,
+    email_parceiro: email,
+    senha: pass
+  }).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️'))
+    .catch(()=>toast('Parceiro adicionado! (Erro no e-mail)'));
+  ['nUE','nUP','nUN'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  renderAdmin();
+}
+function delUser(i){D.users.splice(i,1);saveUsers();renderAdmin();toast('Removido.');}
 function openAdmin(){document.getElementById('appScreen').classList.remove('active');document.getElementById('adminScreen').classList.add('active');renderAdmin();}
 function closeAdmin(){document.getElementById('adminScreen').classList.remove('active');document.getElementById('appScreen').classList.add('active');}
 function openPartnerForm(){
