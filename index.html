@@ -269,6 +269,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 .mcard2{background:var(--card-lo);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;text-align:center}
 .mnum{font-family:'Playfair Display',serif;font-size:2rem;font-weight:400;color:var(--accent);line-height:1;margin-bottom:4px}
 .mlbl2{font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)}
+.pass-wrap{position:relative;display:flex;align-items:center}
+.pass-wrap input{width:100%;padding-right:44px}
+.pass-eye{position:absolute;right:14px;background:transparent;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;justify-content:center;transition:color 0.2s}
+.pass-eye:hover{color:var(--accent)}
+.pass-eye svg{width:18px;height:18px}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg-deep);padding:10px 24px;border-radius:50px;font-size:0.78rem;font-weight:600;opacity:0;transition:all 0.3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
@@ -291,6 +296,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
   <symbol id="ipause" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></symbol>
   <symbol id="iplay" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="5,3 19,12 5,21"/></symbol>
   <symbol id="ipix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="5" y="5" width="3" height="3"/><rect x="16" y="5" width="3" height="3"/><rect x="5" y="16" width="3" height="3"/><path d="M14 14h3v3h-3zM17 17h4v4h-4zM14 20h3M20 14v3"/></symbol>
+  <symbol id="ieye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="ieyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
   <symbol id="imny" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
     <path d="M20.42 4.58a5.4 5.4 0 00-7.65 0l-.77.78-.77-.78a5.4 5.4 0 00-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/>
     <path d="M12 5.36L8.87 8.5a2.13 2.13 0 003 3L12 10.5l1.13 1a2.13 2.13 0 003-3L13 5.36"/>
@@ -307,7 +314,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     </div>
     <div class="lform">
       <div class="lf"><label>E-mail</label><input type="email" id="lE" placeholder="seu@email.com"></div>
-      <div class="lf"><label>Senha</label><input type="password" id="lP" placeholder="••••••••"></div>
+      <div class="lf"><label>Senha</label>
+  <div class="pass-wrap">
+    <input type="password" id="lP" placeholder="••••••••">
+    <button class="pass-eye" type="button" onclick="toggleEye('lP',this)" tabindex="-1">
+      <svg><use href="#ieye" id="eyeIcon_lP"/></svg>
+    </button>
+  </div>
+</div>
       <div class="lerr" id="lErr">E-mail ou senha incorretos.</div>
       <button class="lbtn" onclick="doLogin()">Entrar</button>
     </div>
@@ -362,7 +376,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="qgrid">
           <div class="qcard qa" onclick="navTo('news');track('q-news')"><div class="qico"><svg><use href="#in"/></svg></div><div class="qlbl">Notícias</div><div class="qsub">Informativos</div></div>
           <div class="qcard qg" onclick="navTo('journey');track('q-journey')"><div class="qico"><svg><use href="#im"/></svg></div><div class="qlbl">Caminhada</div><div class="qsub">Linha do tempo</div></div>
-          <div class="qcard qw" onclick="navTo('partner');track('q-partner')"><div class="qico"><svg><use href="#imny"/></svg></div><div class="qlbl">Parceria</div><div class="qsub">vamos conosco</div></div>
+          <div class="qcard qw" onclick="navTo('partner');track('q-partner')"><div class="qico"><svg><use href="#imny"/></svg></div><div class="qlbl">Parceria</div><div class="qsub">vamos com a gente</div></div>
           <div class="qcard qp" onclick="navTo('about');track('q-about')"><div class="qico"><svg><use href="#if"/></svg></div><div class="qlbl">Família</div><div class="qsub">Quem somos</div></div>
         </div>
       </div>
@@ -550,7 +564,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div class="adform">
         <div><label class="adlbl">Nome do parceiro</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
         <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE" placeholder="parceiro@email.com"></div>
-        <div><label class="adlbl">Senha</label><input type="text" class="adinp" id="nUP" placeholder="Crie uma senha"></div>
+        <div><label class="adlbl">Senha</label>
+  <div class="pass-wrap">
+    <input type="password" class="adinp" id="nUP" placeholder="Crie uma senha">
+    <button class="pass-eye" type="button" onclick="toggleEye('nUP',this)" tabindex="-1">
+      <svg><use href="#ieye" id="eyeIcon_nUP"/></svg>
+    </button>
+  </div>
+</div>
         <button class="adbtn" onclick="addUser()">Adicionar parceiro & enviar e-mail</button>
       </div>
     </div>
@@ -704,10 +725,23 @@ const D={
 
 // Load all persisted data on startup
 (function initData(){
-  loadUsers(); loadNews(); loadPrayers(); loadTimeline();
-  // Load settings
+  // Load users - always keep default admin, merge with saved partners
+  const savedUsers = localStorage.getItem('grao_users');
+  if(savedUsers){
+    try{
+      const parsed = JSON.parse(savedUsers);
+      // Keep default admins, add saved non-admin users
+      const savedPartners = parsed.filter(u => !u.admin);
+      // Merge: default users + saved partners (avoid duplicates)
+      savedPartners.forEach(sp => {
+        if(!D.users.find(u => u.email.toLowerCase() === sp.email.toLowerCase())){
+          D.users.push(sp);
+        }
+      });
+    }catch(e){}
+  }
+  loadNews(); loadPrayers(); loadTimeline();
   const gaId=localStorage.getItem('grao_ga_id');
-  const mName=localStorage.getItem('grao_music_name');
   if(gaId) window._gaId=gaId;
 })();
 
@@ -752,7 +786,6 @@ function initMusic(){
   const savedName=localStorage.getItem('grao_music_name');
   if(savedName) document.querySelector('.mname').textContent=savedName;
   document.getElementById('mbar').classList.add('on');
-  // Load YouTube API
   if(window.YT&&window.YT.Player){ onYouTubeIframeAPIReady(); return; }
   const tag=document.createElement('script');
   tag.src='https://www.youtube.com/iframe_api';
@@ -904,30 +937,35 @@ function saveGA(){
 }
 
 function saveMusic(){
-  const name=document.getElementById('musicName').value.trim();
+  const name=document.getElementById('musicName').value.trim()||'Seguro — Shirley Carvalhaes';
   const url=document.getElementById('musicUrl').value.trim();
-  if(!url)return toast('Informe a URL do YouTube.');
-  const vid=ytId(url);
-  if(!vid)return toast('URL inválida. Use um link do YouTube.');
-  localStorage.setItem('grao_music_name',name||'Música');
-  localStorage.setItem('grao_music_id',vid);
-  document.querySelector('.mname').textContent=name||'Música';
-  if(ytPlayer&&ytPlayer.loadVideoById){
-    ytPlayer.loadVideoById({videoId:vid});
-    ytPlayer.playVideo();
-    mPlaying=true;
-    document.getElementById('micon').setAttribute('href','#ipause');
+  const vid=url?ytId(url):null;
+  // Save name always
+  localStorage.setItem('grao_music_name', name);
+  document.querySelector('.mname').textContent=name;
+  // Save and change video only if URL provided
+  if(vid){
+    localStorage.setItem('grao_music_id', vid);
+    if(ytPlayer&&ytPlayer.loadVideoById){
+      ytPlayer.loadVideoById({videoId:vid});
+      ytPlayer.playVideo();
+      mPlaying=true;
+      document.getElementById('micon').setAttribute('href','#ipause');
+    }
   }
-  toast('Música atualizada!');
+  toast('Configurações salvas!');
 }
 
 function loadSavedSettings(){
   const gaId=localStorage.getItem('grao_ga_id');
-  if(gaId){ document.getElementById('gaId').value=gaId; }
   const mName=localStorage.getItem('grao_music_name');
   const mId=localStorage.getItem('grao_music_id');
-  if(mName){ document.querySelector('.mname').textContent=mName; document.getElementById('musicName').value=mName; }
-  if(mId){ document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+mId; }
+  if(gaId) document.getElementById('gaId').value=gaId;
+  if(mName){
+    document.querySelector('.mname').textContent=mName;
+    document.getElementById('musicName').value=mName;
+  }
+  if(mId) document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+mId;
 }
 function addNews(){
   const name=g('nIT'),date=g('nID'),summary=g('nIS'),content=g('nIC');
@@ -1019,6 +1057,15 @@ function submitPartnerForm(){
   document.getElementById('pfSuccess').style.display='block';
   track('partner-form');
 }
+function toggleEye(inputId, btn){
+  const input = document.getElementById(inputId);
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+  const iconId = 'eyeIcon_' + inputId;
+  const icon = document.getElementById(iconId);
+  if(icon) icon.setAttribute('href', isPass ? '#ieyeoff' : '#ieye');
+}
+
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
 function g(id){return(document.getElementById(id)?.value||'').trim();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
