@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#4A2E20">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GRÃO">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>GRÃO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -960,6 +965,15 @@ function submitPartnerForm(){
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
 function g(id){return(document.getElementById(id)?.value||'').trim();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/grao/sw.js')
+      .then(r => console.log('SW registered'))
+      .catch(e => console.log('SW error', e));
+  });
+}
 </script>
 </body>
 </html>
