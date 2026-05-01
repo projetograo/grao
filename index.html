@@ -340,7 +340,54 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div class="lerr" id="lErr">E-mail ou senha incorretos.</div>
       <button class="lbtn" onclick="doLogin()">Entrar</button>
     </div>
-    <p class="lhint">Acesso exclusivo para parceiros do Projeto GRÃO.<br>Não tem acesso? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
+    <p class="lhint">Quer fazer parte da equipe?</p>
+    <button onclick="openRegister()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border-hi);border-radius:var(--r-md);padding:12px;font-size:0.78rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--text2)'">Quero ter acesso</button>
+    <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
+
+<!-- REGISTER MODAL -->
+<div id="registerModal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:28px 24px 48px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)">Quero ter <em style="color:var(--accent);font-style:italic">acesso</em></div>
+        <div style="font-size:0.75rem;color:var(--text3);margin-top:2px">Preencha e entre para a equipe</div>
+      </div>
+      <button onclick="closeRegister()" style="background:transparent;border:1px solid var(--border-md);border-radius:50%;width:32px;height:32px;color:var(--text2);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <div id="regForm" style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Nome completo *</label>
+        <input id="regName" type="text" placeholder="Seu nome" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">E-mail *</label>
+        <input id="regEmail" type="email" placeholder="seu@email.com" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Crie sua senha *</label>
+        <div style="position:relative;display:flex;align-items:center">
+          <input id="regPass" type="password" placeholder="Mínimo 4 caracteres" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 44px 12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+          <button type="button" onclick="toggleEye('regPass',this)" style="position:absolute;right:14px;background:transparent;border:none;cursor:pointer;color:var(--text3);display:flex;align-items:center" tabindex="-1">
+            <svg width="18" height="18"><use href="#ieye" id="eyeIcon_regPass"/></svg>
+          </button>
+        </div>
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Como nos conheceu?</label>
+        <input id="regHow" type="text" placeholder="Ex: indicação de um amigo, redes sociais..." style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div id="regErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
+      <button onclick="submitRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px">Quero ter acesso</button>
+      <p style="font-size:0.75rem;color:var(--text3);text-align:center;line-height:1.6">Após o envio, Bruno ou Malu vão revisar e ativar sua participação em breve.</p>
+    </div>
+    <div id="regSuccess" style="display:none;text-align:center;padding:32px 0">
+      <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Solicitação enviada!</div>
+      <p style="font-size:0.9rem;color:var(--text2);line-height:1.75">Recebemos seu pedido. Em breve você estará dentro da equipe — e poderá acompanhar cada passo dessa jornada de perto.</p>
+      <button onclick="closeRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:24px">Fechar</button>
+    </div>
+  </div>
+</div>
   </div>
 </div>
 
@@ -351,6 +398,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="alogo">GR<em>ÃO</em></div>
     <div style="display:flex;gap:8px;align-items:center">
       <button class="hbtn" id="adminBtn" onclick="openAdmin()" style="display:none"><span class="hdot"></span>Admin</button>
+      <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:3px 6px">
+        <button onclick="changeFontSize(-1)" style="background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:0.85rem;font-weight:600;padding:2px 6px;font-family:'Inter',sans-serif" title="Diminuir fonte">A-</button>
+        <div style="width:1px;height:14px;background:var(--border-md)"></div>
+        <button onclick="changeFontSize(1)" style="background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:1rem;font-weight:600;padding:2px 6px;font-family:'Inter',sans-serif" title="Aumentar fonte">A+</button>
+      </div>
       <button class="hbtn" onclick="doLogout()">Sair</button>
     </div>
   </div>
@@ -371,7 +423,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <h1 class="htitle">Você faz parte<br>dessa <em>jornada</em></h1>
         <p class="hverse">"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24</p>
         <div class="pills">
-          <div class="pill"><span class="pdot pg"></span>Em preparação</div>
+          <div class="pill"><span class="pdot pg"></span>Em preparo</div>
           <div class="pill"><span class="pdot pa"></span>APMT & Pioneiros</div>
           <div class="pill">Norte da África · Sudeste Asiático</div>
         </div>
@@ -391,7 +443,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="qgrid">
           <div class="qcard qa" onclick="navTo('news');track('q-news')"><div class="qico"><svg><use href="#in"/></svg></div><div class="qlbl">Notícias</div><div class="qsub">Informativos</div></div>
           <div class="qcard qg" onclick="navTo('journey');track('q-journey')"><div class="qico"><svg><use href="#im"/></svg></div><div class="qlbl">Caminhada</div><div class="qsub">Linha do tempo</div></div>
-          <div class="qcard qw" onclick="navTo('partner');track('q-partner')"><div class="qico"><svg><use href="#imny"/></svg></div><div class="qlbl">Parceria</div><div class="qsub">vamos com a gente</div></div>
+          <div class="qcard qw" onclick="navTo('partner');track('q-partner')"><div class="qico"><svg><use href="#imny"/></svg></div><div class="qlbl">Parceria</div><div class="qsub">faça parte</div></div>
           <div class="qcard qp" onclick="navTo('about');track('q-about')"><div class="qico"><svg><use href="#if"/></svg></div><div class="qlbl">Família</div><div class="qsub">Quem somos</div></div>
         </div>
       </div>
@@ -468,33 +520,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="view" id="view-partner">
       <div class="vpad" style="padding-bottom:8px">
         <div class="slbl">Parceria</div>
-        <h2 class="vtitle">Caminhe <em>conosco</em></h2>
-        <p style="font-size:0.92rem;color:var(--text2);line-height:1.85">Há formas concretas de fazer parte dessa jornada.</p>
+        <h2 class="vtitle">Faça sua <em>parte</em></h2>
+        <p style="font-size:0.92rem;color:var(--text2);line-height:1.85">Numa parceria bíblica, cada um faz a sua parte. Não estamos pedindo ajuda — estamos convidando você para a equipe.</p>
       </div>
       <div style="padding:0 20px" class="ptcards">
         <div class="ptcard">
-          <div class="pthd"><div class="ptico"><svg><use href="#ihands"/></svg></div><div class="ptinfo"><div class="pttitle">Orando</div><div class="ptsub">O trabalho mais essencial</div></div></div>
+          <div class="pthd"><div class="ptico"><svg><use href="#ihands"/></svg></div><div class="ptinfo"><div class="pttitle">Orando</div><div class="ptsub">Sua parte insubstituível nessa equipe</div></div></div>
           <div class="ptbody">
             <ul class="ptlist" id="prayerPartner"></ul>
             <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="bact bwa-s" onclick="track('wa-prayer')">Grupo de oração no WhatsApp</a>
           </div>
         </div>
         <div class="ptcard">
-          <div class="pthd"><div class="ptico"><svg><use href="#in"/></svg></div><div class="ptinfo"><div class="pttitle">Acompanhando</div><div class="ptsub">Estar presente é colaboração real</div></div></div>
+          <div class="pthd"><div class="ptico"><svg><use href="#in"/></svg></div><div class="ptinfo"><div class="pttitle">Acompanhando</div><div class="ptsub">Informado, você faz parte de verdade</div></div></div>
           <div class="ptbody">
-            <ul class="ptlist"><li>Ler os informativos aqui no app</li><li>Compartilhar o projeto com irmãos e igrejas</li><li>Conectar redes ao projeto</li></ul>
+            <ul class="ptlist"><li>Acompanhar os informativos — estar informado é parte do projeto</li><li>Mobilizar igrejas e irmãos — ampliar a equipe</li><li>Conectar redes ao projeto — cada novo parceiro fortalece a missão</li></ul>
             <button class="bact bout" onclick="navTo('news');track('ver-noticias')">Ver informativos</button>
           </div>
         </div>
         <div class="ptcard" style="border-top:2px solid var(--accent)">
-          <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Parceiro Mensal</div><div class="ptsub">A constância transforma — faça parte todo mês</div></div></div>
+          <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Parceiro Mensal</div><div class="ptsub">Seja parte ativa desse projeto</div></div></div>
           <div class="ptbody">
-            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:14px">A missão não para. As contas não param. E os parceiros mensais são quem torna isso possível. Uma contribuição recorrente — qualquer valor — é o que nos permite planejar, avançar e depender menos da inconstância. <strong style="color:var(--text)">A constância de muitos é o que sustenta a presença de poucos em lugares onde ninguém mais vai.</strong></p>
-            <button class="bact bsol" onclick="openPartnerForm()">Quero ser parceiro mensal</button>
+            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:14px">Numa parceria, todos fazem a sua parte. Enquanto Bruno e Malu vão ao campo, pregam e discipulam — você ora, envia e sustenta. <strong style="color:var(--text)">Não é ajuda: é sociedade. O projeto é um só, os agentes são muitos. Cada oferta mensal é a sua parte nessa equipe.</strong></p>
+            <button class="bact bsol" onclick="openPartnerForm()">Quero fazer minha parte todo mês</button>
           </div>
         </div>
         <div class="ptcard">
-          <div class="pthd"><div class="ptico"><svg><use href="#ipix"/></svg></div><div class="ptinfo"><div class="pttitle">Contribuindo via Pix</div><div class="ptsub">Parceria financeira · Bradesco</div></div></div>
+          <div class="pthd"><div class="ptico"><svg><use href="#ipix"/></svg></div><div class="ptinfo"><div class="pttitle">Enviando via Pix</div><div class="ptsub">Sua parte mensal · Bradesco</div></div></div>
           <div class="ptbody">
             <div class="pixbox">
               <h4>Bruno Ramires Baracho</h4>
@@ -504,7 +556,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
                 <span class="pixval">nossoprojetograo@gmail.com</span>
                 <button class="pixbtn" id="cpBtn" onclick="copyPix()">Copiar chave</button>
               </div>
-              <p class="pixnote">Escaneie o QR Code ou copie a chave. Qualquer valor tem impacto real e eterno.</p>
+              <p class="pixnote">Escaneie o QR Code ou copie a chave. Cada oferta mensal é a sua parte nesse projeto — não é ajuda, é parceria.</p>
             </div>
           </div>
         </div>
@@ -579,6 +631,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div><label class="adlbl">Status</label><select class="adsel adinp" id="nTS"><option value="done">Concluído</option><option value="active">Em andamento</option><option value="next">Próximo passo</option></select></div>
       <button class="adbtn" onclick="addTimeline()">Adicionar</button>
     </div></div>
+    <div class="adsl">Solicitações de acesso pendentes</div>
+    <div class="adcard">
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Pessoas que querem entrar para a equipe do GRÃO. Aprove para liberar o acesso.</p>
+      <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
+    </div>
+
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
       <div class="adform">
@@ -656,7 +714,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div id="pfSuccess" style="display:none;text-align:center;padding:32px 0">
       <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
       <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Obrigado!</div>
-      <p style="font-size:0.9rem;color:var(--text2);line-height:1.75">Recebemos seu cadastro. Bruno ou Malu vão entrar em contato pelo WhatsApp em breve para confirmar tudo. Que alegria caminhar com você!</p>
+      <p style="font-size:0.9rem;color:var(--text2);line-height:1.75">Recebemos! Em breve entramos em contato. Bem-vindo à equipe — você não está ajudando, você está junto nesse projeto.</p>
       <button onclick="closePartnerForm()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:24px">Fechar</button>
     </div>
   </div>
@@ -743,14 +801,13 @@ const D={
   ]
 };
 
-// Load all persisted data on startup
-(function initData(){
+// Load all persisted data after Firebase is ready
+function initData(){
   loadNews(); loadPrayers(); loadTimeline();
   const gaId=localStorage.getItem('grao_ga_id');
   if(gaId) window._gaId=gaId;
-  // Load partners from Firebase
   loadPartnersFromFirebase();
-})();
+}
 
 function loadPartnersFromFirebase(){
   db.collection('partners').get().then(snap => {
@@ -963,6 +1020,7 @@ function loadMensais(){
 }
 
 function renderAdmin(){
+  loadPending();
   loadMensais();
   loadAdmins();
   const m=JSON.parse(localStorage.getItem('gm')||'{}');
@@ -1191,6 +1249,51 @@ function addAdmin(){
   }).catch(e=>{ console.log(e); toast('Erro ao adicionar.'); });
 }
 
+function loadPending(){
+  const el=document.getElementById('pendingList');
+  if(!el) return;
+  db.collection('pending_partners').where('status','==','pending').orderBy('requestedAt','desc').get()
+  .then(snap=>{
+    if(snap.empty){ el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhuma solicitação pendente.</p>'; return; }
+    el.innerHTML=snap.docs.map(doc=>{
+      const d=doc.data();
+      return `<div class="adrow" style="flex-direction:column;align-items:flex-start;gap:8px">
+        <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start">
+          <div><div class="adrt">${d.nome}</div><div class="adrm">${d.email}</div>${d.how?`<div class="adrm">Como conheceu: ${d.how}</div>`:''}</div>
+        </div>
+        <div style="display:flex;gap:8px;width:100%">
+          <button onclick="approvePending('${doc.id}','${d.nome}','${d.email}','${d.pass}')" style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:8px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">✓ Aprovar</button>
+          <button onclick="rejectPending('${doc.id}')" style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:8px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif">✕ Recusar</button>
+        </div>
+      </div>`;
+    }).join('');
+  })
+  .catch(e=>{ el.innerHTML='<p style="font-size:0.82rem;color:var(--red)">Erro: '+e.message+'</p>'; });
+}
+
+function approvePending(docId, nome, email, pass){
+  // Move to partners collection
+  db.collection('partners').add({email, pass, nome, admin:false, createdAt:new Date().toISOString()})
+  .then(()=> db.collection('pending_partners').doc(docId).update({status:'approved'}))
+  .then(()=>{
+    // Send welcome email
+    emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass})
+      .catch(()=>{});
+    loadPending();
+    loadPartnersFromFirebase();
+    renderAdmin();
+    toast('Bem-vindo à equipe! E-mail enviado ✓');
+  })
+  .catch(e=>toast('Erro: '+e.message));
+}
+
+function rejectPending(docId){
+  if(!confirm('Recusar esta solicitação?')) return;
+  db.collection('pending_partners').doc(docId).update({status:'rejected'})
+  .then(()=>{ loadPending(); toast('Solicitação recusada.'); })
+  .catch(e=>toast('Erro: '+e.message));
+}
+
 function loadAdmins(){
   const el=document.getElementById('adminList');
   if(!el) return;
@@ -1220,6 +1323,74 @@ function delAdmin(docId, email){
   }).catch(e=>{ console.log(e); toast('Erro ao remover.'); });
 }
 
+// ── FONT SIZE ──
+function changeFontSize(dir){
+  const html = document.documentElement;
+  const current = parseFloat(getComputedStyle(html).fontSize);
+  const next = Math.min(22, Math.max(13, current + dir));
+  html.style.fontSize = next + 'px';
+  localStorage.setItem('grao_font_size', next);
+}
+function loadFontSize(){
+  const saved = localStorage.getItem('grao_font_size');
+  if(saved) document.documentElement.style.fontSize = saved + 'px';
+}
+
+// ── SELF REGISTER ──
+function openRegister(){
+  const m = document.getElementById('registerModal');
+  m.style.display = 'flex';
+  document.getElementById('regForm').style.display = 'flex';
+  document.getElementById('regSuccess').style.display = 'none';
+  document.getElementById('regErr').style.display = 'none';
+}
+function closeRegister(){
+  document.getElementById('registerModal').style.display = 'none';
+}
+function submitRegister(){
+  const name  = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim().toLowerCase();
+  const pass  = document.getElementById('regPass').value.trim();
+  const how   = document.getElementById('regHow').value.trim();
+  const err   = document.getElementById('regErr');
+  if(!name||!email||!pass){ err.textContent='Preencha nome, e-mail e senha.'; err.style.display='block'; return; }
+  if(pass.length < 4){ err.textContent='Senha muito curta — mínimo 4 caracteres.'; err.style.display='block'; return; }
+  err.style.display='none';
+
+  // Check if already exists
+  db.collection('partners').where('email','==',email).get()
+  .then(snap=>{
+    if(!snap.empty){ err.textContent='Este e-mail já está cadastrado.'; err.style.display='block'; return; }
+    // Save as pending partner
+    return db.collection('pending_partners').add({
+      nome: name, email, pass, how,
+      status: 'pending',
+      requestedAt: new Date().toISOString()
+    });
+  })
+  .then(ref=>{
+    if(!ref) return; // already existed
+    // Notify Bruno via WhatsApp
+    const msg = encodeURIComponent(
+      `🌱 *Nova solicitação para entrar na equipe — GRÃO*
+
+`+
+      `*Nome:* ${name}
+`+
+      `*E-mail:* ${email}
+`+
+      `*Como conheceu:* ${how||'Não informado'}
+
+`+
+      `Acesse o painel admin para aprovar a entrada na equipe.`
+    );
+    window.open(`https://wa.me/5582996210019?text=${msg}`,'_blank');
+    document.getElementById('regForm').style.display='none';
+    document.getElementById('regSuccess').style.display='block';
+  })
+  .catch(e=>{ err.textContent='Erro: '+e.message; err.style.display='block'; });
+}
+
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
 function g(id){return(document.getElementById(id)?.value||'').trim();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
@@ -1232,6 +1403,15 @@ if ('serviceWorker' in navigator && location.hostname === 'projetograo.github.io
       .catch(e => console.log('SW error', e));
   });
 }
+
+// Init everything after DOM and Firebase are ready
+document.addEventListener('DOMContentLoaded', function(){
+  loadFontSize();
+  // Small delay to ensure Firebase SDK is fully initialized
+  setTimeout(function(){
+    try { initData(); } catch(e){ console.log('initData error:', e); }
+  }, 300);
+});
 </script>
 </body>
 </html>
