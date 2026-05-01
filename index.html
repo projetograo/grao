@@ -1149,36 +1149,46 @@ function toggleEye(inputId, btn){
 function changeMyPassword(){
   const newPass = document.getElementById('myNewPass').value.trim();
   if(!newPass) return toast('Digite a nova senha.');
-  if(newPass.length < 4) return toast('Senha muito curta — mínimo 4 caracteres.');
-  // Update in Firebase
-  db.collection('admins').doc(me.email.replace(/[.@]/g,'_')).set({
-    email: me.email, pass: newPass, admin: true, nome: me.nome||'Admin'
-  }, {merge:true})
-  .then(()=>{
-    me.pass = newPass;
-    // Update in D.users too
-    const u = D.users.find(x=>x.email===me.email);
-    if(u) u.pass = newPass;
-    document.getElementById('myNewPass').value='';
-    toast('Senha alterada com sucesso!');
-  })
-  .catch(()=>toast('Erro ao salvar. Tente novamente.'));
+  if(newPass.length < 4) return toast('Mínimo 4 caracteres.');
+  // If me is a default user (not in Firebase), update locally and in Firebase
+  const isDefault = (me.email === 'admin@grao.com');
+  if(isDefault){
+    // Save to Firebase admins collection for future logins
+    db.collection('admins').doc('default_admin').set({
+      email: me.email, pass: newPass, admin: true, nome: 'Admin'
+    }).then(()=>{
+      me.pass = newPass;
+      const u = D.users.find(x=>x.email===me.email);
+      if(u) u.pass = newPass;
+      document.getElementById('myNewPass').value='';
+      toast('Senha alterada! Na próxima vez use a nova senha.');
+    }).catch(e=>{ console.log(e); toast('Erro ao salvar.'); });
+  } else if(me.id){
+    // Update in Firebase partners or admins
+    const col = me.isAdminCol ? 'admins' : 'partners';
+    db.collection(col).doc(me.id).update({pass: newPass})
+    .then(()=>{
+      me.pass = newPass;
+      document.getElementById('myNewPass').value='';
+      toast('Senha alterada com sucesso!');
+    }).catch(e=>{ console.log(e); toast('Erro ao salvar.'); });
+  } else {
+    toast('Não foi possível identificar sua conta.');
+  }
 }
 
 function addAdmin(){
   const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
   if(!nome||!email||!pass) return toast('Preencha todos os campos.');
   if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  db.collection('admins').doc(email.replace(/[.@]/g,'_')).set({
+  db.collection('admins').add({
     email, pass, admin:true, nome, createdAt: new Date().toISOString()
-  })
-  .then(()=>{
-    D.users.push({email, pass, admin:true, nome});
+  }).then(docRef=>{
+    D.users.push({email, pass, admin:true, nome, id:docRef.id, isAdminCol:true});
     ['nAN','nAE','nAP'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
     renderAdmin();
     toast('Administrador adicionado!');
-  })
-  .catch(()=>toast('Erro ao adicionar.'));
+  }).catch(e=>{ console.log(e); toast('Erro ao adicionar.'); });
 }
 
 function loadAdmins(){
@@ -1186,25 +1196,28 @@ function loadAdmins(){
   if(!el) return;
   db.collection('admins').get()
   .then(snap=>{
-    if(snap.empty){ el.innerHTML=''; return; }
-    el.innerHTML=snap.docs.map(doc=>{
-      const d=doc.data();
-      if(d.email==='admin@grao.com') return ''; // protect default admin
-      return `<div class="adrow">
-        <div class="adri"><div class="adrt">${d.nome||d.email}</div><div class="adrm">${d.email} · Admin</div></div>
-        <button class="addel" onclick="delAdmin('${doc.id}','${d.email}')">Remover</button>
-      </div>`;
-    }).join('');
-  }).catch(()=>{});
+    if(snap.empty){ el.innerHTML='<p style="font-size:0.8rem;color:var(--text3);padding:8px 0">Nenhum admin adicional cadastrado.</p>'; return; }
+    const rows = snap.docs
+      .filter(doc=>doc.data().email!=='admin@grao.com')
+      .map(doc=>{
+        const d=doc.data();
+        return `<div class="adrow">
+          <div class="adri"><div class="adrt">${d.nome||'Admin'}</div><div class="adrm">${d.email}</div></div>
+          <button class="addel" onclick="delAdmin('${doc.id}','${d.email}')">Remover</button>
+        </div>`;
+      });
+    el.innerHTML = rows.length ? rows.join('') : '<p style="font-size:0.8rem;color:var(--text3);padding:8px 0">Nenhum admin adicional.</p>';
+  }).catch(e=>{ console.log('loadAdmins error:',e); });
 }
 
 function delAdmin(docId, email){
+  if(!confirm('Remover admin ' + email + '?')) return;
   db.collection('admins').doc(docId).delete()
   .then(()=>{
     D.users = D.users.filter(u=>u.email!==email);
-    renderAdmin();
+    loadAdmins();
     toast('Admin removido.');
-  }).catch(()=>toast('Erro ao remover.'));
+  }).catch(e=>{ console.log(e); toast('Erro ao remover.'); });
 }
 
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
