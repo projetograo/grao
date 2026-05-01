@@ -1,5 +1,5 @@
-// GRÃO — Service Worker
-const CACHE = 'grao-v1';
+// GRÃO — Service Worker v3
+const CACHE = 'grao-v3';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
@@ -24,10 +24,15 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Network first — sempre busca versão mais recente
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      return cached || fetch(e.request).catch(() => caches.match('/grao/index.html'));
-    })
+    fetch(e.request)
+      .then(res => {
+        const clone = res.clone();
+        caches.open(CACHE).then(cache => cache.put(e.request, clone));
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
