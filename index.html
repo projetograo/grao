@@ -7,6 +7,21 @@
 <meta name="theme-color" content="#4A2E20">
 <link rel="manifest" href="manifest.json">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBofyU6uNSSJu2Y3iNF0ZpkPzITbfAwgyY",
+  authDomain: "projeto-grao-c3b3d.firebaseapp.com",
+  projectId: "projeto-grao-c3b3d",
+  storageBucket: "projeto-grao-c3b3d.firebasestorage.app",
+  messagingSenderId: "812250944695",
+  appId: "1:812250944695:web:5ec406584e948ce5c02932"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
 <script>emailjs.init("KntRzGvrjbRuUiVZn");</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -725,25 +740,23 @@ const D={
 
 // Load all persisted data on startup
 (function initData(){
-  // Load users - always keep default admin, merge with saved partners
-  const savedUsers = localStorage.getItem('grao_users');
-  if(savedUsers){
-    try{
-      const parsed = JSON.parse(savedUsers);
-      // Keep default admins, add saved non-admin users
-      const savedPartners = parsed.filter(u => !u.admin);
-      // Merge: default users + saved partners (avoid duplicates)
-      savedPartners.forEach(sp => {
-        if(!D.users.find(u => u.email.toLowerCase() === sp.email.toLowerCase())){
-          D.users.push(sp);
-        }
-      });
-    }catch(e){}
-  }
   loadNews(); loadPrayers(); loadTimeline();
   const gaId=localStorage.getItem('grao_ga_id');
   if(gaId) window._gaId=gaId;
+  // Load partners from Firebase
+  loadPartnersFromFirebase();
 })();
+
+function loadPartnersFromFirebase(){
+  db.collection('partners').get().then(snap => {
+    snap.forEach(doc => {
+      const u = doc.data();
+      if(!D.users.find(x => x.email.toLowerCase() === u.email.toLowerCase())){
+        D.users.push({email:u.email, pass:u.pass, admin:false, nome:u.nome, id:doc.id});
+      }
+    });
+  }).catch(e => console.log('Firebase load error:', e));
+}
 
 function doLogin(){
   const email=g('lE').toLowerCase(),pass=g('lP');
@@ -986,19 +999,37 @@ function addUser(){
   const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
   if(!email||!pass) return toast('Preencha e-mail e senha.');
   if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  D.users.push({email,pass,admin:false,nome});
-  saveUsers();
-  // Send welcome email via EmailJS
-  emailjs.send('service_grao','template_grao_1',{
-    nome: nome,
-    email_parceiro: email,
-    senha: pass
-  }).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️'))
-    .catch(()=>toast('Parceiro adicionado! (Erro no e-mail)'));
+  
+  // Save to Firebase
+  db.collection('partners').add({email, pass, nome, createdAt: new Date().toISOString()})
+    .then(docRef => {
+      D.users.push({email, pass, admin:false, nome, id:docRef.id});
+      renderAdmin();
+      // Send welcome email
+      emailjs.send('service_grao','template_grao_1',{
+        nome, email_parceiro:email, senha:pass
+      }).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️'))
+        .catch(()=>toast('Parceiro adicionado! (Verifique o e-mail)'));
+    })
+    .catch(e => {
+      // Fallback: save locally if Firebase fails
+      D.users.push({email, pass, admin:false, nome});
+      saveUsers();
+      renderAdmin();
+      toast('Parceiro adicionado localmente.');
+    });
   ['nUE','nUP','nUN'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  renderAdmin();
 }
-function delUser(i){D.users.splice(i,1);saveUsers();renderAdmin();toast('Removido.');}
+function delUser(i){
+  const user = D.users[i];
+  if(user && user.id){
+    db.collection('partners').doc(user.id).delete().catch(e=>console.log('Delete error',e));
+  }
+  D.users.splice(i,1);
+  saveUsers();
+  renderAdmin();
+  toast('Removido.');
+}
 function openAdmin(){document.getElementById('appScreen').classList.remove('active');document.getElementById('adminScreen').classList.add('active');renderAdmin();}
 function closeAdmin(){document.getElementById('adminScreen').classList.remove('active');document.getElementById('appScreen').classList.add('active');}
 function openPartnerForm(){
