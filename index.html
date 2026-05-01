@@ -357,7 +357,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
   <div class="mbar" id="mbar">
     <svg width="14" height="14" style="color:var(--accent);flex-shrink:0"><use href="#imu"/></svg>
     <div style="flex:1;min-width:0">
-      <div class="mlbl">ouça enquanto navega pelo app</div>
+      <div class="mlbl">ouça o que estamos escutando, enquanto lê nosso app</div>
       <div class="mname">Seguro — Shirley Carvalhaes</div>
     </div>
     <button class="mbtn" onclick="toggleMusic()"><svg width="12" height="12"><use href="#ipause" id="micon"/></svg></button>
@@ -527,6 +527,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 <div class="screen" id="adminScreen">
   <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" onclick="closeAdmin()">← Voltar</button></div>
   <div class="adcont">
+    <div class="adsl">Parceiros Mensais</div>
+    <div class="adcard">
+      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Pessoas que preencheram o formulário de parceria mensal.</p>
+      <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
+    </div>
     <div class="adsl">Métricas</div>
     <div class="adcard"><div class="mgrid" id="metricsGrid"></div><button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,0.08);color:var(--text2);font-weight:400" onclick="clearMetrics()">Zerar métricas</button></div>
 
@@ -776,7 +781,7 @@ function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remo
 let ytPlayer=null;
 
 function onYouTubeIframeAPIReady(){
-  const vid=localStorage.getItem('grao_music_id')||MID;
+  const vid=window._savedMusicId||MID;
   ytPlayer=new YT.Player('ytFr',{
     height:'1',width:'1',videoId:vid,
     playerVars:{autoplay:1,loop:1,playlist:vid,controls:0,rel:0,playsinline:1},
@@ -796,13 +801,24 @@ function onYouTubeIframeAPIReady(){
 }
 
 function initMusic(){
-  const savedName=localStorage.getItem('grao_music_name');
-  if(savedName) document.querySelector('.mname').textContent=savedName;
   document.getElementById('mbar').classList.add('on');
-  if(window.YT&&window.YT.Player){ onYouTubeIframeAPIReady(); return; }
-  const tag=document.createElement('script');
-  tag.src='https://www.youtube.com/iframe_api';
-  document.head.appendChild(tag);
+  // Load music config from Firebase
+  db.collection('settings').doc('music').get()
+    .then(doc=>{
+      if(doc.exists){
+        const d=doc.data();
+        if(d.musicName) document.querySelector('.mname').textContent=d.musicName;
+        if(d.musicId) window._savedMusicId=d.musicId;
+      }
+    })
+    .catch(()=>{})
+    .finally(()=>{
+      // Load YouTube API after Firebase responds
+      if(window.YT&&window.YT.Player){ onYouTubeIframeAPIReady(); return; }
+      const tag=document.createElement('script');
+      tag.src='https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    });
 }
 
 function toggleMusic(){
@@ -920,7 +936,34 @@ function renderPrayerPartner(){
 
 function renderAll(){renderNews();renderTimeline();renderPrayer();renderAdmin();}
 
+function loadMensais(){
+  const el=document.getElementById('mensaisList');
+  if(!el) return;
+  db.collection('parceiros_mensais').orderBy('timestamp','desc').get()
+    .then(snap=>{
+      if(snap.empty){
+        el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum cadastro ainda.</p>';
+        return;
+      }
+      el.innerHTML=snap.docs.map(doc=>{
+        const d=doc.data();
+        return `<div class="adrow" style="flex-direction:column;align-items:flex-start;gap:6px">
+          <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+            <div class="adrt">${d.nome}</div>
+            <span style="font-size:0.7rem;color:var(--accent);font-weight:600">${d.valor}</span>
+          </div>
+          <div class="adrm">${d.email} · ${d.phone}</div>
+          <div class="adrm">📍 ${d.cidade} · 🎂 ${d.aniversario} · 📅 ${d.data}</div>
+        </div>`;
+      }).join('');
+    })
+    .catch(e=>{
+      el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Erro ao carregar.</p>';
+    });
+}
+
 function renderAdmin(){
+  loadMensais();
   const m=JSON.parse(localStorage.getItem('gm')||'{}');
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('metricsGrid').innerHTML=`
@@ -953,32 +996,37 @@ function saveMusic(){
   const name=document.getElementById('musicName').value.trim()||'Seguro — Shirley Carvalhaes';
   const url=document.getElementById('musicUrl').value.trim();
   const vid=url?ytId(url):null;
-  // Save name always
-  localStorage.setItem('grao_music_name', name);
+  // Save to Firebase
+  const data={musicName:name};
+  if(vid) data.musicId=vid;
+  db.collection('settings').doc('music').set(data,{merge:true})
+    .then(()=>toast('Música atualizada para todos! ✓'))
+    .catch(()=>toast('Erro ao salvar.'));
+  // Update current player immediately
   document.querySelector('.mname').textContent=name;
-  // Save and change video only if URL provided
-  if(vid){
-    localStorage.setItem('grao_music_id', vid);
-    if(ytPlayer&&ytPlayer.loadVideoById){
-      ytPlayer.loadVideoById({videoId:vid});
-      ytPlayer.playVideo();
-      mPlaying=true;
-      document.getElementById('micon').setAttribute('href','#ipause');
-    }
+  if(vid&&ytPlayer&&ytPlayer.loadVideoById){
+    ytPlayer.loadVideoById({videoId:vid});
+    ytPlayer.playVideo();
+    mPlaying=true;
+    document.getElementById('micon').setAttribute('href','#ipause');
   }
-  toast('Configurações salvas!');
 }
 
 function loadSavedSettings(){
   const gaId=localStorage.getItem('grao_ga_id');
-  const mName=localStorage.getItem('grao_music_name');
-  const mId=localStorage.getItem('grao_music_id');
   if(gaId) document.getElementById('gaId').value=gaId;
-  if(mName){
-    document.querySelector('.mname').textContent=mName;
-    document.getElementById('musicName').value=mName;
-  }
-  if(mId) document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+mId;
+  // Load music settings from Firebase to populate admin fields
+  db.collection('settings').doc('music').get()
+    .then(doc=>{
+      if(doc.exists){
+        const d=doc.data();
+        if(d.musicName){
+          document.getElementById('musicName').value=d.musicName;
+          document.querySelector('.mname').textContent=d.musicName;
+        }
+        if(d.musicId) document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+d.musicId;
+      }
+    }).catch(()=>{});
 }
 function addNews(){
   const name=g('nIT'),date=g('nID'),summary=g('nIS'),content=g('nIC');
