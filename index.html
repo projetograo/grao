@@ -412,7 +412,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div class="vpad">
         <div class="qsblk" style="margin-bottom:10px">
           <div class="qsbh"><svg><use href="#isd"/></svg><h3>Sobre o projeto</h3></div>
-          <p>Somos Bruno, Malu e Tom, uma família chamada para testemunhar a Cristo e discipular pessoas entre os povos não alcançados. Nosso coração arde pelo avanço do Reino, e caminhamos em obediência ao chamado de Deus, servindo e nos preparando para o campo missionário.</p>
+          <p>Somos Bruno, Malu, Tom e Cauê, uma família chamada para testemunhar a Cristo e discipular pessoas entre os povos não alcançados. Nosso coração arde pelo avanço do Reino, e caminhamos em obediência ao chamado de Deus, servindo e nos preparando para o campo missionário.</p>
           <p>Bruno está atualmente licenciado pelo Presbitério de Alagoas (PRAL) e servindo na Primeira Igreja Presbiteriana do Tabuleiro (IPT), onde participamos ativamente da mobilização missionária e da exposição da Palavra. Malu trabalha na System e na Vila Materna, enquanto buscamos o equilíbrio entre nosso sustento e a dedicação ao ministério.</p>
           <p>Nosso filho Tom nos acompanha nessa jornada, crescendo em um ambiente de fé, cuidado e missão. Nosso objetivo é que, em <strong>2027</strong>, estejamos prontos para sermos enviados ao campo missionário.</p>
           <p>Criamos este espaço para compartilhar nossa caminhada, desafios e testemunhos, permitindo que você faça parte ativa dessa missão. Ore por nós, caminhe conosco e descubra como você pode fazer parte. Compartilhe com outros irmãos e igrejas!</p>
@@ -964,6 +964,7 @@ function loadMensais(){
 
 function renderAdmin(){
   loadMensais();
+  loadAdmins();
   const m=JSON.parse(localStorage.getItem('gm')||'{}');
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('metricsGrid').innerHTML=`
@@ -1143,6 +1144,67 @@ function toggleEye(inputId, btn){
   const iconId = 'eyeIcon_' + inputId;
   const icon = document.getElementById(iconId);
   if(icon) icon.setAttribute('href', isPass ? '#ieyeoff' : '#ieye');
+}
+
+function changeMyPassword(){
+  const newPass = document.getElementById('myNewPass').value.trim();
+  if(!newPass) return toast('Digite a nova senha.');
+  if(newPass.length < 4) return toast('Senha muito curta — mínimo 4 caracteres.');
+  // Update in Firebase
+  db.collection('admins').doc(me.email.replace(/[.@]/g,'_')).set({
+    email: me.email, pass: newPass, admin: true, nome: me.nome||'Admin'
+  }, {merge:true})
+  .then(()=>{
+    me.pass = newPass;
+    // Update in D.users too
+    const u = D.users.find(x=>x.email===me.email);
+    if(u) u.pass = newPass;
+    document.getElementById('myNewPass').value='';
+    toast('Senha alterada com sucesso!');
+  })
+  .catch(()=>toast('Erro ao salvar. Tente novamente.'));
+}
+
+function addAdmin(){
+  const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
+  if(!nome||!email||!pass) return toast('Preencha todos os campos.');
+  if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
+  db.collection('admins').doc(email.replace(/[.@]/g,'_')).set({
+    email, pass, admin:true, nome, createdAt: new Date().toISOString()
+  })
+  .then(()=>{
+    D.users.push({email, pass, admin:true, nome});
+    ['nAN','nAE','nAP'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    renderAdmin();
+    toast('Administrador adicionado!');
+  })
+  .catch(()=>toast('Erro ao adicionar.'));
+}
+
+function loadAdmins(){
+  const el=document.getElementById('adminList');
+  if(!el) return;
+  db.collection('admins').get()
+  .then(snap=>{
+    if(snap.empty){ el.innerHTML=''; return; }
+    el.innerHTML=snap.docs.map(doc=>{
+      const d=doc.data();
+      if(d.email==='admin@grao.com') return ''; // protect default admin
+      return `<div class="adrow">
+        <div class="adri"><div class="adrt">${d.nome||d.email}</div><div class="adrm">${d.email} · Admin</div></div>
+        <button class="addel" onclick="delAdmin('${doc.id}','${d.email}')">Remover</button>
+      </div>`;
+    }).join('');
+  }).catch(()=>{});
+}
+
+function delAdmin(docId, email){
+  db.collection('admins').doc(docId).delete()
+  .then(()=>{
+    D.users = D.users.filter(u=>u.email!==email);
+    renderAdmin();
+    toast('Admin removido.');
+  }).catch(()=>toast('Erro ao remover.'));
 }
 
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
