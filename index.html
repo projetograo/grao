@@ -9,25 +9,13 @@
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-KNC0KYVRG4"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-KNC0KYVRG4');
-  window._gaId = 'G-KNC0KYVRG4';
+window.dataLayer=window.dataLayer||[];
+function gtag(){dataLayer.push(arguments);}
+gtag('js',new Date());
+gtag('config','G-KNC0KYVRG4');
 </script>
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-// Firebase config defined externally
-try {
-  firebase.initializeApp(firebaseConfig);
-  window.db = firebase.firestore();
-  console.log('Firebase ready');
-} catch(e){
-  console.log('Firebase init error:', e);
-}
-</script>
+
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GRÃO">
@@ -483,6 +471,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="qsblk"><div class="qsbh"><svg><use href="#ihrt"/></svg><h3>Nossa base</h3></div>
           <p>Servimos na <strong>Primeira Igreja Presbiteriana do Tabuleiro</strong>, em Maceió-AL. Bruno prega a série "O Caminho do Senhor Servo" em Marcos. Malu coordena a secretaria de missões da SAF.</p>
           <p>Em processo com <strong>APMT</strong> (avaliação psicológica aprovada, aguardando entrevista) e <strong>Pioneiros</strong> (Basic Profile enviado, reunião realizada).</p>
+          <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
+            <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:600">Acompanhe a IPT</div>
+            <p style="font-size:0.88rem;color:var(--text2);line-height:1.7;margin-bottom:14px">Acesse as mensagens da série em Marcos, localização e redes sociais da nossa igreja base.</p>
+            <a href="https://linktr.ee/iptabuleiro" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--card-lo);border:1px solid var(--border-md);border-radius:var(--r-md);padding:14px 16px;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
+              <div style="width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg-deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+              </div>
+              <div>
+                <div style="font-size:0.88rem;font-weight:600;color:var(--text)">IPT — Primeira Igreja Presbiteriana do Tabuleiro</div>
+                <div style="font-size:0.74rem;color:var(--text3);margin-top:2px">linktr.ee/iptabuleiro</div>
+              </div>
+              <span style="color:var(--text3);margin-left:auto">›</span>
+            </a>
+          </div>
         </div>
         <div class="qsblk"><div class="qsbh"><svg><use href="#igl"/></svg><h3>Para onde vamos</h3></div>
           <p>Inclinação para povos não alcançados no <strong>Norte da África</strong> ou <strong>Sudeste Asiático</strong> — grupos com pouca presença cristã e sem acesso ao Evangelho na própria língua. Campo a ser confirmado pelas agências.</p>
@@ -547,10 +549,18 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           </div>
         </div>
         <div class="ptcard" style="border-top:2px solid var(--accent)">
-          <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Parceiro Mensal</div><div class="ptsub">Seja parte ativa desse projeto</div></div></div>
+          <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Contribuindo</div><div class="ptsub">Sua parte financeira nessa equipe</div></div></div>
           <div class="ptbody">
-            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:14px">Numa parceria, todos fazem a sua parte. Enquanto Bruno e Malu vão ao campo, pregam e discipulam — você ora, envia e sustenta. <strong style="color:var(--text)">Não é ajuda: é sociedade. O projeto é um só, os agentes são muitos. Cada oferta mensal é a sua parte nessa equipe.</strong></p>
-            <button class="bact bsol" onclick="openPartnerForm()">Quero fazer minha parte todo mês</button>
+            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:16px">Numa parceria bíblica, cada um faz a sua parte. Não é ajuda — é sociedade. Cada oferta é a sua parte nessa equipe enviada ao campo.</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <button onclick="openContribuicao('recorrente')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 8px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
+                💳 Todo mês
+              </button>
+              <button onclick="openContribuicao('pontual')" style="background:transparent;border:1px solid var(--border-hi);color:var(--text2);border-radius:var(--r-md);padding:12px 8px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
+                💳 Uma vez
+              </button>
+            </div>
+            <p style="font-size:0.72rem;color:var(--text3);text-align:center;margin-bottom:0">Pagamento seguro via cartão de crédito</p>
           </div>
         </div>
         <div class="ptcard">
@@ -608,21 +618,80 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <button class="adbtn" onclick="saveMusic()">Salvar música</button>
     </div></div>
 
-    <div class="adsl">Publicar informativo</div>
-    <div class="adcard"><div class="adform">
-      <div><label class="adlbl">Nome</label><input class="adinp" id="nIT" placeholder="Ex: Quarto Informativo"></div>
-      <div><label class="adlbl">Período</label><input class="adinp" id="nID" placeholder="Ex: Segundo trimestre de 2026"></div>
-      <div><label class="adlbl">Resumo</label><input class="adinp" id="nIS" placeholder="Uma frase resumindo..."></div>
-      <div><label class="adlbl">Conteúdo (# Título, ## Sub, **negrito**, _itálico_)</label><textarea class="adta" id="nIC"></textarea></div>
-      <div><label class="adlbl">URLs das fotos (uma por linha)</label><textarea class="adta" id="nIFo" style="min-height:60px"></textarea></div>
-      <div><label class="adlbl">URL vídeo YouTube 1</label><input class="adinp" id="nIV" placeholder="https://youtube.com/..."></div>
-      <div><label class="adlbl">Label vídeo 1</label><input class="adinp" id="nIVL" placeholder="Ex: Acampamento dos Homens"></div>
-      <div><label class="adlbl">URL vídeo YouTube 2 (opcional)</label><input class="adinp" id="nIV2" placeholder="https://youtube.com/..."></div>
-      <div><label class="adlbl">Label vídeo 2</label><input class="adinp" id="nIV2L" placeholder="Ex: Sobre a APMT"></div>
-      <div><label class="adlbl">Pedidos de oração (um por linha)</label><textarea class="adta" id="nIPr" style="min-height:60px"></textarea></div>
-      <div><label class="adlbl">Assinatura</label><input class="adinp" id="nISg" placeholder="Com carinho, Malu Kassar 🌱"></div>
-      <button class="adbtn" onclick="addNews()">Publicar</button>
-    </div></div>
+        <div class="adsl">Publicar informativo</div>
+    <div class="adcard">
+      <!-- Step indicator -->
+      <div style="display:flex;gap:6px;margin-bottom:20px" id="newsSteps">
+        <div onclick="newsGoStep(1)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--accent);color:var(--bg-deep);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep1">1. Básico</div>
+        <div onclick="newsGoStep(2)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep2">2. Conteúdo</div>
+        <div onclick="newsGoStep(3)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep3">3. Fotos</div>
+        <div onclick="newsGoStep(4)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep4">4. Oração</div>
+      </div>
+
+      <!-- STEP 1: Basic info -->
+      <div id="newsStep1" class="adform">
+        <div><label class="adlbl">Nome do informativo *</label><input class="adinp" id="nIT" placeholder="Ex: Quarto Informativo"></div>
+        <div><label class="adlbl">Período *</label><input class="adinp" id="nID" placeholder="Ex: Segundo trimestre de 2026"></div>
+        <div><label class="adlbl">Resumo (1 frase) *</label><input class="adinp" id="nIS" placeholder="Uma frase resumindo o informativo..."></div>
+        <div><label class="adlbl">Assinatura</label><input class="adinp" id="nISg" placeholder="Com carinho, Malu Kassar 🌱"></div>
+        <button class="adbtn" onclick="newsGoStep(2)">Próximo → Conteúdo</button>
+      </div>
+
+      <!-- STEP 2: Content with blocks -->
+      <div id="newsStep2" style="display:none" class="adform">
+        <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Adicione blocos de conteúdo em qualquer ordem — texto, foto ou vídeo.</p>
+        <div id="newsBlocks" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px">
+          <button onclick="addNewsBlock('text')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">📝 Texto</button>
+          <button onclick="addNewsBlock('photo')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">📷 Foto</button>
+          <button onclick="addNewsBlock('video')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">▶ Vídeo</button>
+        </div>
+        <!-- Preview -->
+        <div id="newsPreviewWrap" style="display:none;margin-bottom:16px">
+          <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Pré-visualização</div>
+          <div id="newsPreview" style="background:var(--card-lo);border-radius:var(--r-sm);padding:14px;max-height:200px;overflow-y:auto;font-size:0.85rem;color:var(--text2);line-height:1.7"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(1)">← Voltar</button>
+          <button class="adbtn" style="flex:2" onclick="newsGoStep(3)">Próximo → Fotos</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Photos upload -->
+      <div id="newsStep3" style="display:none" class="adform">
+        <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:12px">Faça upload das fotos do informativo. Elas aparecerão na ordem que você adicionar.</p>
+        <div id="photoDropZone" onclick="document.getElementById('photoFileInput').click()"
+          style="border:2px dashed var(--border-md);border-radius:var(--r-lg);padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:12px"
+          ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
+          ondragleave="this.style.borderColor='var(--border-md)'"
+          ondrop="handlePhotoDrop(event)">
+          <div style="font-size:2rem;margin-bottom:8px">📷</div>
+          <div style="font-size:0.85rem;color:var(--text2);margin-bottom:4px">Toque para selecionar fotos</div>
+          <div style="font-size:0.72rem;color:var(--text3)">ou arraste aqui — JPG, PNG</div>
+        </div>
+        <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
+        <div id="photoPreviewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(2)">← Voltar</button>
+          <button class="adbtn" style="flex:2" onclick="newsGoStep(4)">Próximo → Oração</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Prayer requests + publish -->
+      <div id="newsStep4" style="display:none" class="adform">
+        <div><label class="adlbl">Pedidos de oração (um por linha)</label>
+          <textarea class="adta" id="nIPr" style="min-height:80px" placeholder="Pela saúde de Malu e Cauê&#10;Pelo processo com a APMT&#10;..."></textarea>
+        </div>
+        <div style="background:var(--card-lo);border-radius:var(--r-md);padding:14px;margin-top:4px">
+          <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Resumo do informativo</div>
+          <div id="newsSummaryFinal" style="font-size:0.82rem;color:var(--text2);line-height:1.65"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(3)">← Voltar</button>
+          <button class="adbtn" style="flex:2;background:var(--green)" onclick="addNews()">🌱 Publicar</button>
+        </div>
+      </div>
+    </div>
     <div id="existingNews"></div>
     <div class="adsl">Pedidos de oração gerais</div>
     <div class="adcard"><div class="adform">
@@ -645,37 +714,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
 
-    <div class="adsl">Minha conta</div>
-    <div class="adcard"><div class="adform">
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:4px">Altere sua senha de acesso ao painel.</p>
-      <div><label class="adlbl">Nova senha</label>
-        <div class="pass-wrap">
-          <input type="password" class="adinp" id="myNewPass" placeholder="Nova senha">
-          <button class="pass-eye" type="button" onclick="toggleEye('myNewPass',this)" tabindex="-1">
-            <svg><use href="#ieye" id="eyeIcon_myNewPass"/></svg>
-          </button>
-        </div>
-      </div>
-      <button class="adbtn" onclick="changeMyPassword()">Salvar nova senha</button>
-    </div></div>
-
-    <div class="adsl">Administradores</div>
-    <div id="adminList" style="margin-bottom:8px"></div>
-    <div class="adcard"><div class="adform">
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:4px">Adicione outros administradores — acesso total ao painel.</p>
-      <div><label class="adlbl">Nome</label><input type="text" class="adinp" id="nAN" placeholder="Nome do admin"></div>
-      <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nAE" placeholder="admin@email.com"></div>
-      <div><label class="adlbl">Senha</label>
-        <div class="pass-wrap">
-          <input type="password" class="adinp" id="nAP" placeholder="Senha do admin">
-          <button class="pass-eye" type="button" onclick="toggleEye('nAP',this)" tabindex="-1">
-            <svg><use href="#ieye" id="eyeIcon_nAP"/></svg>
-          </button>
-        </div>
-      </div>
-      <button class="adbtn" onclick="addAdmin()">Adicionar administrador</button>
-    </div></div>
-
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
       <div class="adform">
@@ -697,6 +735,59 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <div id="ytFr" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none"></div>
 <div class="toast" id="toast"></div>
+
+<!-- CONTRIBUIÇÃO MODAL -->
+<div id="contribuicaoModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
+  <div id="contBox" style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:28px 24px 48px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)" id="contTitle">Contribuição</div>
+      <button onclick="closeContribuicao()" style="background:transparent;border:1px solid var(--border-md);border-radius:50%;width:32px;height:32px;color:var(--text2);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">×</button>
+    </div>
+    <p id="contSubtitle" style="font-size:0.78rem;color:var(--text3);margin-bottom:24px"></p>
+
+    <!-- Step 1: Choose amount -->
+    <div id="contStep1">
+      <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text2);margin-bottom:12px">Escolha um valor</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px" id="contValues"></div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Ou digite outro valor</label>
+        <div style="display:flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;overflow:hidden">
+          <span style="padding:12px 12px 12px 16px;color:var(--text3);font-size:0.9rem">R$</span>
+          <input id="contCustom" type="number" min="10" placeholder="0,00" style="flex:1;background:transparent;border:none;padding:12px 16px 12px 4px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
+        </div>
+      </div>
+      <button onclick="contNext()" style="width:100%;background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">Continuar</button>
+    </div>
+
+    <!-- Step 2: Fill info and pay -->
+    <div id="contStep2" style="display:none">
+      <button onclick="contBack()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:0.82rem;margin-bottom:16px;padding:0;font-family:'Inter',sans-serif">← Voltar</button>
+      <div style="background:rgba(232,168,112,0.1);border:1px solid var(--border-md);border-radius:12px;padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:0.82rem;color:var(--text2)" id="contSummary"></span>
+        <span style="font-size:1.1rem;font-weight:600;color:var(--accent)" id="contAmount"></span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div>
+          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Nome completo *</label>
+          <input id="contName" type="text" placeholder="Seu nome" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+        </div>
+        <div>
+          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">E-mail *</label>
+          <input id="contEmail" type="email" placeholder="seu@email.com" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+        </div>
+        <div>
+          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">WhatsApp</label>
+          <input id="contPhone" type="tel" placeholder="+55 82 99999-9999" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+        </div>
+        <div id="contErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
+        <button onclick="contPay()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
+          💳 Ir para o pagamento
+        </button>
+        <p style="font-size:0.72rem;color:var(--text3);text-align:center;line-height:1.6">Você será redirecionado para uma página segura de pagamento via Stripe.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- PARTNER MODAL -->
 <div id="partnerModal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
@@ -761,6 +852,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <script>
 const MID='c0VO-WfnW0k';
+const STRIPE_PK='pk_live_51TTU4m3O6qoVuJnRZrtaodgORjpb8Lil6G2bzYd1QJ4I85y8ozbIDDS1bkpsFBxwiJygSyjr8IfyksQTzfohWb5J00FZMbhnQI';
+function getDb(){ return window.db||db; }
 let mPlaying=false,me=null;
 
 // ── PERSISTENCE ──
@@ -846,35 +939,53 @@ function initData(){
   const gaId=localStorage.getItem('grao_ga_id');
   if(gaId) window._gaId=gaId;
   loadPartnersFromFirebase();
+  loadNewsFromFirebase();
+  loadPrayersFromFirebase();
 }
 
-function safeDb(fn){
-  if(typeof db !== 'undefined') fn(db);
-  else if(typeof window.db !== 'undefined') fn(window.db);
-  else console.log('DB not available');
+function loadNewsFromFirebase(){
+  try {
+    getDb().collection('news').orderBy('createdAt','desc').get()
+    .then(snap=>{
+      let changed = false;
+      snap.forEach(doc=>{
+        const n=doc.data();
+        if(!D.news.find(x=>String(x.id)===String(n.id))){
+          D.news.unshift({...n, photos:[]});
+          changed = true;
+        }
+      });
+      if(changed){ D.news.sort((a,b)=>b.id-a.id); renderNews(); }
+    }).catch(()=>{});
+  } catch(e){}
+}
+
+function loadPrayersFromFirebase(){
+  try {
+    getDb().collection('prayers').get()
+    .then(snap=>{
+      let changed = false;
+      snap.forEach(doc=>{
+        const pr=doc.data();
+        if(!D.prayers.find(x=>x.title===pr.title)){
+          D.prayers.push({id:doc.id, ...pr});
+          changed = true;
+        }
+      });
+      if(changed){ renderPrayer(); renderPrayerPartner(); }
+    }).catch(()=>{});
+  } catch(e){}
 }
 
 function loadPartnersFromFirebase(){
-  const fdb = window.db||db;
-  if(!fdb) return;
-  // Load partners
-  fdb.collection('partners').get().then(snap=>{
-    snap.forEach(doc=>{
-      const u=doc.data();
-      if(!D.users.find(x=>x.email.toLowerCase()===u.email.toLowerCase())){
-        D.users.push({email:u.email,pass:u.pass,admin:false,nome:u.nome,id:doc.id});
+  getDb().collection('partners').get().then(snap => {
+    snap.forEach(doc => {
+      const u = doc.data();
+      if(!D.users.find(x => x.email.toLowerCase() === u.email.toLowerCase())){
+        D.users.push({email:u.email, pass:u.pass, admin:false, nome:u.nome, id:doc.id});
       }
     });
-  }).catch(e=>console.log('Partners load error:',e));
-  // Load extra admins from Firebase
-  fdb.collection('admins').get().then(snap=>{
-    snap.forEach(doc=>{
-      const u=doc.data();
-      if(!D.users.find(x=>x.email.toLowerCase()===u.email.toLowerCase())){
-        D.users.push({email:u.email,pass:u.pass,admin:true,nome:u.nome,id:doc.id});
-      }
-    });
-  }).catch(()=>{});
+  }).catch(e => console.log('Firebase load error:', e));
 }
 
 function doLogin(){
@@ -895,7 +1006,7 @@ function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remo
 let ytPlayer=null;
 
 function onYouTubeIframeAPIReady(){
-  const vid=window._savedMusicId||MID;
+  const vid=window._savedMusicId||localStorage.getItem('grao_music_id')||MID;
   ytPlayer=new YT.Player('ytFr',{
     height:'1',width:'1',videoId:vid,
     playerVars:{autoplay:1,loop:1,playlist:vid,controls:0,rel:0,playsinline:1},
@@ -916,23 +1027,41 @@ function onYouTubeIframeAPIReady(){
 
 function initMusic(){
   document.getElementById('mbar').classList.add('on');
-  // Load music config from Firebase
-  db.collection('settings').doc('music').get()
+  // Load name from localStorage as immediate fallback
+  const cachedName = localStorage.getItem('grao_music_name');
+  if(cachedName) document.querySelector('.mname').textContent = cachedName;
+
+  // Load YouTube API immediately
+  if(window.YT && window.YT.Player){
+    onYouTubeIframeAPIReady();
+  } else {
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+  }
+
+  // Load music config from Firebase in background
+  try {
+    getDb().collection('settings').doc('music').get()
     .then(doc=>{
       if(doc.exists){
-        const d=doc.data();
-        if(d.musicName) document.querySelector('.mname').textContent=d.musicName;
-        if(d.musicId) window._savedMusicId=d.musicId;
+        const d = doc.data();
+        if(d.musicName){
+          document.querySelector('.mname').textContent = d.musicName;
+          localStorage.setItem('grao_music_name', d.musicName);
+        }
+        if(d.musicId && d.musicId !== (window._savedMusicId||MID)){
+          window._savedMusicId = d.musicId;
+          localStorage.setItem('grao_music_id', d.musicId);
+          // If player already loaded, switch track
+          if(ytPlayer && ytPlayer.loadVideoById){
+            ytPlayer.loadVideoById({videoId:d.musicId});
+            ytPlayer.playVideo();
+          }
+        }
       }
-    })
-    .catch(()=>{})
-    .finally(()=>{
-      // Load YouTube API after Firebase responds
-      if(window.YT&&window.YT.Player){ onYouTubeIframeAPIReady(); return; }
-      const tag=document.createElement('script');
-      tag.src='https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-    });
+    }).catch(()=>{});
+  } catch(e){}
 }
 
 function toggleMusic(){
@@ -946,20 +1075,7 @@ function pauseMusic(){
   mPlaying=false;
 }
 
-function track(a){
-  // Save locally
-  const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');
-  const d=new Date().toISOString().split('T')[0];
-  m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);
-  localStorage.setItem(k,JSON.stringify(m));
-  // Also save to Firebase
-  if(typeof db!=='undefined'||typeof window.db!=='undefined'){
-    const fdb=window.db||db;
-    fdb.collection('metrics').doc('global').set({
-      total:m.t, sessions:m.s, byDay:m.d, lastUpdated:new Date().toISOString()
-    },{merge:true}).catch(()=>{});
-  }
-}
+function track(a){const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');const d=new Date().toISOString().split('T')[0];m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);localStorage.setItem(k,JSON.stringify(m));}
 
 function md(t){if(!t)return'';return t.replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h4>$4</h4>'.replace('$4','$1')).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');}
 
@@ -1066,7 +1182,7 @@ function renderAll(){renderNews();renderTimeline();renderPrayer();renderAdmin();
 function loadMensais(){
   const el=document.getElementById('mensaisList');
   if(!el) return;
-  db.collection('parceiros_mensais').orderBy('timestamp','desc').get()
+  getDb().collection('parceiros_mensais').orderBy('timestamp','desc').get()
     .then(snap=>{
       if(snap.empty){
         el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum cadastro ainda.</p>';
@@ -1090,6 +1206,9 @@ function loadMensais(){
 }
 
 function renderAdmin(){
+  loadPending();
+  loadMensais();
+  loadAdmins();
   const m=JSON.parse(localStorage.getItem('gm')||'{}');
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('metricsGrid').innerHTML=`
@@ -1119,96 +1238,46 @@ function saveGA(){
 }
 
 function saveMusic(){
-  const name=document.getElementById('musicName').value.trim()||'Seguro — Shirley Carvalhaes';
-  const url=document.getElementById('musicUrl').value.trim();
-  const vid=url?ytId(url):null;
-  // Save to Firebase
-  const data={musicName:name};
-  if(vid) data.musicId=vid;
-  db.collection('settings').doc('music').set(data,{merge:true})
-    .then(()=>toast('Música atualizada para todos! ✓'))
-    .catch(()=>toast('Erro ao salvar.'));
-  // Update current player immediately
-  document.querySelector('.mname').textContent=name;
-  if(vid&&ytPlayer&&ytPlayer.loadVideoById){
-    ytPlayer.loadVideoById({videoId:vid});
-    ytPlayer.playVideo();
-    mPlaying=true;
-    document.getElementById('micon').setAttribute('href','#ipause');
-  }
-}
+  const name = document.getElementById('musicName').value.trim() || 'Seguro — Shirley Carvalhaes';
+  const url  = document.getElementById('musicUrl').value.trim();
+  const vid  = url ? ytId(url) : null;
 
-function loadSavedSettings(){
-  const gaId=localStorage.getItem('grao_ga_id');
-  if(gaId) document.getElementById('gaId').value=gaId;
-  // Load music settings from Firebase to populate admin fields
-  db.collection('settings').doc('music').get()
-    .then(doc=>{
-      if(doc.exists){
-        const d=doc.data();
-        if(d.musicName){
-          document.getElementById('musicName').value=d.musicName;
-          document.querySelector('.mname').textContent=d.musicName;
-        }
-        if(d.musicId) document.getElementById('musicUrl').value='https://www.youtube.com/watch?v='+d.musicId;
-      }
-    }).catch(()=>{});
-}
-function addNews(){
-  const name=g('nIT'),date=g('nID'),summary=g('nIS'),content=g('nIC');
-  if(!name||!content)return toast('Preencha nome e conteúdo.');
-  const photos=g('nIFo').split('\n').map(s=>s.trim()).filter(Boolean);
-  const video=g('nIV'),videoLabel=g('nIVL'),video2=g('nIV2'),video2Label=g('nIV2L');
-  const prayers=g('nIPr').split('\n').map(s=>s.trim()).filter(Boolean);
-  const sign=g('nISg');
-  D.news.unshift({id:Date.now(),name,date,summary,content,photos,photoCaps:[],video,videoLabel,video2,video2Label,prayers,sign,isNew:true});
-  ['nIT','nID','nIS','nIC','nIFo','nIV','nIVL','nIV2','nIV2L','nIPr','nISg'].forEach(id=>document.getElementById(id).value='');
-  saveNews();
+  // Save name always
+  localStorage.setItem('grao_music_name', name);
+  document.querySelector('.mname').textContent = name;
+
   // Save to Firebase
-  if(typeof window.db!=='undefined'){
-    const n=D.news[0];
-    window.db.collection('news').doc(String(n.id)).set({
-      id:n.id,name:n.name,date:n.date,summary:n.summary,
-      content:n.content,video:n.video||'',video2:n.video2||'',
-      videoLabel:n.videoLabel||'',video2Label:n.video2Label||'',
-      prayers:n.prayers||[],sign:n.sign||'',isNew:n.isNew,
-      photos:[], // photos stored as base64 locally only
-      createdAt:new Date().toISOString()
-    }).catch(()=>{});
+  const fireData = {musicName: name, updatedAt: new Date().toISOString()};
+  if(vid) fireData.musicId = vid;
+  try {
+    getDb().collection('settings').doc('music').set(fireData, {merge:true})
+    .then(()=> toast('Música salva para todos! ✓'))
+    .catch(()=> toast('Nome salvo localmente.'));
+  } catch(e){ toast('Nome salvo!'); }
+
+  // Update player if new video
+  if(vid){
+    localStorage.setItem('grao_music_id', vid);
+    window._savedMusicId = vid;
+    if(ytPlayer && ytPlayer.loadVideoById){
+      ytPlayer.loadVideoById({videoId:vid});
+      ytPlayer.playVideo();
+      mPlaying = true;
+      document.getElementById('micon').setAttribute('href','#ipause');
+    }
   }
-  renderAll();toast('Publicado!');
 }
-function delNews(id){
-  D.news=D.news.filter(n=>n.id!==id);
-  saveNews();
-  if(typeof window.db!=='undefined') window.db.collection('news').doc(String(id)).delete().catch(()=>{});
-  renderAll();toast('Removido.');
-}
-function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();
-  if(typeof window.db!=='undefined'){
-    window.db.collection('prayers').doc(String(Date.now())).set({title,body,createdAt:new Date().toISOString()}).catch(()=>{});
-  }
-  renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
-function delPr(id){
-  D.prayers=D.prayers.filter(p=>p.id!==id);
-  savePrayers();
-  if(typeof window.db!=='undefined') window.db.collection('prayers').doc(String(id)).delete().catch(()=>{});
-  renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');
-}
-function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');
-  saveTimeline();
-  const lastTl=D.timeline[D.timeline.length-1];
-  if(typeof window.db!=='undefined'){
-    window.db.collection('timeline').doc(String(lastTl.id)).set({...lastTl,createdAt:new Date().toISOString()}).catch(()=>{});
-  }
-  renderTimeline();toast('Adicionado!');}
+function delNews(id){D.news=D.news.filter(n=>n.id!==id);saveNews();renderAll();toast('Removido.');}
+function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
+function delPr(id){D.prayers=D.prayers.filter(p=>p.id!==id);savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');}
+function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');saveTimeline();renderTimeline();toast('Adicionado!');}
 function addUser(){
   const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
   if(!email||!pass) return toast('Preencha e-mail e senha.');
   if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
   
   // Save to Firebase
-  db.collection('partners').add({email, pass, nome, createdAt: new Date().toISOString()})
+  getDb().collection('partners').add({email, pass, nome, createdAt: new Date().toISOString()})
     .then(docRef => {
       D.users.push({email, pass, admin:false, nome, id:docRef.id});
       renderAdmin();
@@ -1230,7 +1299,7 @@ function addUser(){
 function delUser(i){
   const user = D.users[i];
   if(user && user.id){
-    db.collection('partners').doc(user.id).delete().catch(e=>console.log('Delete error',e));
+    getDb().collection('partners').doc(user.id).delete().catch(e=>console.log('Delete error',e));
   }
   D.users.splice(i,1);
   saveUsers();
@@ -1273,24 +1342,12 @@ function submitPartnerForm(){
   }
   err.style.display='none';
   const value=val==='outro'?other:val;
-  // Send via WhatsApp to Bruno
-  const msg=encodeURIComponent(
-    `🌱 *Novo Parceiro Mensal — Projeto GRÃO*
-
-`+
-    `*Nome:* ${name}
-`+
-    `*WhatsApp:* ${phone}
-`+
-    `*E-mail:* ${email}
-`+
-    `*Aniversário:* ${birth}
-`+
-    `*Cidade:* ${city}
-`+
-    `*Contribuição:* ${value}`
-  );
-  window.open(`https://wa.me/5582996210019?text=${msg}`,'_blank');
+  // Notify via email
+  emailjs.send('service_grao','template_grao_1',{
+    nome: `Novo Parceiro Mensal: ${name}`,
+    email_parceiro: 'nossoprojetograo@gmail.com',
+    senha: `Tel: ${phone} | Cidade: ${city} | Valor: ${value} | Nasc: ${birth}`
+  }).catch(()=>{});
   document.getElementById('pfForm').style.display='none';
   document.getElementById('pfSuccess').style.display='block';
   track('partner-form');
@@ -1312,7 +1369,7 @@ function changeMyPassword(){
   const isDefault = (me.email === 'admin@grao.com');
   if(isDefault){
     // Save to Firebase admins collection for future logins
-    db.collection('admins').doc('default_admin').set({
+    getDb().collection('admins').doc('default_admin').set({
       email: me.email, pass: newPass, admin: true, nome: 'Admin'
     }).then(()=>{
       me.pass = newPass;
@@ -1324,7 +1381,7 @@ function changeMyPassword(){
   } else if(me.id){
     // Update in Firebase partners or admins
     const col = me.isAdminCol ? 'admins' : 'partners';
-    db.collection(col).doc(me.id).update({pass: newPass})
+    getDb().collection(col).doc(me.id).update({pass: newPass})
     .then(()=>{
       me.pass = newPass;
       document.getElementById('myNewPass').value='';
@@ -1339,7 +1396,7 @@ function addAdmin(){
   const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
   if(!nome||!email||!pass) return toast('Preencha todos os campos.');
   if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  db.collection('admins').add({
+  getDb().collection('admins').add({
     email, pass, admin:true, nome, createdAt: new Date().toISOString()
   }).then(docRef=>{
     D.users.push({email, pass, admin:true, nome, id:docRef.id, isAdminCol:true});
@@ -1352,7 +1409,7 @@ function addAdmin(){
 function loadPending(){
   const el=document.getElementById('pendingList');
   if(!el) return;
-  db.collection('pending_partners').where('status','==','pending').orderBy('requestedAt','desc').get()
+  getDb().collection('pending_partners').where('status','==','pending').orderBy('requestedAt','desc').get()
   .then(snap=>{
     if(snap.empty){ el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhuma solicitação pendente.</p>'; return; }
     el.innerHTML=snap.docs.map(doc=>{
@@ -1373,8 +1430,8 @@ function loadPending(){
 
 function approvePending(docId, nome, email, pass){
   // Move to partners collection
-  db.collection('partners').add({email, pass, nome, admin:false, createdAt:new Date().toISOString()})
-  .then(()=> db.collection('pending_partners').doc(docId).update({status:'approved'}))
+  getDb().collection('partners').add({email, pass, nome, admin:false, createdAt:new Date().toISOString()})
+  .then(()=> getDb().collection('pending_partners').doc(docId).update({status:'approved'}))
   .then(()=>{
     // Send welcome email
     emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass})
@@ -1389,7 +1446,7 @@ function approvePending(docId, nome, email, pass){
 
 function rejectPending(docId){
   if(!confirm('Recusar esta solicitação?')) return;
-  db.collection('pending_partners').doc(docId).update({status:'rejected'})
+  getDb().collection('pending_partners').doc(docId).update({status:'rejected'})
   .then(()=>{ loadPending(); toast('Solicitação recusada.'); })
   .catch(e=>toast('Erro: '+e.message));
 }
@@ -1397,7 +1454,7 @@ function rejectPending(docId){
 function loadAdmins(){
   const el=document.getElementById('adminList');
   if(!el) return;
-  db.collection('admins').get()
+  getDb().collection('admins').get()
   .then(snap=>{
     if(snap.empty){ el.innerHTML='<p style="font-size:0.8rem;color:var(--text3);padding:8px 0">Nenhum admin adicional cadastrado.</p>'; return; }
     const rows = snap.docs
@@ -1415,7 +1472,7 @@ function loadAdmins(){
 
 function delAdmin(docId, email){
   if(!confirm('Remover admin ' + email + '?')) return;
-  db.collection('admins').doc(docId).delete()
+  getDb().collection('admins').doc(docId).delete()
   .then(()=>{
     D.users = D.users.filter(u=>u.email!==email);
     loadAdmins();
@@ -1439,13 +1496,18 @@ function loadFontSize(){
 // ── SELF REGISTER ──
 function openRegister(){
   const m = document.getElementById('registerModal');
+  // Move to body root to escape position:fixed parent constraint
+  document.body.appendChild(m);
   m.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
   document.getElementById('regForm').style.display = 'flex';
   document.getElementById('regSuccess').style.display = 'none';
   document.getElementById('regErr').style.display = 'none';
 }
 function closeRegister(){
-  document.getElementById('registerModal').style.display = 'none';
+  const m = document.getElementById('registerModal');
+  m.style.display = 'none';
+  document.body.style.overflow = 'hidden';
 }
 function submitRegister(){
   const name  = document.getElementById('regName').value.trim();
@@ -1458,11 +1520,11 @@ function submitRegister(){
   err.style.display='none';
 
   // Check if already exists
-  db.collection('partners').where('email','==',email).get()
+  getDb().collection('partners').where('email','==',email).get()
   .then(snap=>{
     if(!snap.empty){ err.textContent='Este e-mail já está cadastrado.'; err.style.display='block'; return; }
     // Save as pending partner
-    return db.collection('pending_partners').add({
+    return getDb().collection('pending_partners').add({
       nome: name, email, pass, how,
       status: 'pending',
       requestedAt: new Date().toISOString()
@@ -1470,34 +1532,182 @@ function submitRegister(){
   })
   .then(ref=>{
     if(!ref) return; // already existed
-    // Notify Bruno/Malu via email
+    // Notify via email
     emailjs.send('service_grao','template_grao_1',{
       nome: `Nova solicitação: ${name}`,
       email_parceiro: 'nossoprojetograo@gmail.com',
-      senha: `E-mail: ${email} | Como conheceu: ${how||'Não informado'} | Acesse o painel admin para aprovar.`
-    }).then(()=>console.log('Notificação enviada'))
-      .catch(e=>console.log('Erro:',e));
+      senha: `E-mail: ${email} | Como conheceu: ${how||'Não informado'} | Aprovar no painel admin.`
+    }).catch(()=>{});
     document.getElementById('regForm').style.display='none';
     document.getElementById('regSuccess').style.display='block';
   })
   .catch(e=>{ err.textContent='Erro: '+e.message; err.style.display='block'; });
 }
 
+// ── CONTRIBUIÇÃO ──
+let contType = 'recorrente';
+let contValue = 0;
+
+// Stripe payment links - to be configured
+// For now using placeholder links - replace with real Stripe links
+const STRIPE_LINKS = {
+  recorrente: {
+    30:  'https://buy.stripe.com/recorrente_30',
+    50:  'https://buy.stripe.com/recorrente_50',
+    100: 'https://buy.stripe.com/recorrente_100',
+    200: 'https://buy.stripe.com/recorrente_200',
+    custom: 'https://buy.stripe.com/recorrente_custom'
+  },
+  pontual: {
+    30:  'https://buy.stripe.com/pontual_30',
+    50:  'https://buy.stripe.com/pontual_50',
+    100: 'https://buy.stripe.com/pontual_100',
+    200: 'https://buy.stripe.com/pontual_200',
+    custom: 'https://buy.stripe.com/pontual_custom'
+  }
+};
+
+function openContribuicao(tipo){
+  contType = tipo;
+  document.body.appendChild(document.getElementById('contribuicaoModal'));
+  document.getElementById('contribuicaoModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  document.getElementById('contStep1').style.display = 'block';
+  document.getElementById('contStep2').style.display = 'none';
+  document.getElementById('contCustom').value = '';
+  document.getElementById('contErr') && (document.getElementById('contErr').style.display='none');
+
+  const isRec = tipo === 'recorrente';
+  document.getElementById('contTitle').textContent = isRec ? 'Parceria mensal' : 'Contribuição pontual';
+  document.getElementById('contSubtitle').textContent = isRec
+    ? 'Cobrado automaticamente todo mês no cartão. Cancele quando quiser.'
+    : 'Uma contribuição única. Rápido e seguro.';
+
+  const values = isRec ? [30,50,100,200,300,500] : [30,50,100,200,500,1000];
+  document.getElementById('contValues').innerHTML = values.map(v =>
+    `<button onclick="selectContValue(${v})" id="cv_${v}" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-md);padding:12px 8px;font-size:0.88rem;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">R$ ${v}</button>`
+  ).join('');
+}
+
+function selectContValue(v){
+  contValue = v;
+  document.querySelectorAll('[id^="cv_"]').forEach(b=>{
+    b.style.background = 'rgba(255,255,255,0.07)';
+    b.style.borderColor = 'var(--border-md)';
+    b.style.color = 'var(--text2)';
+  });
+  const btn = document.getElementById('cv_'+v);
+  if(btn){
+    btn.style.background = 'rgba(232,168,112,0.2)';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+  }
+  document.getElementById('contCustom').value = '';
+}
+
+function contNext(){
+  const custom = parseFloat(document.getElementById('contCustom').value);
+  if(custom >= 10) contValue = custom;
+  if(!contValue || contValue < 10){
+    toast('Selecione ou digite um valor mínimo de R$ 10.');
+    return;
+  }
+  document.getElementById('contStep1').style.display = 'none';
+  document.getElementById('contStep2').style.display = 'block';
+  const isRec = contType === 'recorrente';
+  document.getElementById('contSummary').textContent = isRec ? 'Todo mês:' : 'Valor único:';
+  document.getElementById('contAmount').textContent = 'R$ ' + contValue.toFixed(2).replace('.',',');
+}
+
+function contBack(){
+  document.getElementById('contStep1').style.display = 'block';
+  document.getElementById('contStep2').style.display = 'none';
+}
+
+function contPay(){
+  const name  = document.getElementById('contName').value.trim();
+  const email = document.getElementById('contEmail').value.trim();
+  const phone = document.getElementById('contPhone').value.trim();
+  const err   = document.getElementById('contErr');
+  if(!name||!email){ err.textContent='Preencha nome e e-mail.'; err.style.display='block'; return; }
+  err.style.display='none';
+
+  // Save to Firebase
+  try {
+    getDb().collection('parceiros_mensais').add({
+      nome:name, email, phone,
+      valor: 'R$ '+contValue,
+      tipo: contType,
+      data: new Date().toLocaleDateString('pt-BR'),
+      timestamp: new Date().toISOString()
+    }).catch(()=>{});
+  } catch(e){}
+
+  // Send thank you email
+  emailjs.send('service_grao','template_parceiro_mensal',{
+    nome:name, email_parceiro:email, valor:'R$ '+contValue, cidade:''
+  }).catch(()=>{});
+
+  // Notify Bruno/Malu
+  emailjs.send('service_grao','template_grao_1',{
+    nome:`Contribuição ${contType}: ${name}`,
+    email_parceiro:'nossoprojetograo@gmail.com',
+    senha:`Valor: R$ ${contValue} | E-mail: ${email} | Tel: ${phone||'—'} | Tipo: ${contType}`
+  }).catch(()=>{});
+
+  // Get Stripe payment link for this value/type
+  const linkKey = contType === 'recorrente' ? 'rec' : 'pon';
+  const values = contType === 'recorrente'
+    ? [30,50,100,200,300,500]
+    : [30,50,100,200,500,1000];
+  
+  // Find closest predefined value or use custom
+  let linkUrl = STRIPE_LINKS[contType] && STRIPE_LINKS[contType][contValue]
+    ? STRIPE_LINKS[contType][contValue]
+    : (STRIPE_LINKS[contType] ? STRIPE_LINKS[contType]['custom'] : null);
+
+  if(!linkUrl){
+    toast('Links de pagamento ainda sendo configurados. Por enquanto use o Pix!');
+    closeContribuicao();
+    return;
+  }
+
+  // Add prefilled email to Stripe link
+  const stripeUrl = linkUrl + (linkUrl.includes('?') ? '&' : '?')
+    + 'prefilled_email=' + encodeURIComponent(email)
+    + '&client_reference_id=' + encodeURIComponent(name);
+
+  window.open(stripeUrl, '_blank');
+  closeContribuicao();
+  track('contribuicao-'+contType);
+}
+
+function closeContribuicao(){
+  document.getElementById('contribuicaoModal').style.display = 'none';
+  document.body.style.overflow = 'hidden';
+}
+
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
 function g(id){return(document.getElementById(id)?.value||'').trim();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
-<!-- Load external SDKs here so they are ready before main script -->
+<!-- External SDKs loaded here to ensure correct order -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-// Firebase config - runs after SDKs load
-// Firebase config defined externally
+const firebaseConfig = {
+  apiKey: "AIzaSyBofyU6uNSSJu2Y3iNF0ZpkPzITbfAwgyY",
+  authDomain: "projeto-grao-c3b3d.firebaseapp.com",
+  projectId: "projeto-grao-c3b3d",
+  storageBucket: "projeto-grao-c3b3d.firebasestorage.app",
+  messagingSenderId: "812250944695",
+  appId: "1:812250944695:web:5ec406584e948ce5c02932"
+};
 firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore();
 emailjs.init("KntRzGvrjbRuUiVZn");
-console.log('Firebase + EmailJS ready');
+console.log("Firebase + EmailJS prontos");
 </script>
 
 <script>
@@ -1512,18 +1722,16 @@ if ('serviceWorker' in navigator && location.hostname === 'projetograo.github.io
 // Init everything after DOM and Firebase are ready
 document.addEventListener('DOMContentLoaded', function(){
   loadFontSize();
-  // Wait for Firebase to be fully ready before running initData
-  function waitForFirebase(attempts){
-    if(typeof firebase !== 'undefined' && typeof db !== 'undefined'){
-      try { initData(); } catch(e){ console.log('initData error:', e); }
-    } else if(attempts > 0){
-      setTimeout(function(){ waitForFirebase(attempts-1); }, 200);
+  function waitForFirebase(n){
+    if(typeof firebase!=='undefined' && typeof window.db!=='undefined'){
+      try{ initData(); }catch(e){ console.log('initData error:',e); }
+    } else if(n>0){
+      setTimeout(function(){ waitForFirebase(n-1); }, 200);
     } else {
-      console.log('Firebase timeout - running without DB');
-      try { initData(); } catch(e){}
+      try{ initData(); }catch(e){}
     }
   }
-  waitForFirebase(15); // try for up to 3 seconds
+  waitForFirebase(20);
 });
 </script>
 </body>
