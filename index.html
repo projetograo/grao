@@ -552,15 +552,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Contribuindo</div><div class="ptsub">Sua parte financeira nessa equipe</div></div></div>
           <div class="ptbody">
             <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:16px">Numa parceria bíblica, cada um faz a sua parte. Não é ajuda — é sociedade. Cada oferta é a sua parte nessa equipe enviada ao campo.</p>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-              <button onclick="openContribuicao('recorrente')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 8px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
-                💳 Todo mês
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+              <button onclick="openContribuicao('cartao')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <span style="font-size:1.2rem">💳</span>Cartão
               </button>
-              <button onclick="openContribuicao('pontual')" style="background:transparent;border:1px solid var(--border-hi);color:var(--text2);border-radius:var(--r-md);padding:12px 8px;font-size:0.72rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
-                💳 Uma vez
+              <button onclick="openContribuicao('pix')" style="background:transparent;border:1px solid var(--border-hi);color:var(--text2);border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <span style="font-size:1.2rem">🔑</span>Pix
               </button>
             </div>
-            <p style="font-size:0.72rem;color:var(--text3);text-align:center;margin-bottom:0">Pagamento seguro via cartão de crédito</p>
+            <p style="font-size:0.72rem;color:var(--text3);text-align:center">Ambos recebem confirmação por e-mail</p>
           </div>
         </div>
         <div class="ptcard">
@@ -738,53 +738,48 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <!-- CONTRIBUIÇÃO MODAL -->
 <div id="contribuicaoModal" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
-  <div id="contBox" style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:28px 24px 48px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:28px 24px 48px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)" id="contTitle">Contribuição</div>
       <button onclick="closeContribuicao()" style="background:transparent;border:1px solid var(--border-md);border-radius:50%;width:32px;height:32px;color:var(--text2);cursor:pointer;font-size:1.1rem;display:flex;align-items:center;justify-content:center">×</button>
     </div>
     <p id="contSubtitle" style="font-size:0.78rem;color:var(--text3);margin-bottom:24px"></p>
 
-    <!-- Step 1: Choose amount -->
-    <div id="contStep1">
-      <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text2);margin-bottom:12px">Escolha um valor</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px" id="contValues"></div>
-      <div style="margin-bottom:16px">
-        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Ou digite outro valor</label>
+    <!-- Form -->
+    <div id="contForm" style="display:flex;flex-direction:column;gap:16px">
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Nome completo *</label>
+        <input id="contName" type="text" placeholder="Seu nome" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">E-mail *</label>
+        <input id="contEmail" type="email" placeholder="seu@email.com" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">WhatsApp</label>
+        <input id="contPhone" type="tel" placeholder="+55 82 99999-9999" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Valor da contribuição *</label>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px" id="contValueBtns"></div>
         <div style="display:flex;align-items:center;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;overflow:hidden">
           <span style="padding:12px 12px 12px 16px;color:var(--text3);font-size:0.9rem">R$</span>
-          <input id="contCustom" type="number" min="10" placeholder="0,00" style="flex:1;background:transparent;border:none;padding:12px 16px 12px 4px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
+          <input id="contCustom" type="number" min="10" placeholder="outro valor" style="flex:1;background:transparent;border:none;padding:12px 16px 12px 4px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none" oninput="contValue=parseFloat(this.value)||0;contUnselectBtns()">
         </div>
       </div>
-      <button onclick="contNext()" style="width:100%;background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">Continuar</button>
+      <div id="contErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
+      <button id="contPayBtn" onclick="contPay()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
+        Confirmar e continuar
+      </button>
+      <p id="contNote" style="font-size:0.72rem;color:var(--text3);text-align:center;line-height:1.6"></p>
     </div>
 
-    <!-- Step 2: Fill info and pay -->
-    <div id="contStep2" style="display:none">
-      <button onclick="contBack()" style="background:transparent;border:none;color:var(--text3);cursor:pointer;font-size:0.82rem;margin-bottom:16px;padding:0;font-family:'Inter',sans-serif">← Voltar</button>
-      <div style="background:rgba(232,168,112,0.1);border:1px solid var(--border-md);border-radius:12px;padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
-        <span style="font-size:0.82rem;color:var(--text2)" id="contSummary"></span>
-        <span style="font-size:1.1rem;font-weight:600;color:var(--accent)" id="contAmount"></span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div>
-          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Nome completo *</label>
-          <input id="contName" type="text" placeholder="Seu nome" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
-        </div>
-        <div>
-          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">E-mail *</label>
-          <input id="contEmail" type="email" placeholder="seu@email.com" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
-        </div>
-        <div>
-          <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">WhatsApp</label>
-          <input id="contPhone" type="tel" placeholder="+55 82 99999-9999" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
-        </div>
-        <div id="contErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
-        <button onclick="contPay()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
-          💳 Ir para o pagamento
-        </button>
-        <p style="font-size:0.72rem;color:var(--text3);text-align:center;line-height:1.6">Você será redirecionado para uma página segura de pagamento via Stripe.</p>
-      </div>
+    <!-- Success -->
+    <div id="contSuccess" style="display:none;text-align:center;padding:32px 0">
+      <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Obrigado!</div>
+      <p style="font-size:0.9rem;color:var(--text2);line-height:1.75;margin-bottom:24px" id="contSuccessMsg"></p>
+      <button onclick="closeContribuicao()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">Fechar</button>
     </div>
   </div>
 </div>
@@ -1545,105 +1540,84 @@ function submitRegister(){
 }
 
 // ── CONTRIBUIÇÃO ──
-let contType = 'recorrente';
+let contType = 'cartao';
 let contValue = 0;
-
-// Stripe payment links - to be configured
-// For now using placeholder links - replace with real Stripe links
-const STRIPE_LINKS = {
-  recorrente: {
-    30:  'https://buy.stripe.com/recorrente_30',
-    50:  'https://buy.stripe.com/recorrente_50',
-    100: 'https://buy.stripe.com/recorrente_100',
-    200: 'https://buy.stripe.com/recorrente_200',
-    custom: 'https://buy.stripe.com/recorrente_custom'
-  },
-  pontual: {
-    30:  'https://buy.stripe.com/pontual_30',
-    50:  'https://buy.stripe.com/pontual_50',
-    100: 'https://buy.stripe.com/pontual_100',
-    200: 'https://buy.stripe.com/pontual_200',
-    custom: 'https://buy.stripe.com/pontual_custom'
-  }
-};
 
 function openContribuicao(tipo){
   contType = tipo;
+  contValue = 0;
   document.body.appendChild(document.getElementById('contribuicaoModal'));
   document.getElementById('contribuicaoModal').style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  document.getElementById('contStep1').style.display = 'block';
-  document.getElementById('contStep2').style.display = 'none';
+  document.getElementById('contForm').style.display = 'flex';
+  document.getElementById('contSuccess').style.display = 'none';
+  document.getElementById('contErr').style.display = 'none';
   document.getElementById('contCustom').value = '';
-  document.getElementById('contErr') && (document.getElementById('contErr').style.display='none');
+  // Clear name/email/phone if reopening
+  ['contName','contEmail','contPhone'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
 
-  const isRec = tipo === 'recorrente';
-  document.getElementById('contTitle').textContent = isRec ? 'Parceria mensal' : 'Contribuição pontual';
-  document.getElementById('contSubtitle').textContent = isRec
-    ? 'Cobrado automaticamente todo mês no cartão. Cancele quando quiser.'
-    : 'Uma contribuição única. Rápido e seguro.';
+  const isCard = tipo === 'cartao';
+  document.getElementById('contTitle').textContent = isCard ? 'Contribuir via Cartão' : 'Contribuir via Pix';
+  document.getElementById('contSubtitle').textContent = isCard
+    ? 'Preencha seus dados e escolha o valor. Você será direcionado para o pagamento seguro.'
+    : 'Preencha seus dados e escolha o valor. Você receberá a chave Pix para transferência.';
+  document.getElementById('contPayBtn').textContent = isCard ? '💳 Ir para o pagamento' : '🔑 Ver chave Pix';
+  document.getElementById('contNote').textContent = isCard
+    ? 'Pagamento seguro via Stripe. Pode ser mensal ou único.'
+    : 'Você receberá os dados por e-mail e a chave Pix será exibida.';
 
-  const values = isRec ? [30,50,100,200,300,500] : [30,50,100,200,500,1000];
-  document.getElementById('contValues').innerHTML = values.map(v =>
-    `<button onclick="selectContValue(${v})" id="cv_${v}" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-md);padding:12px 8px;font-size:0.88rem;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">R$ ${v}</button>`
+  // Value buttons
+  const vals = [30, 50, 100, 200, 300, 500];
+  document.getElementById('contValueBtns').innerHTML = vals.map(v=>
+    `<button id="cvb_${v}" onclick="contSelectVal(${v})" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-md);padding:10px 4px;font-size:0.85rem;font-weight:500;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s">R$ ${v}</button>`
   ).join('');
 }
 
-function selectContValue(v){
+function contSelectVal(v){
   contValue = v;
-  document.querySelectorAll('[id^="cv_"]').forEach(b=>{
-    b.style.background = 'rgba(255,255,255,0.07)';
-    b.style.borderColor = 'var(--border-md)';
-    b.style.color = 'var(--text2)';
-  });
-  const btn = document.getElementById('cv_'+v);
-  if(btn){
-    btn.style.background = 'rgba(232,168,112,0.2)';
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color = 'var(--accent)';
-  }
   document.getElementById('contCustom').value = '';
+  document.querySelectorAll('[id^="cvb_"]').forEach(b=>{
+    b.style.background='rgba(255,255,255,0.07)';
+    b.style.borderColor='var(--border-md)';
+    b.style.color='var(--text2)';
+  });
+  const btn = document.getElementById('cvb_'+v);
+  if(btn){ btn.style.background='rgba(232,168,112,0.2)'; btn.style.borderColor='var(--accent)'; btn.style.color='var(--accent)'; }
 }
 
-function contNext(){
-  const custom = parseFloat(document.getElementById('contCustom').value);
-  if(custom >= 10) contValue = custom;
-  if(!contValue || contValue < 10){
-    toast('Selecione ou digite um valor mínimo de R$ 10.');
-    return;
-  }
-  document.getElementById('contStep1').style.display = 'none';
-  document.getElementById('contStep2').style.display = 'block';
-  const isRec = contType === 'recorrente';
-  document.getElementById('contSummary').textContent = isRec ? 'Todo mês:' : 'Valor único:';
-  document.getElementById('contAmount').textContent = 'R$ ' + contValue.toFixed(2).replace('.',',');
-}
-
-function contBack(){
-  document.getElementById('contStep1').style.display = 'block';
-  document.getElementById('contStep2').style.display = 'none';
+function contUnselectBtns(){
+  document.querySelectorAll('[id^="cvb_"]').forEach(b=>{
+    b.style.background='rgba(255,255,255,0.07)';
+    b.style.borderColor='var(--border-md)';
+    b.style.color='var(--text2)';
+  });
 }
 
 function contPay(){
   const name  = document.getElementById('contName').value.trim();
   const email = document.getElementById('contEmail').value.trim();
   const phone = document.getElementById('contPhone').value.trim();
+  const custom= parseFloat(document.getElementById('contCustom').value)||0;
+  if(custom>=10) contValue=custom;
   const err   = document.getElementById('contErr');
   if(!name||!email){ err.textContent='Preencha nome e e-mail.'; err.style.display='block'; return; }
+  if(!contValue||contValue<10){ err.textContent='Selecione ou digite um valor mínimo de R$ 10.'; err.style.display='block'; return; }
   err.style.display='none';
 
   // Save to Firebase
-  try {
+  try{
     getDb().collection('parceiros_mensais').add({
       nome:name, email, phone,
-      valor: 'R$ '+contValue,
-      tipo: contType,
-      data: new Date().toLocaleDateString('pt-BR'),
-      timestamp: new Date().toISOString()
+      valor:'R$ '+contValue,
+      tipo:contType,
+      data:new Date().toLocaleDateString('pt-BR'),
+      timestamp:new Date().toISOString()
     }).catch(()=>{});
-  } catch(e){}
+  }catch(e){}
 
-  // Send thank you email
+  // Send thank you email to contributor
   emailjs.send('service_grao','template_parceiro_mensal',{
     nome:name, email_parceiro:email, valor:'R$ '+contValue, cidade:''
   }).catch(()=>{});
@@ -1652,39 +1626,40 @@ function contPay(){
   emailjs.send('service_grao','template_grao_1',{
     nome:`Contribuição ${contType}: ${name}`,
     email_parceiro:'nossoprojetograo@gmail.com',
-    senha:`Valor: R$ ${contValue} | E-mail: ${email} | Tel: ${phone||'—'} | Tipo: ${contType}`
+    senha:`Valor: R$ ${contValue} | E-mail: ${email} | Tel: ${phone||'—'} | Via: ${contType}`
   }).catch(()=>{});
 
-  // Get Stripe payment link for this value/type
-  const linkKey = contType === 'recorrente' ? 'rec' : 'pon';
-  const values = contType === 'recorrente'
-    ? [30,50,100,200,300,500]
-    : [30,50,100,200,500,1000];
-  
-  // Find closest predefined value or use custom
-  let linkUrl = STRIPE_LINKS[contType] && STRIPE_LINKS[contType][contValue]
-    ? STRIPE_LINKS[contType][contValue]
-    : (STRIPE_LINKS[contType] ? STRIPE_LINKS[contType]['custom'] : null);
-
-  if(!linkUrl){
-    toast('Links de pagamento ainda sendo configurados. Por enquanto use o Pix!');
-    closeContribuicao();
-    return;
-  }
-
-  // Add prefilled email to Stripe link
-  const stripeUrl = linkUrl + (linkUrl.includes('?') ? '&' : '?')
-    + 'prefilled_email=' + encodeURIComponent(email)
-    + '&client_reference_id=' + encodeURIComponent(name);
-
-  window.open(stripeUrl, '_blank');
-  closeContribuicao();
   track('contribuicao-'+contType);
+
+  if(contType==='cartao'){
+    // Show success then redirect to Stripe
+    document.getElementById('contForm').style.display='none';
+    document.getElementById('contSuccess').style.display='block';
+    document.getElementById('contSuccessMsg').textContent =
+      'E-mail de confirmação enviado para '+email+'. Redirecionando para o pagamento...';
+    // Redirect to Stripe after 2s
+    const stripeLink = STRIPE_LINKS && STRIPE_LINKS.geral
+      ? STRIPE_LINKS.geral
+      : null;
+    setTimeout(()=>{
+      if(stripeLink) window.open(stripeLink+'?prefilled_email='+encodeURIComponent(email),'_blank');
+      else toast('Configure os links do Stripe no painel admin.');
+    }, 2000);
+  } else {
+    // PIX — show success with pix key
+    document.getElementById('contForm').style.display='none';
+    document.getElementById('contSuccess').style.display='block';
+    document.getElementById('contSuccessMsg').innerHTML =
+      'E-mail de confirmação enviado para <strong>'+email+'</strong>.<br><br>'+
+      'Chave Pix: <strong>nossoprojetograo@gmail.com</strong><br>'+
+      'Banco Bradesco · Bruno Ramires Baracho<br>'+
+      '<span style="font-size:0.82rem;color:var(--text3)">Valor sugerido: R$ '+contValue+'</span>';
+  }
 }
 
 function closeContribuicao(){
-  document.getElementById('contribuicaoModal').style.display = 'none';
-  document.body.style.overflow = 'hidden';
+  document.getElementById('contribuicaoModal').style.display='none';
+  document.body.style.overflow='hidden';
 }
 
 function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gmail.com5204000053039865802BR5921BRUNO RAMIRES BARACHO6006MACEIO62130509Qrcodeapp6304184B';navigator.clipboard.writeText(k).then(()=>{const b=document.getElementById('cpBtn');b.textContent='Copiado!';b.style.background='var(--green)';setTimeout(()=>{b.textContent='Copiar chave';b.style.background='var(--accent)';},2000);toast('Chave Pix copiada!');}).catch(()=>{const el=document.createElement('textarea');el.value='nossoprojetograo@gmail.com';document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);toast('Chave copiada!');});}
