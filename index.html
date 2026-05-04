@@ -855,14 +855,26 @@ function safeDb(fn){
 }
 
 function loadPartnersFromFirebase(){
-  db.collection('partners').get().then(snap => {
-    snap.forEach(doc => {
-      const u = doc.data();
-      if(!D.users.find(x => x.email.toLowerCase() === u.email.toLowerCase())){
-        D.users.push({email:u.email, pass:u.pass, admin:false, nome:u.nome, id:doc.id});
+  const fdb = window.db||db;
+  if(!fdb) return;
+  // Load partners
+  fdb.collection('partners').get().then(snap=>{
+    snap.forEach(doc=>{
+      const u=doc.data();
+      if(!D.users.find(x=>x.email.toLowerCase()===u.email.toLowerCase())){
+        D.users.push({email:u.email,pass:u.pass,admin:false,nome:u.nome,id:doc.id});
       }
     });
-  }).catch(e => console.log('Firebase load error:', e));
+  }).catch(e=>console.log('Partners load error:',e));
+  // Load extra admins from Firebase
+  fdb.collection('admins').get().then(snap=>{
+    snap.forEach(doc=>{
+      const u=doc.data();
+      if(!D.users.find(x=>x.email.toLowerCase()===u.email.toLowerCase())){
+        D.users.push({email:u.email,pass:u.pass,admin:true,nome:u.nome,id:doc.id});
+      }
+    });
+  }).catch(()=>{});
 }
 
 function doLogin(){
@@ -934,7 +946,20 @@ function pauseMusic(){
   mPlaying=false;
 }
 
-function track(a){const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');const d=new Date().toISOString().split('T')[0];m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);localStorage.setItem(k,JSON.stringify(m));}
+function track(a){
+  // Save locally
+  const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');
+  const d=new Date().toISOString().split('T')[0];
+  m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);
+  localStorage.setItem(k,JSON.stringify(m));
+  // Also save to Firebase
+  if(typeof db!=='undefined'||typeof window.db!=='undefined'){
+    const fdb=window.db||db;
+    fdb.collection('metrics').doc('global').set({
+      total:m.t, sessions:m.s, byDay:m.d, lastUpdated:new Date().toISOString()
+    },{merge:true}).catch(()=>{});
+  }
+}
 
 function md(t){if(!t)return'';return t.replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h4>$4</h4>'.replace('$4','$1')).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');}
 
@@ -1065,9 +1090,6 @@ function loadMensais(){
 }
 
 function renderAdmin(){
-  loadPending();
-  loadMensais();
-  loadAdmins();
   const m=JSON.parse(localStorage.getItem('gm')||'{}');
   const today=new Date().toISOString().split('T')[0];
   document.getElementById('metricsGrid').innerHTML=`
@@ -1141,12 +1163,45 @@ function addNews(){
   const sign=g('nISg');
   D.news.unshift({id:Date.now(),name,date,summary,content,photos,photoCaps:[],video,videoLabel,video2,video2Label,prayers,sign,isNew:true});
   ['nIT','nID','nIS','nIC','nIFo','nIV','nIVL','nIV2','nIV2L','nIPr','nISg'].forEach(id=>document.getElementById(id).value='');
-  saveNews();renderAll();toast('Publicado!');
+  saveNews();
+  // Save to Firebase
+  if(typeof window.db!=='undefined'){
+    const n=D.news[0];
+    window.db.collection('news').doc(String(n.id)).set({
+      id:n.id,name:n.name,date:n.date,summary:n.summary,
+      content:n.content,video:n.video||'',video2:n.video2||'',
+      videoLabel:n.videoLabel||'',video2Label:n.video2Label||'',
+      prayers:n.prayers||[],sign:n.sign||'',isNew:n.isNew,
+      photos:[], // photos stored as base64 locally only
+      createdAt:new Date().toISOString()
+    }).catch(()=>{});
+  }
+  renderAll();toast('Publicado!');
 }
-function delNews(id){D.news=D.news.filter(n=>n.id!==id);saveNews();renderAll();toast('Removido.');}
-function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
-function delPr(id){D.prayers=D.prayers.filter(p=>p.id!==id);savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');}
-function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');saveTimeline();renderTimeline();toast('Adicionado!');}
+function delNews(id){
+  D.news=D.news.filter(n=>n.id!==id);
+  saveNews();
+  if(typeof window.db!=='undefined') window.db.collection('news').doc(String(id)).delete().catch(()=>{});
+  renderAll();toast('Removido.');
+}
+function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();
+  if(typeof window.db!=='undefined'){
+    window.db.collection('prayers').doc(String(Date.now())).set({title,body,createdAt:new Date().toISOString()}).catch(()=>{});
+  }
+  renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
+function delPr(id){
+  D.prayers=D.prayers.filter(p=>p.id!==id);
+  savePrayers();
+  if(typeof window.db!=='undefined') window.db.collection('prayers').doc(String(id)).delete().catch(()=>{});
+  renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');
+}
+function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');
+  saveTimeline();
+  const lastTl=D.timeline[D.timeline.length-1];
+  if(typeof window.db!=='undefined'){
+    window.db.collection('timeline').doc(String(lastTl.id)).set({...lastTl,createdAt:new Date().toISOString()}).catch(()=>{});
+  }
+  renderTimeline();toast('Adicionado!');}
 function addUser(){
   const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
   if(!email||!pass) return toast('Preencha e-mail e senha.');
