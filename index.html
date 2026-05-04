@@ -6,23 +6,28 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#4A2E20">
 <link rel="manifest" href="manifest.json">
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KNC0KYVRG4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KNC0KYVRG4');
+  window._gaId = 'G-KNC0KYVRG4';
+</script>
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBofyU6uNSSJu2Y3iNF0ZpkPzITbfAwgyY",
-  authDomain: "projeto-grao-c3b3d.firebaseapp.com",
-  projectId: "projeto-grao-c3b3d",
-  storageBucket: "projeto-grao-c3b3d.firebasestorage.app",
-  messagingSenderId: "812250944695",
-  appId: "1:812250944695:web:5ec406584e948ce5c02932"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Firebase config defined externally
+try {
+  firebase.initializeApp(firebaseConfig);
+  window.db = firebase.firestore();
+  console.log('Firebase ready');
+} catch(e){
+  console.log('Firebase init error:', e);
+}
 </script>
-<script>emailjs.init("KntRzGvrjbRuUiVZn");</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GRÃO">
@@ -640,6 +645,37 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
 
+    <div class="adsl">Minha conta</div>
+    <div class="adcard"><div class="adform">
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:4px">Altere sua senha de acesso ao painel.</p>
+      <div><label class="adlbl">Nova senha</label>
+        <div class="pass-wrap">
+          <input type="password" class="adinp" id="myNewPass" placeholder="Nova senha">
+          <button class="pass-eye" type="button" onclick="toggleEye('myNewPass',this)" tabindex="-1">
+            <svg><use href="#ieye" id="eyeIcon_myNewPass"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="adbtn" onclick="changeMyPassword()">Salvar nova senha</button>
+    </div></div>
+
+    <div class="adsl">Administradores</div>
+    <div id="adminList" style="margin-bottom:8px"></div>
+    <div class="adcard"><div class="adform">
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:4px">Adicione outros administradores — acesso total ao painel.</p>
+      <div><label class="adlbl">Nome</label><input type="text" class="adinp" id="nAN" placeholder="Nome do admin"></div>
+      <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nAE" placeholder="admin@email.com"></div>
+      <div><label class="adlbl">Senha</label>
+        <div class="pass-wrap">
+          <input type="password" class="adinp" id="nAP" placeholder="Senha do admin">
+          <button class="pass-eye" type="button" onclick="toggleEye('nAP',this)" tabindex="-1">
+            <svg><use href="#ieye" id="eyeIcon_nAP"/></svg>
+          </button>
+        </div>
+      </div>
+      <button class="adbtn" onclick="addAdmin()">Adicionar administrador</button>
+    </div></div>
+
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
       <div class="adform">
@@ -750,7 +786,7 @@ function loadTimeline(){
 }
 
 const D={
-  users:[{email:'admin@grao.com',pass:'grao2026',admin:true},{email:'parceiro@grao.com',pass:'parceiro123',admin:false}],
+  users:[{email:'nossoprojetograo@gmail.com',pass:'Tomecaue2426#app',admin:true},{email:'parceiro@grao.com',pass:'parceiro123',admin:false}],
   news:[
     {id:3,name:'Terceiro Informativo',date:'Primeiro trimestre de 2026',isNew:true,
       summary:'Perspectivas concluído, avanços com APMT e Pioneiros, e nossa família crescendo — Cauê a caminho!',
@@ -810,6 +846,12 @@ function initData(){
   const gaId=localStorage.getItem('grao_ga_id');
   if(gaId) window._gaId=gaId;
   loadPartnersFromFirebase();
+}
+
+function safeDb(fn){
+  if(typeof db !== 'undefined') fn(db);
+  else if(typeof window.db !== 'undefined') fn(window.db);
+  else console.log('DB not available');
 }
 
 function loadPartnersFromFirebase(){
@@ -1373,21 +1415,13 @@ function submitRegister(){
   })
   .then(ref=>{
     if(!ref) return; // already existed
-    // Notify Bruno via WhatsApp
-    const msg = encodeURIComponent(
-      `🌱 *Nova solicitação para entrar na equipe — GRÃO*
-
-`+
-      `*Nome:* ${name}
-`+
-      `*E-mail:* ${email}
-`+
-      `*Como conheceu:* ${how||'Não informado'}
-
-`+
-      `Acesse o painel admin para aprovar a entrada na equipe.`
-    );
-    window.open(`https://wa.me/5582996210019?text=${msg}`,'_blank');
+    // Notify Bruno/Malu via email
+    emailjs.send('service_grao','template_grao_1',{
+      nome: `Nova solicitação: ${name}`,
+      email_parceiro: 'nossoprojetograo@gmail.com',
+      senha: `E-mail: ${email} | Como conheceu: ${how||'Não informado'} | Acesse o painel admin para aprovar.`
+    }).then(()=>console.log('Notificação enviada'))
+      .catch(e=>console.log('Erro:',e));
     document.getElementById('regForm').style.display='none';
     document.getElementById('regSuccess').style.display='block';
   })
@@ -1398,6 +1432,19 @@ function copyPix(){const k='00020126480014BR.GOV.BCB.PIX0126nossoprojetograo@gma
 function g(id){return(document.getElementById(id)?.value||'').trim();}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
+<!-- Load external SDKs here so they are ready before main script -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// Firebase config - runs after SDKs load
+// Firebase config defined externally
+firebase.initializeApp(firebaseConfig);
+window.db = firebase.firestore();
+emailjs.init("KntRzGvrjbRuUiVZn");
+console.log('Firebase + EmailJS ready');
+</script>
+
 <script>
 if ('serviceWorker' in navigator && location.hostname === 'projetograo.github.io') {
   window.addEventListener('load', () => {
@@ -1410,10 +1457,18 @@ if ('serviceWorker' in navigator && location.hostname === 'projetograo.github.io
 // Init everything after DOM and Firebase are ready
 document.addEventListener('DOMContentLoaded', function(){
   loadFontSize();
-  // Small delay to ensure Firebase SDK is fully initialized
-  setTimeout(function(){
-    try { initData(); } catch(e){ console.log('initData error:', e); }
-  }, 300);
+  // Wait for Firebase to be fully ready before running initData
+  function waitForFirebase(attempts){
+    if(typeof firebase !== 'undefined' && typeof db !== 'undefined'){
+      try { initData(); } catch(e){ console.log('initData error:', e); }
+    } else if(attempts > 0){
+      setTimeout(function(){ waitForFirebase(attempts-1); }, 200);
+    } else {
+      console.log('Firebase timeout - running without DB');
+      try { initData(); } catch(e){}
+    }
+  }
+  waitForFirebase(15); // try for up to 3 seconds
 });
 </script>
 </body>
