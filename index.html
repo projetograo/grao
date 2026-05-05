@@ -551,7 +551,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="ptcard" style="border-top:2px solid var(--accent)">
           <div class="pthd"><div class="ptico"><svg><use href="#imny"/></svg></div><div class="ptinfo"><div class="pttitle">Contribuindo</div><div class="ptsub">Sua parte financeira nessa equipe</div></div></div>
           <div class="ptbody">
-            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:16px">Numa parceria bíblica, cada um faz a sua parte. Não é ajuda — é sociedade. Cada oferta é a sua parte nessa equipe enviada ao campo.</p>
+            <p style="font-size:0.88rem;color:var(--text2);line-height:1.75;margin-bottom:16px">Numa parceria bíblSomos chamados a caminhar juntos. Enquanto Bruno e Malu vão, pregam e discipulam — você ora, envia e sustenta. Cada um com a sua parte, todos pelo mesmo Reino.</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
               <button onclick="openContribuicao('cartao')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
                 <span style="font-size:1.2rem">💳</span>Cartão
@@ -989,18 +989,55 @@ function loadPartnersFromFirebase(){
 }
 
 function doLogin(){
-  const email=g('lE').toLowerCase(),pass=g('lP');
-  const user=D.users.find(u=>u.email.toLowerCase()===email&&u.pass===pass);
-  if(user){me=user;document.getElementById('lErr').style.display='none';
+  const email=g('lE').toLowerCase(), pass=g('lP');
+  document.getElementById('lErr').style.display='none';
+
+  function successLogin(user){
+    me=user;
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('appScreen').classList.add('active');
-    if(user.admin)document.getElementById('adminBtn').style.display='flex';
-    initMusic();renderAll();track('login');
-  }else document.getElementById('lErr').style.display='block';
+    if(user.admin) document.getElementById('adminBtn').style.display='flex';
+    initMusic(); renderAll(); loadSavedSettings(); track('login');
+  }
+
+  // Check local users first (includes default admin)
+  const localUser = D.users.find(u=>u.email.toLowerCase()===email && u.pass===pass);
+  if(localUser){ successLogin(localUser); return; }
+
+  // Check Firebase admins
+  try{
+    getDb().collection('admins').where('email','==',email).get()
+    .then(snap=>{
+      if(!snap.empty){
+        const u=snap.docs[0].data();
+        if(u.pass===pass){ successLogin({...u,admin:true,id:snap.docs[0].id}); return; }
+      }
+      // Check Firebase partners
+      return getDb().collection('partners').where('email','==',email).get();
+    })
+    .then(snap=>{
+      if(!snap||snap.empty){ document.getElementById('lErr').style.display='block'; return; }
+      const u=snap.docs[0].data();
+      if(u.pass===pass){ successLogin({...u,admin:false,id:snap.docs[0].id}); }
+      else { document.getElementById('lErr').style.display='block'; }
+    })
+    .catch(()=>{ document.getElementById('lErr').style.display='block'; });
+  }catch(e){ document.getElementById('lErr').style.display='block'; }
 }
 ['lE','lP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
 function doLogout(){me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
 
+
+function openAdmin(){
+  document.getElementById('appScreen').classList.remove('active');
+  document.getElementById('adminScreen').classList.add('active');
+  renderAdmin();
+}
+
+function closeAdmin(){
+  document.getElementById('adminScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+}
 function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;}
 
 let ytPlayer=null;
