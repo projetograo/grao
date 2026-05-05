@@ -597,9 +597,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 <div class="screen" id="adminScreen">
   <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" onclick="closeAdmin()">← Voltar</button></div>
   <div class="adcont">
-    <div class="adsl">Parceiros Mensais</div>
+    <div class="adsl">Parceiros & Contribuições</div>
     <div class="adcard">
-      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Pessoas que preencheram o formulário de parceria mensal.</p>
+      <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button onclick="filterMensais('todos')" id="mfTodos" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:5px 14px;font-size:0.68rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Todos</button>
+        <button onclick="filterMensais('cartao')" id="mfCartao" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif">💳 Cartão</button>
+        <button onclick="filterMensais('pix')" id="mfPix" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif">🔑 Pix</button>
+      </div>
       <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
     <div class="adsl">Métricas</div>
@@ -1174,253 +1179,89 @@ function renderPrayerPartner(){
 
 function renderAll(){renderNews();renderTimeline();renderPrayer();renderAdmin();}
 
-function loadMensais(){
+function loadMensais(filter){
   const el=document.getElementById('mensaisList');
   if(!el) return;
-  getDb().collection('parceiros_mensais').orderBy('timestamp','desc').get()
-    .then(snap=>{
-      if(snap.empty){
-        el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum cadastro ainda.</p>';
-        return;
-      }
-      el.innerHTML=snap.docs.map(doc=>{
-        const d=doc.data();
-        return `<div class="adrow" style="flex-direction:column;align-items:flex-start;gap:6px">
-          <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
-            <div class="adrt">${d.nome}</div>
-            <span style="font-size:0.7rem;color:var(--accent);font-weight:600">${d.valor}</span>
-          </div>
-          <div class="adrm">${d.email} · ${d.phone}</div>
-          <div class="adrm">📍 ${d.cidade} · 🎂 ${d.aniversario} · 📅 ${d.data}</div>
-        </div>`;
-      }).join('');
-    })
-    .catch(e=>{
-      el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Erro ao carregar.</p>';
-    });
-}
-
-function renderAdmin(){
-  loadPending();
-  loadMensais();
-  loadAdmins();
-  const m=JSON.parse(localStorage.getItem('gm')||'{}');
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('metricsGrid').innerHTML=`
-    <div class="mcard2"><div class="mnum">${m.t||0}</div><div class="mlbl2">Interações</div></div>
-    <div class="mcard2"><div class="mnum">${m.s||0}</div><div class="mlbl2">Logins</div></div>
-    <div class="mcard2"><div class="mnum">${(m.d||{})[today]||0}</div><div class="mlbl2">Hoje</div></div>
-    <div class="mcard2"><div class="mnum">${Object.keys(m.d||{}).length}</div><div class="mlbl2">Dias ativos</div></div>`;
-  document.getElementById('existingNews').innerHTML=D.news.map(n=>`<div class="adrow"><div class="adri"><div class="adrt">${n.name}</div><div class="adrm">${n.date}</div></div><button class="addel" onclick="delNews(${n.id})">Remover</button></div>`).join('');
-  document.getElementById('existingPr').innerHTML=D.prayers.map((p,i)=>`<div class="adrow"><div class="adri"><div class="adrt">${p.title}</div></div><button class="addel" onclick="delPr(${p.id})">Remover</button></div>`).join('');
-  document.getElementById('userList').innerHTML=D.users.map((u,i)=>`<div class="adrow"><div class="adri"><div class="adrt">${u.email}</div><div class="adrm">${u.admin?'Admin':'Parceiro'}</div></div>${!u.admin?`<button class="addel" onclick="delUser(${i})">Remover</button>`:'<span style="font-size:0.7rem;color:var(--text3)">Protegido</span>'}</div>`).join('');
-}
-
-function clearMetrics(){localStorage.removeItem('gm');renderAdmin();toast('Métricas zeradas.');}
-
-function saveGA(){
-  const id=document.getElementById('gaId').value.trim();
-  if(!id)return toast('Informe o ID.');
-  localStorage.setItem('grao_ga_id', id);
-  window._gaId=id;
-  const s=document.createElement('script');
-  s.async=true; s.src='https://www.googletagmanager.com/gtag/js?id='+id;
-  document.head.appendChild(s);
-  window.dataLayer=window.dataLayer||[];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js',new Date()); gtag('config',id);
-  toast('Google Analytics ativado!');
-}
-
-function saveMusic(){
-  const name = document.getElementById('musicName').value.trim() || 'Seguro — Shirley Carvalhaes';
-  const url  = document.getElementById('musicUrl').value.trim();
-  const vid  = url ? ytId(url) : null;
-
-  // Save name always
-  localStorage.setItem('grao_music_name', name);
-  document.querySelector('.mname').textContent = name;
-
-  // Save to Firebase
-  const fireData = {musicName: name, updatedAt: new Date().toISOString()};
-  if(vid) fireData.musicId = vid;
-  try {
-    getDb().collection('settings').doc('music').set(fireData, {merge:true})
-    .then(()=> toast('Música salva para todos! ✓'))
-    .catch(()=> toast('Nome salvo localmente.'));
-  } catch(e){ toast('Nome salvo!'); }
-
-  // Update player if new video
-  if(vid){
-    localStorage.setItem('grao_music_id', vid);
-    window._savedMusicId = vid;
-    if(ytPlayer && ytPlayer.loadVideoById){
-      ytPlayer.loadVideoById({videoId:vid});
-      ytPlayer.playVideo();
-      mPlaying = true;
-      document.getElementById('micon').setAttribute('href','#ipause');
-    }
-  }
-}
-function delNews(id){D.news=D.news.filter(n=>n.id!==id);saveNews();renderAll();toast('Removido.');}
-function addPrayer(){const title=g('nPT'),body=g('nPB');if(!title)return toast('Preencha o título.');D.prayers.push({id:Date.now(),title,body});['nPT','nPB'].forEach(id=>document.getElementById(id).value='');savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Adicionado!');}
-function delPr(id){D.prayers=D.prayers.filter(p=>p.id!==id);savePrayers();renderPrayer();renderPrayerPartner();renderAdmin();toast('Removido.');}
-function addTimeline(){const date=g('nTD'),title=g('nTT'),body=g('nTB'),status=g('nTS');if(!title)return toast('Preencha o título.');const dotMap={done:'dg',active:'da',next:'dd'};D.timeline.push({id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'});['nTD','nTT','nTB'].forEach(id=>document.getElementById(id).value='');saveTimeline();renderTimeline();toast('Adicionado!');}
-function addUser(){
-  const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
-  if(!email||!pass) return toast('Preencha e-mail e senha.');
-  if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
+  el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
   
-  // Save to Firebase
-  getDb().collection('partners').add({email, pass, nome, createdAt: new Date().toISOString()})
-    .then(docRef => {
-      D.users.push({email, pass, admin:false, nome, id:docRef.id});
-      renderAdmin();
-      // Send welcome email
-      emailjs.send('service_grao','template_grao_1',{
-        nome, email_parceiro:email, senha:pass
-      }).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️'))
-        .catch(()=>toast('Parceiro adicionado! (Verifique o e-mail)'));
-    })
-    .catch(e => {
-      // Fallback: save locally if Firebase fails
-      D.users.push({email, pass, admin:false, nome});
-      saveUsers();
-      renderAdmin();
-      toast('Parceiro adicionado localmente.');
-    });
-  ['nUE','nUP','nUN'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-}
-function delUser(i){
-  const user = D.users[i];
-  if(user && user.id){
-    getDb().collection('partners').doc(user.id).delete().catch(e=>console.log('Delete error',e));
-  }
-  D.users.splice(i,1);
-  saveUsers();
-  renderAdmin();
-  toast('Removido.');
-}
-function openAdmin(){document.getElementById('appScreen').classList.remove('active');document.getElementById('adminScreen').classList.add('active');renderAdmin();}
-function closeAdmin(){document.getElementById('adminScreen').classList.remove('active');document.getElementById('appScreen').classList.add('active');}
-function openPartnerForm(){
-  const m=document.getElementById('partnerModal');
-  m.style.display='flex';
-  document.body.style.overflow='hidden';
-  document.getElementById('pfForm').style.display='flex';
-  document.getElementById('pfSuccess').style.display='none';
-  document.getElementById('pfErr').style.display='none';
-}
-function closePartnerForm(){
-  document.getElementById('partnerModal').style.display='none';
-  document.body.style.overflow='hidden';
-}
-document.getElementById('pfValue').addEventListener('change',function(){
-  document.getElementById('pfOtherWrap').style.display=this.value==='outro'?'block':'none';
-});
-function submitPartnerForm(){
-  const name=document.getElementById('pfName').value.trim();
-  const phone=document.getElementById('pfPhone').value.trim();
-  const email=document.getElementById('pfEmail').value.trim();
-  const birth=document.getElementById('pfBirth').value;
-  const city=document.getElementById('pfCity').value.trim();
-  const val=document.getElementById('pfValue').value;
-  const other=document.getElementById('pfOther').value.trim();
-  const err=document.getElementById('pfErr');
-  if(!name||!phone||!email||!birth||!city||!val){
-    err.textContent='Por favor, preencha todos os campos obrigatórios.';
-    err.style.display='block';return;
-  }
-  if(val==='outro'&&!other){
-    err.textContent='Por favor, informe o valor desejado.';
-    err.style.display='block';return;
-  }
-  err.style.display='none';
-  const value=val==='outro'?other:val;
-  // Notify via email
-  emailjs.send('service_grao','template_grao_1',{
-    nome: `Novo Parceiro Mensal: ${name}`,
-    email_parceiro: 'nossoprojetograo@gmail.com',
-    senha: `Tel: ${phone} | Cidade: ${city} | Valor: ${value} | Nasc: ${birth}`
-  }).catch(()=>{});
-  document.getElementById('pfForm').style.display='none';
-  document.getElementById('pfSuccess').style.display='block';
-  track('partner-form');
-}
-function toggleEye(inputId, btn){
-  const input = document.getElementById(inputId);
-  const isPass = input.type === 'password';
-  input.type = isPass ? 'text' : 'password';
-  const iconId = 'eyeIcon_' + inputId;
-  const icon = document.getElementById(iconId);
-  if(icon) icon.setAttribute('href', isPass ? '#ieyeoff' : '#ieye');
-}
-
-function changeMyPassword(){
-  const newPass = document.getElementById('myNewPass').value.trim();
-  if(!newPass) return toast('Digite a nova senha.');
-  if(newPass.length < 4) return toast('Mínimo 4 caracteres.');
-  // If me is a default user (not in Firebase), update locally and in Firebase
-  const isDefault = (me.email === 'admin@grao.com');
-  if(isDefault){
-    // Save to Firebase admins collection for future logins
-    getDb().collection('admins').doc('default_admin').set({
-      email: me.email, pass: newPass, admin: true, nome: 'Admin'
-    }).then(()=>{
-      me.pass = newPass;
-      const u = D.users.find(x=>x.email===me.email);
-      if(u) u.pass = newPass;
-      document.getElementById('myNewPass').value='';
-      toast('Senha alterada! Na próxima vez use a nova senha.');
-    }).catch(e=>{ console.log(e); toast('Erro ao salvar.'); });
-  } else if(me.id){
-    // Update in Firebase partners or admins
-    const col = me.isAdminCol ? 'admins' : 'partners';
-    getDb().collection(col).doc(me.id).update({pass: newPass})
-    .then(()=>{
-      me.pass = newPass;
-      document.getElementById('myNewPass').value='';
-      toast('Senha alterada com sucesso!');
-    }).catch(e=>{ console.log(e); toast('Erro ao salvar.'); });
-  } else {
-    toast('Não foi possível identificar sua conta.');
-  }
-}
-
-function addAdmin(){
-  const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
-  if(!nome||!email||!pass) return toast('Preencha todos os campos.');
-  if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  getDb().collection('admins').add({
-    email, pass, admin:true, nome, createdAt: new Date().toISOString()
-  }).then(docRef=>{
-    D.users.push({email, pass, admin:true, nome, id:docRef.id, isAdminCol:true});
-    ['nAN','nAE','nAP'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-    renderAdmin();
-    toast('Administrador adicionado!');
-  }).catch(e=>{ console.log(e); toast('Erro ao adicionar.'); });
-}
-
-function loadPending(){
-  const el=document.getElementById('pendingList');
-  if(!el) return;
-  getDb().collection('pending_partners').where('status','==','pending').orderBy('requestedAt','desc').get()
+  getDb().collection('parceiros_mensais').orderBy('timestamp','desc').get()
   .then(snap=>{
-    if(snap.empty){ el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhuma solicitação pendente.</p>'; return; }
-    el.innerHTML=snap.docs.map(doc=>{
-      const d=doc.data();
-      return `<div class="adrow" style="flex-direction:column;align-items:flex-start;gap:8px">
-        <div style="display:flex;justify-content:space-between;width:100%;align-items:flex-start">
-          <div><div class="adrt">${d.nome}</div><div class="adrm">${d.email}</div>${d.how?`<div class="adrm">Como conheceu: ${d.how}</div>`:''}</div>
+    if(snap.empty){
+      el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum parceiro ainda. Que o Senhor levante!</p>';
+      return;
+    }
+    let docs = snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+    if(filter && filter!=='todos') docs=docs.filter(d=>d.tipo===filter);
+    
+    if(docs.length===0){
+      el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum resultado para esse filtro.</p>';
+      return;
+    }
+
+    el.innerHTML = docs.map(d=>`
+      <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
+          <div style="flex:1">
+            <div style="font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:2px">${d.nome||'—'}</div>
+            <div style="font-size:0.74rem;color:var(--text3)">${d.email||''} ${d.phone?'· '+d.phone:''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
+            <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${d.valor||'—'}</span>
+            <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'}">
+              ${d.tipo==='cartao'?'💳 Cartão':'🔑 Pix'}
+            </span>
+          </div>
         </div>
-        <div style="display:flex;gap:8px;width:100%">
-          <button onclick="approvePending('${doc.id}','${d.nome}','${d.email}','${d.pass}')" style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:8px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">✓ Aprovar</button>
-          <button onclick="rejectPending('${doc.id}')" style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:8px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif">✕ Recusar</button>
+        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Cadastrado em ${d.data||'—'}</div>
+        
+        <!-- Contribution tracking -->
+        <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
+          <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Registro de contribuições</div>
+          <div id="contLog_${d.id}" style="font-size:0.78rem;color:var(--text2);margin-bottom:8px">
+            ${(d.contribuicoes||[]).length===0
+              ? '<span style="color:var(--text3);font-style:italic">Nenhuma registrada ainda</span>'
+              : (d.contribuicoes||[]).map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${c.mes}</span><span style="color:var(--accent)">${c.valor}</span></div>`).join('')
+            }
+          </div>
+          <div style="display:flex;gap:6px">
+            <input id="contMes_${d.id}" type="text" placeholder="Ex: Maio/2026" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
+            <input id="contVal_${d.id}" type="text" placeholder="R$ 50" style="width:80px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
+            <button onclick="addContribuicao('${d.id}')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:8px;padding:7px 12px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">+ Registrar</button>
+          </div>
         </div>
-      </div>`;
-    }).join('');
+        <button onclick="deleteParceiro('${d.id}','${(d.nome||'').replace(/'/g,"\\'")}',this)" style="width:100%;background:transparent;border:1px solid rgba(224,120,96,0.3);color:var(--red);border-radius:8px;padding:7px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">Encerrar parceria</button>
+      </div>`).join('');
   })
   .catch(e=>{ el.innerHTML='<p style="font-size:0.82rem;color:var(--red)">Erro: '+e.message+'</p>'; });
+}
+
+function filterMensais(tipo){
+  ['todos','cartao','pix'].forEach(t=>{
+    const btn=document.getElementById('mf'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(btn){ btn.style.background=t===tipo?'var(--accent)':'rgba(255,255,255,0.07)'; btn.style.color=t===tipo?'var(--bg-deep)':'var(--text2)'; btn.style.border=t===tipo?'none':'1px solid var(--border-md)'; }
+  });
+  loadMensais(tipo);
+}
+
+function addContribuicao(docId){
+  const mes = document.getElementById('contMes_'+docId)?.value.trim();
+  const val = document.getElementById('contVal_'+docId)?.value.trim();
+  if(!mes||!val) return toast('Preencha mês e valor.');
+  const nova = {mes, valor:val, data:new Date().toLocaleDateString('pt-BR')};
+  getDb().collection('parceiros_mensais').doc(docId).update({
+    contribuicoes: firebase.firestore.FieldValue.arrayUnion(nova)
+  }).then(()=>{
+    toast('Contribuição registrada! 🙏');
+    loadMensais();
+  }).catch(e=>toast('Erro: '+e.message));
+}
+
+function deleteParceiro(docId, nome, btn){
+  if(!confirm('Encerrar a parceria com '+nome+'? Isso remove o registro, mas nao cancela cobranças no Stripe.')) return;
+  btn.textContent='Encerrando...';
+  getDb().collection('parceiros_mensais').doc(docId).delete()
+  .then(()=>{ toast('Parceria encerrada. Que Deus abençoe '+nome+'.'); loadMensais(); })
+  .catch(e=>toast('Erro: '+e.message));
 }
 
 function approvePending(docId, nome, email, pass){
