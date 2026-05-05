@@ -316,9 +316,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 <div class="screen active" id="loginScreen">
   <div class="login-box">
     <div class="login-brand">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+        <button onclick="toggleLang()" id="langBtnLogin" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:50px;padding:4px 14px;font-size:0.68rem;letter-spacing:0.1em;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">EN</button>
+      </div>
       <div class="login-mark">GR<em>ÃO</em></div>
-      <span class="login-tag">vida compartilhada, pessoa a pessoa</span>
-      <div><span class="login-chip"><span class="cdot"></span>área de parceiros</span></div>
+      <span class="login-tag" id="loginTag">vida compartilhada, pessoa a pessoa</span>
+      <div><span class="login-chip"><span class="cdot"></span><span id="loginChip">área de parceiros</span></span></div>
     </div>
     <div class="lform">
       <div class="lf"><label data-t="email_label">E-mail</label><input type="email" id="lE" placeholder="seu@email.com"></div>
@@ -529,8 +532,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div class="vpad" style="padding-bottom:16px">
         <div class="slbl">Parceria</div>
         <h2 class="vtitle">Com a gente <em>nessa</em></h2>
-        <p style="font-family:'Playfair Display',serif;font-size:0.95rem;font-style:italic;color:var(--text2);line-height:1.8;border-left:2px solid var(--accent);padding-left:14px">"pela vossa participação no evangelho, desde o primeiro dia até agora" — Fp 1.5</p>
-        <p style="font-size:0.9rem;color:var(--text2);line-height:1.8;margin-top:16px">Paulo não chamou os filipenses de doadores. Chamou de <em>participantes</em> — koinonía. Parceiro não é quem financia uma causa. É quem entra junto, com o coração, com a oração, com o envio. É isso que te convidamos a ser.</p>
+        <p id="fpVerse" style="font-family:'Playfair Display',serif;font-size:0.95rem;font-style:italic;color:var(--text2);line-height:1.8;border-left:2px solid var(--accent);padding-left:14px">"Dou graças pela maneira como vocês têm participado na proclamação do evangelho, desde o primeiro dia até agora." — Filipenses 1.5</p>
+        <p id="fpExplain" style="font-size:0.9rem;color:var(--text2);line-height:1.8;margin-top:16px">Paulo não chamou os filipenses de doadores. Chamou de <em>participantes</em> — koinonía. Parceiro não é quem financia uma causa. É quem entra junto, com o coração, com a oração, com o envio. É isso que te convidamos a ser.</p>
       </div>
       <div style="padding:0 20px" class="ptcards">
 
@@ -539,13 +542,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div class="pthd">
             <div class="ptico"><svg><use href="#ihands"/></svg></div>
             <div class="ptinfo">
-              <div class="pttitle">Orando</div>
-              <div class="ptsub">A intercessão que sustenta o que vai à frente</div>
+              <div class="pttitle" data-tk="praying">Orando</div>
+              <div class="ptsub" data-tk="praying_sub">A intercessão que sustenta o que vai à frente</div>
             </div>
           </div>
           <div class="ptbody">
             <ul class="ptlist" id="prayerPartner"></ul>
-            <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="bact bwa-s" onclick="track('wa-prayer')">Grupo de oração no WhatsApp</a>
+            <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="bact bwa-s" onclick="track('wa-prayer')" data-tk="wa_group">Grupo de oração no WhatsApp</a>
           </div>
         </div>
 
@@ -554,17 +557,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div class="pthd">
             <div class="ptico"><svg><use href="#in"/></svg></div>
             <div class="ptinfo">
-              <div class="pttitle">Acompanhando</div>
-              <div class="ptsub">Estar por dentro da jornada</div>
+              <div class="pttitle" data-tk="following">Acompanhando</div>
+              <div class="ptsub" data-tk="following_sub">Estar por dentro da jornada</div>
             </div>
           </div>
           <div class="ptbody">
             <ul class="ptlist">
-              <li>Ler os informativos aqui no app</li>
-              <li>Compartilhar com igrejas e irmãos</li>
-              <li>Conectar redes e pessoas ao projeto</li>
+              <li data-tk="follow1">Ler os informativos aqui no app</li>
+              <li data-tk="follow2">Compartilhar com igrejas e irmãos</li>
+              <li data-tk="follow3">Conectar redes e pessoas ao projeto</li>
             </ul>
-            <button class="bact bout" onclick="navTo('news');track('ver-noticias')">Ver informativos</button>
+            <button class="bact bout" onclick="navTo('news');track('ver-noticias')" data-tk="see_news">Ver informativos</button>
           </div>
         </div>
 
@@ -578,7 +581,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
             </div>
           </div>
           <div class="ptbody">
-            <p style="font-size:0.88rem;color:var(--text2);line-height:1.8;margin-bottom:16px">O parceiro mensal é quem torna possível planejar, avançar e permanecer. Uma contribuição regular — de qualquer valor — é o que sustenta a presença onde o evangelho ainda não chegou. A constância de muitos libera os poucos que vão.</p>
+            <p id="monthlyBody" style="font-size:0.88rem;color:var(--text2);line-height:1.8;margin-bottom:16px">O parceiro mensal é quem torna possível planejar, avançar e permanecer. Uma contribuição regular — de qualquer valor — é o que sustenta a presença onde o evangelho ainda não chegou. A constância de muitos libera os poucos que vão.</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
               <button onclick="openContribuicao('cartao')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
                 <span style="font-size:1.2rem">💳</span>Cartão
@@ -587,7 +590,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
                 <span style="font-size:1.2rem">🔑</span>Pix
               </button>
             </div>
-            <p style="font-size:0.72rem;color:var(--text3);text-align:center">Ambos recebem confirmação por e-mail</p>
+            <p style="font-size:0.72rem;color:var(--text3);text-align:center" data-tk="both_email">Ambos recebem confirmação por e-mail</p>
           </div>
         </div>
 
@@ -596,8 +599,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div class="pthd">
             <div class="ptico"><svg><use href="#ipix"/></svg></div>
             <div class="ptinfo">
-              <div class="pttitle">Chave Pix</div>
-              <div class="ptsub">Banco Bradesco · Chave e-mail</div>
+              <div class="pttitle" data-tk="pix_title">Chave Pix</div>
+              <div class="ptsub" data-tk="pix_sub">Banco Bradesco · Chave e-mail</div>
             </div>
           </div>
           <div class="ptbody">
@@ -1459,83 +1462,197 @@ let currentLang = 'pt';
 
 const T = {
   pt: {
-    // Nav
-    logout: 'Sair', admin: 'Admin',
-    // Tabs
-    home: 'Início', family: 'Família', news: 'Notícias', journey: 'Caminhada', partner: 'Parceria',
-    // Home
-    welcome: 'Bem-vindo, parceiro', title_home: 'Você faz parte\ndessa', italic_home: 'jornada',
-    verse: '"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24',
-    pill1: 'Em preparo', pill2: 'APMT & Pioneiros', pill3: 'Norte da África · Sudeste Asiático',
-    latest: 'Última atualização', quick: 'Acesso rápido',
-    // Partner
-    praying: 'Orando', praying_sub: 'A intercessão que sustenta o que vai à frente',
-    following: 'Acompanhando', following_sub: 'Estar por dentro da jornada',
-    monthly: 'Parceiro Mensal', monthly_sub: 'Coopere com o projeto todo mês',
-    pix_sub: 'Banco Bradesco · Chave e-mail',
-    wa_group: 'Grupo de oração no WhatsApp',
-    see_news: 'Ver informativos',
-    card_btn: '💳 Cartão', pix_btn: '🔑 Pix',
-    both_email: 'Ambos recebem confirmação por e-mail',
-    copy: 'Copiar',
-    // Family
-    family_title: 'Família Baracho',
-    // Journey
-    journey_title: 'Passo a', journey_italic: 'passo',
-    prayer_requests: 'Pedidos de oração',
-    wa_group_join: 'Entrar no grupo',
     // Login
+    login_tag: 'vida compartilhada, pessoa a pessoa',
+    login_chip: 'área de parceiros',
     email_label: 'E-mail', pass_label: 'Senha', enter: 'Entrar',
     login_hint: 'Quer fazer parte da equipe?',
     join_btn: 'Quero entrar para a equipe',
     doubts: 'Dúvidas?', whatsapp_link: 'Fale pelo WhatsApp',
     error_login: 'E-mail ou senha incorretos.',
+    // Nav/header
+    logout: 'Sair', admin: 'Admin',
+    // Tabs
+    home: 'Início', family: 'Família', news: 'Notícias', journey: 'Caminhada', partner: 'Parceria',
     // Music bar
     music_label: 'ouça o que estamos escutando, enquanto lê nosso app',
+    // Home
+    welcome: 'Bem-vindo, parceiro',
+    home_title: 'Você faz parte dessa',
+    home_italic: 'jornada',
+    verse: '"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24',
+    pill1: 'Em preparo', pill2: 'APMT & Pioneiros', pill3: 'Norte da África · Sudeste Asiático',
+    latest_update: 'Última atualização',
+    quick_access: 'Acesso rápido',
+    // Family tab
+    family_title: 'Família Baracho',
+    family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
+    family_sub2: 'Tom (26/06/2024 · 1a10m) · Cauê (jul/2026)',
+    about_title: 'Sobre o projeto',
+    base_title: 'Nossa base',
+    field_title: 'Para onde vamos',
+    // News tab
+    news_title: 'O que está',
+    news_italic: 'acontecendo',
+    news_sub: 'Compartilhamos tudo o que vivemos — processos, família, aprendizados e pedidos de oração.',
+    read_full: 'Ler informativo completo',
+    close_info: 'Fechar',
+    new_badge: 'Novo',
+    prayers_title: 'Pedidos de oração',
+    // Journey tab
+    journey_label: 'Caminhada',
+    journey_title: 'Passo a',
+    journey_italic: 'passo',
+    journey_sub: 'A jornada é feita de etapas, esperas e decisões tomadas com cuidado.',
+    prayer_section: 'Pedidos de oração',
+    prayer_group_title: 'Grupo de oração',
+    prayer_group_sub: 'Entre no nosso grupo de WhatsApp para receber pedidos em tempo real.',
+    wa_group_join: 'Entrar no grupo',
+    // Partner tab
+    partner_label: 'Parceria',
+    partner_title: 'Com a gente',
+    partner_italic: 'nessa',
+    fp_verse: '"Dou graças pela maneira como vocês têm participado na proclamação do evangelho, desde o primeiro dia até agora." — Filipenses 1.5',
+    fp_explain: 'Paulo não chamou os filipenses de doadores. Chamou de participantes — koinonía. Parceiro não é quem financia uma causa. É quem entra junto, com o coração, com a oração, com o envio. É isso que te convidamos a ser.',
+    praying: 'Orando', praying_sub: 'A intercessão que sustenta o que vai à frente',
+    following: 'Acompanhando', following_sub: 'Estar por dentro da jornada',
+    follow1: 'Ler os informativos aqui no app',
+    follow2: 'Compartilhar com igrejas e irmãos',
+    follow3: 'Conectar redes e pessoas ao projeto',
+    see_news: 'Ver informativos',
+    monthly: 'Parceiro Mensal', monthly_sub: 'Coopere com o projeto todo mês',
+    monthly_body: 'O parceiro mensal é quem torna possível planejar, avançar e permanecer a presença dos que vão, onde o evangelho ainda não chegou. Vamos juntos?',
+    card_btn: '💳 Cartão', pix_btn: '🔑 Pix',
+    both_email: 'Ambos recebem confirmação por e-mail',
+    pix_title: 'Chave Pix', pix_sub: 'Banco Bradesco · Chave e-mail',
+    copy_btn: 'Copiar',
+    wa_group: 'Grupo de oração no WhatsApp',
+    // Status tags
+    done: 'Concluído', active: 'Em andamento', next_step: 'Próximo passo',
+    // Contrib modal
+    card_modal_title: 'Contribuir via Cartão',
+    pix_modal_title: 'Contribuir via Pix',
+    card_modal_sub: 'Preencha seus dados. Você será direcionado para o pagamento seguro via cartão.',
+    pix_modal_sub: 'Preencha seus dados. Você receberá a chave Pix por e-mail para concluir a transferência.',
+    card_modal_btn: '💳 Ir para o pagamento',
+    pix_modal_btn: '🔑 Ver chave Pix',
+    card_note: 'Seguro, rápido e direto. Pode ser mensal ou uma única vez.',
+    pix_note: 'Você receberá os dados por e-mail e a chave Pix será exibida.',
+    name_field: 'Nome completo *', email_field: 'E-mail *', phone_field: 'WhatsApp',
+    value_field: 'Valor da contribuição *', other_value: 'ou digite outro valor',
+    confirm_btn: 'Confirmar e continuar',
+    success_card: 'E-mail de confirmação enviado. Redirecionando para o pagamento...',
+    // Register
+    reg_title: 'Entrar para a', reg_italic: 'equipe',
+    reg_sub: 'Toda grande jornada começa com um primeiro passo',
+    reg_name: 'Nome completo *', reg_email: 'E-mail *', reg_pass: 'Crie sua senha *',
+    reg_how: 'Como nos conheceu?', reg_btn: 'Solicitar participação',
+    reg_note: 'Após o envio, a equipe vai revisar e ativar sua participação em breve.',
+    reg_success_title: 'Solicitação enviada!',
+    reg_success_body: 'Recebemos seu pedido. Em breve você estará dentro da equipe e poderá acompanhar cada passo dessa jornada de perto.',
+    close_btn: 'Fechar',
   },
   en: {
-    // Nav
-    logout: 'Sign out', admin: 'Admin',
-    // Tabs
-    home: 'Home', family: 'Family', news: 'Updates', journey: 'Journey', partner: 'Partner',
-    // Home
-    welcome: 'Welcome, partner', title_home: 'You are part of\nthis', italic_home: 'journey',
-    verse: '"Unless a grain of wheat falls into the earth and dies, it remains alone." — John 12.24',
-    pill1: 'In preparation', pill2: 'APMT & Pioneers', pill3: 'North Africa · Southeast Asia',
-    latest: 'Latest update', quick: 'Quick access',
-    // Partner
-    praying: 'Praying', praying_sub: 'Intercession that sustains what goes ahead',
-    following: 'Following', following_sub: 'Stay connected to the journey',
-    monthly: 'Monthly Partner', monthly_sub: 'Cooperate with the project every month',
-    pix_sub: 'Bradesco Bank · Email key',
-    wa_group: 'Prayer group on WhatsApp',
-    see_news: 'See updates',
-    card_btn: '💳 Card', pix_btn: '🔑 Pix',
-    both_email: 'Both receive email confirmation',
-    copy: 'Copy',
-    // Family
-    family_title: 'Baracho Family',
-    // Journey
-    journey_title: 'Step by', journey_italic: 'step',
-    prayer_requests: 'Prayer requests',
-    wa_group_join: 'Join the group',
     // Login
+    login_tag: 'shared life, person to person',
+    login_chip: 'partner area',
     email_label: 'Email', pass_label: 'Password', enter: 'Sign in',
-    login_hint: 'Want to join the team?',
+    login_hint: 'Want to be part of the team?',
     join_btn: 'I want to join the team',
     doubts: 'Questions?', whatsapp_link: 'Contact via WhatsApp',
     error_login: 'Incorrect email or password.',
+    // Nav/header
+    logout: 'Sign out', admin: 'Admin',
+    // Tabs
+    home: 'Home', family: 'Family', news: 'Updates', journey: 'Journey', partner: 'Partner',
     // Music bar
-    music_label: 'listen to what we are listening to while reading our app',
+    music_label: 'listen along as you read our app',
+    // Home
+    welcome: 'Welcome, partner',
+    home_title: "You're part of this",
+    home_italic: 'journey',
+    verse: '"Unless a grain of wheat falls into the earth and dies, it remains alone." — John 12.24',
+    pill1: 'In preparation', pill2: 'APMT & Pioneers', pill3: 'North Africa · Southeast Asia',
+    latest_update: 'Latest update',
+    quick_access: 'Quick access',
+    // Family tab
+    family_title: 'The Baracho Family',
+    family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
+    family_sub2: 'Tom (June 26, 2024) · Cauê (July 2026)',
+    about_title: 'About the project',
+    base_title: 'Our home church',
+    field_title: 'Where we are going',
+    // News tab
+    news_title: "What's",
+    news_italic: 'happening',
+    news_sub: 'We share everything we live — processes, family, learnings and prayer requests.',
+    read_full: 'Read full update',
+    close_info: 'Close',
+    new_badge: 'New',
+    prayers_title: 'Prayer requests',
+    // Journey tab
+    journey_label: 'Journey',
+    journey_title: 'Step by',
+    journey_italic: 'step',
+    journey_sub: 'The journey is made of stages, seasons of waiting, and carefully made decisions.',
+    prayer_section: 'Prayer requests',
+    prayer_group_title: 'Prayer group',
+    prayer_group_sub: 'Join our WhatsApp group to receive real-time prayer requests.',
+    wa_group_join: 'Join the group',
+    // Partner tab
+    partner_label: 'Partner',
+    partner_title: 'With us',
+    partner_italic: 'in this',
+    fp_verse: '"I thank God for your partnership in the gospel from the first day until now." — Philippians 1.5',
+    fp_explain: "Paul didn't call the Philippians donors. He called them partners — koinonía. A partner isn't someone who funds a cause. It's someone who enters in — with their heart, their prayers, their sending. That's what we're inviting you to be.",
+    praying: 'Praying', praying_sub: 'The intercession that sustains what goes ahead',
+    following: 'Following', following_sub: 'Stay connected to the journey',
+    follow1: 'Read our updates here in the app',
+    follow2: 'Share with churches and brothers and sisters',
+    follow3: 'Connect networks and people to the project',
+    see_news: 'See updates',
+    monthly: 'Monthly Partner', monthly_sub: 'Cooperate with the project every month',
+    monthly_body: "The monthly partner makes it possible to plan, move forward, and sustain a presence where the gospel hasn't yet arrived. Shall we go together?",
+    card_btn: '💳 Card', pix_btn: '🔑 Pix',
+    both_email: 'Both options include email confirmation',
+    pix_title: 'Pix Key', pix_sub: 'Bradesco Bank · Email key',
+    copy_btn: 'Copy',
+    wa_group: 'Prayer group on WhatsApp',
+    // Status tags
+    done: 'Completed', active: 'In progress', next_step: 'Next step',
+    // Contrib modal
+    card_modal_title: 'Contribute via Card',
+    pix_modal_title: 'Contribute via Pix',
+    card_modal_sub: 'Fill in your details. You will be redirected to a secure payment page.',
+    pix_modal_sub: 'Fill in your details. You will receive the Pix key by email to complete the transfer.',
+    card_modal_btn: '💳 Go to payment',
+    pix_modal_btn: '🔑 See Pix key',
+    card_note: 'Secure, fast and direct. Monthly or one-time.',
+    pix_note: 'You will receive the details by email and the Pix key will be shown.',
+    name_field: 'Full name *', email_field: 'Email *', phone_field: 'WhatsApp',
+    value_field: 'Contribution amount *', other_value: 'or enter another amount',
+    confirm_btn: 'Confirm and continue',
+    success_card: 'Confirmation email sent. Redirecting to payment...',
+    // Register
+    reg_title: 'Join the', reg_italic: 'team',
+    reg_sub: 'Every great journey begins with a first step',
+    reg_name: 'Full name *', reg_email: 'Email *', reg_pass: 'Create your password *',
+    reg_how: 'How did you hear about us?', reg_btn: 'Request to join',
+    reg_note: 'Once submitted, the team will review and activate your access shortly.',
+    reg_success_title: 'Request sent!',
+    reg_success_body: "We received your request. You'll soon be part of the team and able to follow every step of this journey up close.",
+    close_btn: 'Close',
   }
 };
-
 function t(key){ return (T[currentLang]||T.pt)[key] || (T.pt)[key] || key; }
 
 function toggleLang(){
   currentLang = currentLang === 'pt' ? 'en' : 'pt';
   localStorage.setItem('grao_lang', currentLang);
-  document.getElementById('langBtn').textContent = currentLang === 'pt' ? 'EN' : 'PT';
+  ['langBtn','langBtnLogin'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent = currentLang==='pt'?'EN':'PT';
+  });
   applyTranslations();
 }
 
@@ -1547,44 +1664,90 @@ function loadLang(){
 }
 
 function applyTranslations(){
-  // Tabs
-  const tabLabels = document.querySelectorAll('.tlbl');
-  const tabKeys = ['home','family','news','journey','partner'];
-  tabLabels.forEach((el,i)=>{ if(tabKeys[i]) el.textContent = t(tabKeys[i]); });
+  const lang = currentLang;
 
-  // Logout button
-  const logout = document.getElementById('logoutBtn');
-  if(logout) logout.textContent = t('logout');
+  // Login screen
+  const loginTag = document.getElementById('loginTag');
+  const loginChip = document.getElementById('loginChip');
+  const langBtnLogin = document.getElementById('langBtnLogin');
+  const langBtn = document.getElementById('langBtn');
+  if(loginTag) loginTag.textContent = t('login_tag');
+  if(loginChip) loginChip.textContent = t('login_chip');
+  if(langBtnLogin) langBtnLogin.textContent = lang==='pt'?'EN':'PT';
+  if(langBtn) langBtn.textContent = lang==='pt'?'EN':'PT';
 
-  // Music bar label
+  // Login form labels
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-t'));
+  });
+
+  // Logout
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn) logoutBtn.textContent = t('logout');
+
+  // Music bar
   const mlbl = document.querySelector('.mlbl');
   if(mlbl) mlbl.textContent = t('music_label');
 
-  // Login page
-  const lErrEl = document.getElementById('lErr');
-  if(lErrEl) lErrEl.textContent = t('error_login');
-
-  // Labels in login
-  document.querySelectorAll('[data-t]').forEach(el=>{
-    const key = el.getAttribute('data-t');
-    if(key) el.textContent = t(key);
-  });
+  // Tabs
+  const tabMap = ['home','family','news','journey','partner'];
+  document.querySelectorAll('.tlbl').forEach((el,i)=>{ if(tabMap[i]) el.textContent = t(tabMap[i]); });
 
   // Home
   const hgreet = document.querySelector('.hgreet');
   if(hgreet) hgreet.textContent = t('welcome');
-  const verse = document.querySelector('.hverse');
-  if(verse) verse.textContent = t('verse');
-
-  // Pills
+  const htitle = document.querySelector('.htitle');
+  if(htitle) htitle.innerHTML = t('home_title')+'<br><em>'+t('home_italic')+'</em>';
+  const hverse = document.querySelector('.hverse');
+  if(hverse) hverse.textContent = t('verse');
   const pills = document.querySelectorAll('.pill');
-  const pillKeys = ['pill1','pill2','pill3'];
-  pills.forEach((p,i)=>{ if(pillKeys[i]) p.textContent = t(pillKeys[i]); });
+  ['pill1','pill2','pill3'].forEach((k,i)=>{ if(pills[i]){ const dot=pills[i].querySelector('.pdot'); pills[i].textContent=t(k); if(dot) pills[i].prepend(dot); }});
+  const sepLatest = document.querySelector('.sep');
+  if(sepLatest) sepLatest.textContent = t('latest_update');
 
-  // Re-render views that have dynamic text
-  if(document.getElementById('view-partner').classList.contains('active')){
-    updatePartnerLang();
+  // Partner tab - rebuild key sections
+  const fpVerse = document.getElementById('fpVerse');
+  if(fpVerse) fpVerse.textContent = t('fp_verse');
+  const fpExplain = document.getElementById('fpExplain');
+  if(fpExplain) fpExplain.textContent = t('fp_explain');
+  const monthlyBody = document.getElementById('monthlyBody');
+  if(monthlyBody) monthlyBody.textContent = t('monthly_body');
+
+  // Partner card titles/subs via data-tk
+  document.querySelectorAll('[data-tk]').forEach(el=>{
+    el.textContent = t(el.getAttribute('data-tk'));
+  });
+
+  // Journey
+  const jtTitle = document.querySelector('#view-journey .vtitle');
+  if(jtTitle) jtTitle.innerHTML = t('journey_title')+' <em>'+t('journey_italic')+'</em>';
+
+  // News
+  const nsTitle = document.querySelector('#view-news .vtitle');
+  if(nsTitle) nsTitle.innerHTML = t('news_title')+' <em>'+t('news_italic')+'</em>';
+
+  // Toggle buttons in news
+  document.querySelectorAll('.nitog span:first-child').forEach(el=>{
+    if(el.textContent.includes('Ler')||el.textContent.includes('Read')) el.textContent = t('read_full');
+    if(el.textContent.includes('Fechar')||el.textContent.includes('Close')) el.textContent = t('close_info');
+  });
+
+  // Contrib modal if open
+  const contTitle = document.getElementById('contTitle');
+  const contSub = document.getElementById('contSubtitle');
+  const contPayBtn = document.getElementById('contPayBtn');
+  const contNote = document.getElementById('contNote');
+  if(contTitle&&contTitle.textContent){
+    if(contType==='cartao'){ if(contTitle) contTitle.textContent=t('card_modal_title'); if(contSub) contSub.textContent=t('card_modal_sub'); if(contPayBtn) contPayBtn.textContent=t('card_modal_btn'); if(contNote) contNote.textContent=t('card_note'); }
+    else { if(contTitle) contTitle.textContent=t('pix_modal_title'); if(contSub) contSub.textContent=t('pix_modal_sub'); if(contPayBtn) contPayBtn.textContent=t('pix_modal_btn'); if(contNote) contNote.textContent=t('pix_note'); }
   }
+
+  // Timeline status tags
+  document.querySelectorAll('.tltag').forEach(el=>{
+    if(el.classList.contains('tt-done')) el.textContent=t('done');
+    else if(el.classList.contains('tt-active')) el.textContent=t('active');
+    else if(el.classList.contains('tt-next')) el.textContent=t('next_step');
+  });
 }
 
 function updatePartnerLang(){
