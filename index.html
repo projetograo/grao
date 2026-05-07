@@ -469,7 +469,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="mgrid">
           <div class="mcard"><div class="mico"><svg><use href="#icf"/></svg></div><div class="mname">Bruno</div><div class="mrole">Teólogo · Barista</div><div class="mdesc">Bacharel em Teologia (SPN), Ed. Física e Arte Dramática (UFAL). Licenciado na IPT desde 2025.</div></div>
           <div class="mcard"><div class="mico"><svg><use href="#ibk"/></svg></div><div class="mname">Malu</div><div class="mrole">Arquiteta · Pedagoga</div><div class="mdesc">Arquitetura (Cesmac), Pedagogia (Estácio). Professora de inglês avançado. 1 ano nos EUA.</div></div>
-          <div class="mcard"><div class="mico"><svg><use href="#ibb"/></svg></div><div class="mname">Tom</div><div class="mrole">1 ano e 10 meses</div><div class="mdesc">Nasceu em 26/06/2024. A alegria da casa — nos ensina sobre dependência e graça.</div></div>
+          <div class="mcard"><div class="mico"><svg><use href="#ibb"/></svg></div><div class="mname">Tom</div><div class="mrole" id="tomAge">1 ano e 10 meses</div><div class="mdesc">Nasceu em 26/06/2024. A alegria da casa — nos ensina sobre dependência e graça.</div></div>
           <div class="mcard"><div class="mico"><svg><use href="#isd"/></svg></div><div class="mname">Cauê</div><div class="mrole">Chegando jul/2026</div><div class="mdesc">Ainda a caminho. Mais um grão sendo plantado com fé e esperança.</div></div>
         </div>
         <div class="qsblk"><div class="qsbh"><svg><use href="#ihrt"/></svg><h3>Nossa base</h3></div>
@@ -887,6 +887,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <script>
 const MID='c0VO-WfnW0k';
+// STRIPE: geral = link de assinatura recorrente (valor livre). Quando a conta for aprovada,
+// crie um Payment Link recorrente no Stripe e substitua o valor abaixo.
 const STRIPE_LINKS = { geral: 'https://buy.stripe.com/8x2fZadaKbH1eln8Roak000' };
 const STRIPE_PK='pk_live_51TTU4m3O6qoVuJnRZrtaodgORjpb8Lil6G2bzYd1QJ4I85y8ozbIDDS1bkpsFBxwiJygSyjr8IfyksQTzfohWb5J00FZMbhnQI';
 function getDb(){ return window.db||db; }
@@ -915,7 +917,7 @@ function loadTimeline(){
 }
 
 const D={
-  users:[{email:'nossoprojetograo@gmail.com',pass:'Tomecaue2426#app',admin:true},{email:'parceiro@grao.com',pass:'parceiro123',admin:false}],
+  users:[], // Usuários carregados do Firebase — nenhuma credencial hardcoded no código
   news:[
     {id:3,name:'Terceiro Informativo',date:'Primeiro trimestre de 2026',isNew:true,
       summary:'Perspectivas concluído, avanços com APMT e Pioneiros, e nossa família crescendo — Cauê a caminho!',
@@ -977,6 +979,27 @@ function initData(){
   loadPartnersFromFirebase();
   loadNewsFromFirebase();
   loadPrayersFromFirebase();
+  loadTimelineFromFirebase();
+  // Pre-render public content (no admin)
+  renderNews(); renderTimeline(); renderPrayer();
+}
+
+function loadTimelineFromFirebase(){
+  try{
+    getDb().collection('timeline').orderBy('id','asc').get()
+    .then(snap=>{
+      if(snap.empty) return;
+      let changed=false;
+      snap.forEach(doc=>{
+        const item=doc.data();
+        if(!D.timeline.find(x=>String(x.id)===String(item.id))){
+          D.timeline.push(item);
+          changed=true;
+        }
+      });
+      if(changed){ D.timeline.sort((a,b)=>a.id-b.id); renderTimeline(); }
+    }).catch(()=>{});
+  }catch(e){}
 }
 
 function loadNewsFromFirebase(){
@@ -1036,29 +1059,40 @@ function doLogin(){
     initMusic(); renderAll(); loadSavedSettings(); track('login');
   }
 
-  // Check local users first (includes default admin)
-  const localUser = D.users.find(u=>u.email.toLowerCase()===email && u.pass===pass);
-  if(localUser){ successLogin(localUser); return; }
+  // Check runtime cache first (already authenticated users from this session)
+  const cached = D.users.find(u=>u.email.toLowerCase()===email && u.pass===pass && u._verified);
+  if(cached){ successLogin(cached); return; }
 
-  // Check Firebase admins
+  // Always check Firebase admins
+  const btn = document.querySelector('.lbtn');
+  if(btn){ btn.textContent='...'; btn.disabled=true; }
+  function restoreBtn(){ if(btn){ btn.textContent='Entrar'; btn.disabled=false; } }
+
   try{
     getDb().collection('admins').where('email','==',email).get()
     .then(snap=>{
       if(!snap.empty){
         const u=snap.docs[0].data();
-        if(u.pass===pass){ successLogin({...u,admin:true,id:snap.docs[0].id}); return; }
+        if(u.pass===pass){
+          const user={...u,admin:true,id:snap.docs[0].id,_verified:true};
+          D.users.push(user);
+          restoreBtn(); successLogin(user); return;
+        }
       }
       // Check Firebase partners
       return getDb().collection('partners').where('email','==',email).get();
     })
     .then(snap=>{
-      if(!snap||snap.empty){ document.getElementById('lErr').style.display='block'; return; }
+      if(!snap||snap.empty){ restoreBtn(); document.getElementById('lErr').style.display='block'; return; }
       const u=snap.docs[0].data();
-      if(u.pass===pass){ successLogin({...u,admin:false,id:snap.docs[0].id}); }
-      else { document.getElementById('lErr').style.display='block'; }
+      if(u.pass===pass){
+        const user={...u,admin:false,id:snap.docs[0].id,_verified:true};
+        D.users.push(user);
+        restoreBtn(); successLogin(user);
+      } else { restoreBtn(); document.getElementById('lErr').style.display='block'; }
     })
-    .catch(()=>{ document.getElementById('lErr').style.display='block'; });
-  }catch(e){ document.getElementById('lErr').style.display='block'; }
+    .catch(()=>{ restoreBtn(); document.getElementById('lErr').style.display='block'; });
+  }catch(e){ restoreBtn(); document.getElementById('lErr').style.display='block'; }
 }
 ['lE','lP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
 function doLogout(){me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
@@ -1166,17 +1200,29 @@ function onYouTubeIframeAPIReady(){
   const vid=window._savedMusicId||localStorage.getItem('grao_music_id')||MID;
   ytPlayer=new YT.Player('ytFr',{
     height:'1',width:'1',videoId:vid,
-    playerVars:{autoplay:1,loop:1,playlist:vid,controls:0,rel:0,playsinline:1},
+    playerVars:{autoplay:0,loop:1,playlist:vid,controls:0,rel:0,playsinline:1},
     events:{
       onReady:function(e){
         e.target.setVolume(60);
-        e.target.playVideo();
-        mPlaying=true;
+        // Autoplay blocked on mobile without user gesture — show play icon instead
         document.getElementById('mbar').classList.add('on');
-        document.getElementById('micon').setAttribute('href','#ipause');
+        document.getElementById('micon').setAttribute('href','#iplay');
+        mPlaying=false;
+        // Try autoplay anyway (works on desktop / after prior interaction)
+        try{
+          e.target.playVideo();
+          setTimeout(()=>{
+            if(e.target.getPlayerState&&e.target.getPlayerState()===1){
+              mPlaying=true;
+              document.getElementById('micon').setAttribute('href','#ipause');
+            }
+          },1200);
+        }catch(ex){}
       },
       onStateChange:function(e){
         if(e.data===YT.PlayerState.ENDED) e.target.playVideo();
+        if(e.data===YT.PlayerState.PLAYING){ mPlaying=true; document.getElementById('micon').setAttribute('href','#ipause'); }
+        if(e.data===YT.PlayerState.PAUSED){ mPlaying=false; document.getElementById('micon').setAttribute('href','#iplay'); }
       }
     }
   });
@@ -1457,6 +1503,17 @@ function addAdmin(){
   .catch(e=>toast('Erro: '+e.message));
 }
 
+// ── UTILITIES ──
+function calcAge(birthDate){
+  const now = new Date();
+  let years = now.getFullYear() - birthDate.getFullYear();
+  let months = now.getMonth() - birthDate.getMonth();
+  if(now.getDate() < birthDate.getDate()) months--;
+  if(months < 0){ years--; months += 12; }
+  if(years >= 1) return years + 'a' + (months > 0 ? months + 'm' : '');
+  return months + 'm';
+}
+
 // ── TRANSLATIONS ──
 let currentLang = 'pt';
 
@@ -1487,7 +1544,7 @@ const T = {
     // Family tab
     family_title: 'Família Baracho',
     family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
-    family_sub2: 'Tom (26/06/2024 · 1a10m) · Cauê (jul/2026)',
+    family_sub2: 'Tom (26/06/2024 · '+calcAge(new Date(2024,5,26))+') · Cauê (jul/2026)',
     about_title: 'Sobre o projeto',
     base_title: 'Nossa base',
     field_title: 'Para onde vamos',
@@ -1578,7 +1635,7 @@ const T = {
     // Family tab
     family_title: 'The Baracho Family',
     family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
-    family_sub2: 'Tom (June 26, 2024) · Cauê (July 2026)',
+    family_sub2: 'Tom (June 26, 2024 · '+calcAge(new Date(2024,5,26))+') · Cauê (July 2026)',
     about_title: 'About the project',
     base_title: 'Our home church',
     field_title: 'Where we are going',
@@ -1762,7 +1819,7 @@ function updatePartnerLang(){
 
 function track(a){const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');const d=new Date().toISOString().split('T')[0];m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);localStorage.setItem(k,JSON.stringify(m));}
 
-function md(t){if(!t)return'';return t.replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h4>$4</h4>'.replace('$4','$1')).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');}
+function md(t){if(!t)return'';return t.replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h4>$1</h4>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');}
 
 function ytId(u){if(!u)return null;const m=u.match(/(?:v=|youtu\.be\/)([^&\n?#]+)/);return m?m[1]:null;}
 
@@ -1819,7 +1876,10 @@ function renderNews(){
         ${n.isNew?'<span class="nibdg">Novo</span>':''}
       </div>
       <div class="niex">${n.summary}</div>
-      <button class="nitog" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
+      <div style="display:flex;gap:8px;margin:0 18px 12px">
+        <button class="nitog" style="flex:1" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
+        ${navigator.share?`<button onclick="shareNews('${n.id}','${n.name.replace(/'/g,"\\'")}','${n.summary.substring(0,80).replace(/'/g,"\\'")}...')" style="background:transparent;border:1px solid var(--border-md);border-radius:var(--r-sm);padding:9px 14px;font-size:0.8rem;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all 0.2s" title="Compartilhar">↗</button>`:''}
+      </div>
       <div class="nibody" id="nb-${n.id}">
         <div class="niinn">${bodyHTML}${hasVids}${prHTML}${signHTML}</div>
       </div>
@@ -1838,10 +1898,16 @@ function toggleNi(id){
 }
 
 function renderTimeline(){
+  const el = document.getElementById('tlList');
+  if(!el) return;
+  if(!D.timeline.length){
+    el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Carregando linha do tempo...</p>';
+    return;
+  }
   const cls={done:'tt-done',active:'tt-active',next:'tt-next'};
   const lbl={done:'Concluído',active:'Em andamento',next:'Próximo passo'};
   const dot={dg:'dg',da:'da',dd:'dd',dn:'dn'};
-  document.getElementById('tlList').innerHTML=D.timeline.map(t=>`
+  el.innerHTML=D.timeline.map(t=>`
     <div class="tlitem"><div class="tldot ${dot[t.dot]||'dn'}"></div>
       <div class="tlcard"><div class="tldate">${t.date}</div><div class="tltitle">${t.title}</div>
       <div class="tlbody">${t.body}</div><span class="tltag ${cls[t.status]}">${lbl[t.status]}</span></div>
@@ -1850,7 +1916,13 @@ function renderTimeline(){
 
 const prIco=['#ihrt','#im','#if','#igl','#ihands','#isd'];
 function renderPrayer(){
-  document.getElementById('prList').innerHTML=D.prayers.map((p,i)=>`
+  const el = document.getElementById('prList');
+  if(!el) return;
+  if(!D.prayers.length){
+    el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Nenhum pedido de oração no momento.</p>';
+    return;
+  }
+  el.innerHTML=D.prayers.map((p,i)=>`
     <div class="pritem"><div class="prico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--accent)"><use href="${prIco[i%prIco.length]}"/></svg></div>
       <div class="prtxt"><div class="prtitle">${p.title}</div><div class="prbody">${p.body}</div></div>
     </div>`).join('');
@@ -1862,7 +1934,19 @@ function renderPrayerPartner(){
   document.getElementById('prayerPartner').innerHTML=items.map(p=>`<li>${p}</li>`).join('');
 }
 
-function renderAll(){renderNews();renderTimeline();renderPrayer();renderAdmin();}
+function renderAll(){
+  // Update Tom's dynamic age
+  const tomEl = document.getElementById('tomAge');
+  if(tomEl){
+    const age = calcAge(new Date(2024,5,26));
+    // Convert "1a2m" format to "1 ano e 2 meses" for display
+    const ageStr = age.replace(/(\d+)a(\d+)m/,'$1 ano(s) e $2 mês(es)')
+                      .replace(/(\d+)a$/,'$1 ano(s)')
+                      .replace(/^(\d+)m$/,'$1 mês(es)');
+    tomEl.textContent = ageStr;
+  }
+  renderNews();renderTimeline();renderPrayer();renderAdmin();
+}
 
 function loadMensais(filter){
   const el=document.getElementById('mensaisList');
@@ -2168,6 +2252,10 @@ function contPay(){
   if(!contValue||contValue<10){ err.textContent='Selecione ou digite um valor mínimo de R$ 10.'; err.style.display='block'; return; }
   err.style.display='none';
 
+  // Disable button to prevent double-click
+  const btn = document.getElementById('contPayBtn');
+  if(btn){ btn.textContent='Aguarde...'; btn.disabled=true; }
+
   // Save to Firebase
   try{
     getDb().collection('parceiros_mensais').add({
@@ -2179,7 +2267,7 @@ function contPay(){
     }).catch(()=>{});
   }catch(e){}
 
-  // Send thank you email to contributor
+  // Send thank-you email
   emailjs.send('service_grao','template_parceiro_mensal',{
     nome:name, email_parceiro:email, valor:'R$ '+contValue, cidade:''
   }).catch(()=>{});
@@ -2194,29 +2282,31 @@ function contPay(){
   track('contribuicao-'+contType);
 
   if(contType==='cartao'){
-    // Show success then redirect to Stripe
-    document.getElementById('contForm').style.display='none';
-    document.getElementById('contSuccess').style.display='block';
-    document.getElementById('contSuccessMsg').textContent =
-      'E-mail de confirmação enviado para '+email+'. Redirecionando para o pagamento...';
-    // Redirect to Stripe after 2s
-    const stripeLink = STRIPE_LINKS && STRIPE_LINKS.geral
-      ? STRIPE_LINKS.geral
-      : null;
-    setTimeout(()=>{
-      if(stripeLink){
-        window.open(stripeLink+'?prefilled_email='+encodeURIComponent(email)+'&client_reference_id='+encodeURIComponent(name),'_blank');
-      } else {
-        toast('Stripe não configurado. Use o Pix!');
-      }
-    }, 1500);
+    const stripeLink = STRIPE_LINKS && STRIPE_LINKS.geral ? STRIPE_LINKS.geral : null;
+    if(stripeLink){
+      // Show brief success, then redirect in same tab (avoids popup blocker on mobile)
+      document.getElementById('contForm').style.display='none';
+      document.getElementById('contSuccess').style.display='block';
+      document.getElementById('contSuccessMsg').textContent =
+        'Redirecionando para o pagamento seguro... Se não redirecionar, toque no botão abaixo.';
+      // Add a manual link in case redirect is slow
+      const manualBtn = document.createElement('a');
+      manualBtn.href = stripeLink+'?prefilled_email='+encodeURIComponent(email);
+      manualBtn.textContent = '💳 Ir para o pagamento';
+      manualBtn.style.cssText = 'display:inline-block;margin-top:16px;background:var(--accent);color:var(--bg-deep);padding:12px 28px;border-radius:var(--r-md);font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;font-family:Inter,sans-serif';
+      document.getElementById('contSuccessMsg').after(manualBtn);
+      setTimeout(()=>{ window.location.href = stripeLink+'?prefilled_email='+encodeURIComponent(email); }, 1500);
+    } else {
+      if(btn){ btn.textContent='Confirmar e continuar'; btn.disabled=false; }
+      err.textContent='Link de pagamento não configurado. Use o Pix por enquanto.'; err.style.display='block';
+    }
   } else {
-    // PIX — show success with pix key
+    // PIX — show success with key
     document.getElementById('contForm').style.display='none';
     document.getElementById('contSuccess').style.display='block';
     document.getElementById('contSuccessMsg').innerHTML =
       'E-mail de confirmação enviado para <strong>'+email+'</strong>.<br><br>'+
-      'Chave Pix: <strong>nossoprojetograo@gmail.com</strong><br>'+
+      '<strong>Chave Pix:</strong> nossoprojetograo@gmail.com<br>'+
       'Banco Bradesco · Bruno Ramires Baracho<br>'+
       '<span style="font-size:0.82rem;color:var(--text3)">Valor sugerido: R$ '+contValue+'</span>';
   }
@@ -2242,6 +2332,15 @@ function copyPix(){
     document.execCommand('copy'); document.body.removeChild(el);
     toast('Chave copiada!');
   });
+}
+
+function shareNews(id, title, summary){
+  if(!navigator.share) return;
+  navigator.share({
+    title: 'Projeto Grão — '+title,
+    text: summary,
+    url: 'https://projetograo.github.io/grao/'
+  }).catch(()=>{});
 }
 
 function g(id){return(document.getElementById(id)?.value||'').trim();}
