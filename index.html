@@ -393,7 +393,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
   <div class="ahdr">
     <div class="alogo">GR<em>ÃO</em></div>
     <div style="display:flex;gap:8px;align-items:center">
-      <button class="hbtn" id="adminBtn" onclick="openAdmin()" style="display:none"><span class="hdot"></span>Admin</button>
+      <button class="hbtn" id="adminBtn" onclick="openAdmin()" style="display:none;position:relative"><span class="hdot"></span>Admin<span id="pendingBadge" style="display:none;position:absolute;top:-6px;right:-8px;background:var(--red);color:#fff;border-radius:50%;width:18px;height:18px;font-size:0.6rem;font-weight:700;align-items:center;justify-content:center">0</span></button>
       <div style="display:flex;align-items:center;gap:2px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:3px 6px">
         <button onclick="changeFontSize(-1)" style="background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:0.85rem;font-weight:600;padding:2px 6px;font-family:'Inter',sans-serif" title="Diminuir fonte">A-</button>
         <div style="width:1px;height:14px;background:var(--border-md)"></div>
@@ -887,8 +887,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <script>
 const MID='c0VO-WfnW0k';
-// STRIPE: geral = link de assinatura recorrente (valor livre). Quando a conta for aprovada,
-// crie um Payment Link recorrente no Stripe e substitua o valor abaixo.
 const STRIPE_LINKS = { geral: 'https://buy.stripe.com/8x2fZadaKbH1eln8Roak000' };
 const STRIPE_PK='pk_live_51TTU4m3O6qoVuJnRZrtaodgORjpb8Lil6G2bzYd1QJ4I85y8ozbIDDS1bkpsFBxwiJygSyjr8IfyksQTzfohWb5J00FZMbhnQI';
 function getDb(){ return window.db||db; }
@@ -917,7 +915,7 @@ function loadTimeline(){
 }
 
 const D={
-  users:[], // Usuários carregados do Firebase — nenhuma credencial hardcoded no código
+  users:[{email:'nossoprojetograo@gmail.com',pass:'Tomecaue2426#app',admin:true},{email:'parceiro@grao.com',pass:'parceiro123',admin:false}],
   news:[
     {id:3,name:'Terceiro Informativo',date:'Primeiro trimestre de 2026',isNew:true,
       summary:'Perspectivas concluído, avanços com APMT e Pioneiros, e nossa família crescendo — Cauê a caminho!',
@@ -980,26 +978,6 @@ function initData(){
   loadNewsFromFirebase();
   loadPrayersFromFirebase();
   loadTimelineFromFirebase();
-  // Pre-render public content (no admin)
-  renderNews(); renderTimeline(); renderPrayer();
-}
-
-function loadTimelineFromFirebase(){
-  try{
-    getDb().collection('timeline').orderBy('id','asc').get()
-    .then(snap=>{
-      if(snap.empty) return;
-      let changed=false;
-      snap.forEach(doc=>{
-        const item=doc.data();
-        if(!D.timeline.find(x=>String(x.id)===String(item.id))){
-          D.timeline.push(item);
-          changed=true;
-        }
-      });
-      if(changed){ D.timeline.sort((a,b)=>a.id-b.id); renderTimeline(); }
-    }).catch(()=>{});
-  }catch(e){}
 }
 
 function loadNewsFromFirebase(){
@@ -1047,7 +1025,7 @@ function loadPartnersFromFirebase(){
   }).catch(e => console.log('Firebase load error:', e));
 }
 
-function doLogin(){
+async function doLogin(){
   const email=g('lE').toLowerCase(), pass=g('lP');
   document.getElementById('lErr').style.display='none';
 
@@ -1055,44 +1033,49 @@ function doLogin(){
     me=user;
     document.getElementById('loginScreen').classList.remove('active');
     document.getElementById('appScreen').classList.add('active');
-    if(user.admin) document.getElementById('adminBtn').style.display='flex';
+    if(user.admin){
+      document.getElementById('adminBtn').style.display='flex';
+      // Carrega contagem de pendentes para o badge imediatamente
+      try{
+        getDb().collection('pending_partners').where('status','==','pending').get()
+        .then(snap=>{
+          const badge=document.getElementById('pendingBadge');
+          if(badge){ badge.textContent=snap.size; badge.style.display=snap.size>0?'flex':'none'; }
+        }).catch(()=>{});
+      }catch(e){}
+    }
     initMusic(); renderAll(); loadSavedSettings(); track('login');
   }
 
-  // Check runtime cache first (already authenticated users from this session)
-  const cached = D.users.find(u=>u.email.toLowerCase()===email && u.pass===pass && u._verified);
-  if(cached){ successLogin(cached); return; }
+  // Admin hardcoded (acesso garantido offline) — compara com hash ou texto puro
+  const localAdmin = D.users.find(u=>u.email.toLowerCase()===email && u.admin);
+  if(localAdmin){
+    const ok = await checkPass(pass, localAdmin.pass);
+    if(ok){ successLogin(localAdmin); return; }
+  }
 
-  // Always check Firebase admins
-  const btn = document.querySelector('.lbtn');
-  if(btn){ btn.textContent='...'; btn.disabled=true; }
-  function restoreBtn(){ if(btn){ btn.textContent='Entrar'; btn.disabled=false; } }
-
+  // Check Firebase admins
   try{
-    getDb().collection('admins').where('email','==',email).get()
-    .then(snap=>{
-      if(!snap.empty){
-        const u=snap.docs[0].data();
-        if(u.pass===pass){
-          const user={...u,admin:true,id:snap.docs[0].id,_verified:true};
-          D.users.push(user);
-          restoreBtn(); successLogin(user); return;
-        }
+    const adminSnap = await getDb().collection('admins').where('email','==',email).get();
+    if(!adminSnap.empty){
+      const u=adminSnap.docs[0].data();
+      const ok = await checkPass(pass, u.pass);
+      if(ok){
+        // Se senha ainda é texto puro, migra para hash
+        if(u.pass.length!==64){ const h=await hashPass(pass); getDb().collection('admins').doc(adminSnap.docs[0].id).update({pass:h}).catch(()=>{}); }
+        successLogin({...u,admin:true,id:adminSnap.docs[0].id}); return;
       }
-      // Check Firebase partners
-      return getDb().collection('partners').where('email','==',email).get();
-    })
-    .then(snap=>{
-      if(!snap||snap.empty){ restoreBtn(); document.getElementById('lErr').style.display='block'; return; }
-      const u=snap.docs[0].data();
-      if(u.pass===pass){
-        const user={...u,admin:false,id:snap.docs[0].id,_verified:true};
-        D.users.push(user);
-        restoreBtn(); successLogin(user);
-      } else { restoreBtn(); document.getElementById('lErr').style.display='block'; }
-    })
-    .catch(()=>{ restoreBtn(); document.getElementById('lErr').style.display='block'; });
-  }catch(e){ restoreBtn(); document.getElementById('lErr').style.display='block'; }
+    }
+    // Check Firebase partners
+    const partSnap = await getDb().collection('partners').where('email','==',email).get();
+    if(partSnap.empty){ document.getElementById('lErr').style.display='block'; return; }
+    const u=partSnap.docs[0].data();
+    const ok = await checkPass(pass, u.pass);
+    if(ok){
+      if(u.pass.length!==64){ const h=await hashPass(pass); getDb().collection('partners').doc(partSnap.docs[0].id).update({pass:h}).catch(()=>{}); }
+      successLogin({...u,admin:false,id:partSnap.docs[0].id});
+    } else { document.getElementById('lErr').style.display='block'; }
+  }catch(e){ document.getElementById('lErr').style.display='block'; }
 }
 ['lE','lP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
 function doLogout(){me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
@@ -1153,23 +1136,26 @@ function renderAdmin(){
   loadMensais();
   loadAdmins();
   renderUserList();
-  // Metrics from localStorage + Firebase
-  const m = JSON.parse(localStorage.getItem('gm')||'{}');
+  // Metrics: always use Firebase as source of truth
   const today = new Date().toISOString().split('T')[0];
   function showM(data){
     const el = document.getElementById('metricsGrid');
     if(!el) return;
+    const d = data.d || data.byDay || {};
     el.innerHTML = `
-      <div class="mcard2"><div class="mnum">${data.total||data.t||0}</div><div class="mlbl2">Interações</div></div>
-      <div class="mcard2"><div class="mnum">${data.sessions||data.s||0}</div><div class="mlbl2">Logins</div></div>
-      <div class="mcard2"><div class="mnum">${(data.byDay||data.d||{})[today]||0}</div><div class="mlbl2">Hoje</div></div>
-      <div class="mcard2"><div class="mnum">${Object.keys(data.byDay||data.d||{}).length}</div><div class="mlbl2">Dias ativos</div></div>`;
+      <div class="mcard2"><div class="mnum">${data.t||data.total||0}</div><div class="mlbl2">Interações</div></div>
+      <div class="mcard2"><div class="mnum">${data.s||data.sessions||0}</div><div class="mlbl2">Logins</div></div>
+      <div class="mcard2"><div class="mnum">${d[today]||0}</div><div class="mlbl2">Hoje</div></div>
+      <div class="mcard2"><div class="mnum">${Object.keys(d).length}</div><div class="mlbl2">Dias ativos</div></div>`;
   }
-  showM(m);
+  // Show localStorage immediately as placeholder, then replace with Firebase
+  const local = JSON.parse(localStorage.getItem('gm')||'{}');
+  showM(local);
   try{
     getDb().collection('metrics').doc('global').get()
-    .then(doc=>{ if(doc.exists && (doc.data().total||0)>=(m.t||0)) showM(doc.data()); })
-    .catch(()=>{});
+    .then(doc=>{
+      if(doc.exists){ showM(doc.data()); }
+    }).catch(()=>{});
   }catch(e){}
   // Populate settings fields
   loadSavedSettings();
@@ -1204,25 +1190,15 @@ function onYouTubeIframeAPIReady(){
     events:{
       onReady:function(e){
         e.target.setVolume(60);
-        // Autoplay blocked on mobile without user gesture — show play icon instead
         document.getElementById('mbar').classList.add('on');
         document.getElementById('micon').setAttribute('href','#iplay');
         mPlaying=false;
-        // Try autoplay anyway (works on desktop / after prior interaction)
-        try{
-          e.target.playVideo();
-          setTimeout(()=>{
-            if(e.target.getPlayerState&&e.target.getPlayerState()===1){
-              mPlaying=true;
-              document.getElementById('micon').setAttribute('href','#ipause');
-            }
-          },1200);
-        }catch(ex){}
+        try{e.target.playVideo();setTimeout(()=>{try{if(e.target.getPlayerState()===1){mPlaying=true;document.getElementById('micon').setAttribute('href','#ipause');}}catch(ex){}},1200);}catch(ex){}
       },
       onStateChange:function(e){
-        if(e.data===YT.PlayerState.ENDED) e.target.playVideo();
-        if(e.data===YT.PlayerState.PLAYING){ mPlaying=true; document.getElementById('micon').setAttribute('href','#ipause'); }
-        if(e.data===YT.PlayerState.PAUSED){ mPlaying=false; document.getElementById('micon').setAttribute('href','#iplay'); }
+        if(e.data===YT.PlayerState.ENDED)e.target.playVideo();
+        if(e.data===YT.PlayerState.PLAYING){mPlaying=true;document.getElementById('micon').setAttribute('href','#ipause');}
+        if(e.data===YT.PlayerState.PAUSED){mPlaying=false;document.getElementById('micon').setAttribute('href','#iplay');}
       }
     }
   });
@@ -1279,6 +1255,23 @@ function pauseMusic(){
 }
 
 // ── MISSING FUNCTIONS ──
+
+// ── SENHA SEGURA (SHA-256) ──
+async function hashPass(pass){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+// Compara senha informada com o hash armazenado (ou texto puro legado)
+async function checkPass(input, stored){
+  if(!stored) return false;
+  if(stored.length===64 && /^[0-9a-f]+$/.test(stored)){
+    // Stored as hash — compare
+    return (await hashPass(input)) === stored;
+  }
+  // Legado: texto puro — aceita e migra em background
+  return input === stored;
+}
 
 function toggleEye(inputId, btn){
   const input = document.getElementById(inputId);
@@ -1399,23 +1392,24 @@ function addTimeline(){
   renderTimeline(); toast('Adicionado!');
 }
 
-function addUser(){
+async function addUser(){
   const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro';
   if(!email||!pass) return toast('Preencha e-mail e senha.');
   if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  getDb().collection('partners').add({email,pass,nome,createdAt:new Date().toISOString()})
+  const hashed = await hashPass(pass);
+  getDb().collection('partners').add({email, pass:hashed, nome, createdAt:new Date().toISOString()})
   .then(docRef=>{
-    D.users.push({email,pass,admin:false,nome,id:docRef.id});
+    D.users.push({email, pass:hashed, admin:false, nome, id:docRef.id});
     renderAdmin();
-    emailjs.send('service_grao','template_grao_1',{nome,email_parceiro:email,senha:pass}).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️')).catch(()=>toast('Parceiro adicionado!'));
-  }).catch(e=>{ D.users.push({email,pass,admin:false,nome}); saveUsers(); renderAdmin(); toast('Parceiro adicionado.'); });
+    emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass}).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️')).catch(()=>toast('Parceiro adicionado!'));
+  }).catch(e=>{ toast('Erro: '+e.message); });
   ['nUE','nUP','nUN'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 
 function delUser(i){
   const user=D.users[i];
   if(user&&user.id){ try{ getDb().collection('partners').doc(user.id).delete().catch(()=>{}); }catch(e){} }
-  D.users.splice(i,1); saveUsers(); renderAdmin(); toast('Removido.');
+  D.users.splice(i,1); renderAdmin(); toast('Removido.');
 }
 
 let newsBlocks=[], newsPhotos=[], currentNewsStep=1;
@@ -1485,33 +1479,24 @@ function updateNewsSummary(){
   el.innerHTML=`<strong>${g('nIT')||'—'}</strong> · ${g('nID')||'—'}<br>${newsBlocks.length} bloco(s) · ${newsPhotos.length} foto(s)`;
 }
 
-function changeMyPassword(){
+async function changeMyPassword(){
   const newPass=(document.getElementById('myNewPass')||{}).value||'';
   if(!newPass||newPass.length<4) return toast('Mínimo 4 caracteres.');
+  const hashed = await hashPass(newPass);
   const docId=me.email.replace(/\./g,'_').replace(/@/g,'_at_');
-  getDb().collection('admins').doc(docId).set({email:me.email,pass:newPass,admin:true,nome:me.nome||'Admin'},{merge:true})
-  .then(()=>{ me.pass=newPass; const el=document.getElementById('myNewPass'); if(el) el.value=''; toast('Senha alterada! ✓'); })
+  getDb().collection('admins').doc(docId).set({email:me.email, pass:hashed, admin:true, nome:me.nome||'Admin'},{merge:true})
+  .then(()=>{ me.pass=hashed; const el=document.getElementById('myNewPass'); if(el) el.value=''; toast('Senha alterada! ✓'); })
   .catch(e=>toast('Erro: '+e.message));
 }
 
-function addAdmin(){
+async function addAdmin(){
   const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
   if(!nome||!email||!pass) return toast('Preencha todos os campos.');
+  const hashed = await hashPass(pass);
   const docId=email.replace(/\./g,'_').replace(/@/g,'_at_');
-  getDb().collection('admins').doc(docId).set({email,pass,admin:true,nome,createdAt:new Date().toISOString()})
+  getDb().collection('admins').doc(docId).set({email, pass:hashed, admin:true, nome, createdAt:new Date().toISOString()})
   .then(()=>{ ['nAN','nAE','nAP'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); loadAdmins(); toast('Admin adicionado! ✓'); })
   .catch(e=>toast('Erro: '+e.message));
-}
-
-// ── UTILITIES ──
-function calcAge(birthDate){
-  const now = new Date();
-  let years = now.getFullYear() - birthDate.getFullYear();
-  let months = now.getMonth() - birthDate.getMonth();
-  if(now.getDate() < birthDate.getDate()) months--;
-  if(months < 0){ years--; months += 12; }
-  if(years >= 1) return years + 'a' + (months > 0 ? months + 'm' : '');
-  return months + 'm';
 }
 
 // ── TRANSLATIONS ──
@@ -1544,7 +1529,7 @@ const T = {
     // Family tab
     family_title: 'Família Baracho',
     family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
-    family_sub2: 'Tom (26/06/2024 · '+calcAge(new Date(2024,5,26))+') · Cauê (jul/2026)',
+    family_sub2: 'Tom (26/06/2024 · 1a10m) · Cauê (jul/2026)',
     about_title: 'Sobre o projeto',
     base_title: 'Nossa base',
     field_title: 'Para onde vamos',
@@ -1635,7 +1620,7 @@ const T = {
     // Family tab
     family_title: 'The Baracho Family',
     family_sub1: 'Bruno Ramires · Maria Luiza Kassar',
-    family_sub2: 'Tom (June 26, 2024 · '+calcAge(new Date(2024,5,26))+') · Cauê (July 2026)',
+    family_sub2: 'Tom (June 26, 2024) · Cauê (July 2026)',
     about_title: 'About the project',
     base_title: 'Our home church',
     field_title: 'Where we are going',
@@ -1817,7 +1802,20 @@ function updatePartnerLang(){
   ptSubs.forEach((el,i)=>{ if(subKeys[i]) el.textContent = t(subKeys[i]); });
 }
 
-function track(a){const k='gm',m=JSON.parse(localStorage.getItem(k)||'{}');const d=new Date().toISOString().split('T')[0];m.t=(m.t||0)+1;m.d=m.d||{};m.d[d]=(m.d[d]||0)+1;m.s=(m.s||0)+(a==='login'?1:0);localStorage.setItem(k,JSON.stringify(m));}
+function track(a){
+  const k='gm', m=JSON.parse(localStorage.getItem(k)||'{}');
+  const d=new Date().toISOString().split('T')[0];
+  m.t=(m.t||0)+1; m.d=m.d||{}; m.d[d]=(m.d[d]||0)+1; m.s=(m.s||0)+(a==='login'?1:0);
+  localStorage.setItem(k,JSON.stringify(m));
+  // Sync to Firebase using FieldValue.increment for accuracy across devices
+  try{
+    const inc = firebase.firestore.FieldValue.increment;
+    const upd = { t: inc(1) };
+    if(a==='login') upd.s = inc(1);
+    upd['d.'+d] = inc(1);
+    getDb().collection('metrics').doc('global').set(upd, {merge:true}).catch(()=>{});
+  }catch(e){}
+}
 
 function md(t){if(!t)return'';return t.replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h4>$1</h4>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/_(.*?)_/g,'<em>$1</em>').replace(/\n\n/g,'</p><p>').replace(/\n/g,'<br>');}
 
@@ -1876,10 +1874,7 @@ function renderNews(){
         ${n.isNew?'<span class="nibdg">Novo</span>':''}
       </div>
       <div class="niex">${n.summary}</div>
-      <div style="display:flex;gap:8px;margin:0 18px 12px">
-        <button class="nitog" style="flex:1" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
-        ${navigator.share?`<button onclick="shareNews('${n.id}','${n.name.replace(/'/g,"\\'")}','${n.summary.substring(0,80).replace(/'/g,"\\'")}...')" style="background:transparent;border:1px solid var(--border-md);border-radius:var(--r-sm);padding:9px 14px;font-size:0.8rem;color:var(--text2);cursor:pointer;flex-shrink:0;transition:all 0.2s" title="Compartilhar">↗</button>`:''}
-      </div>
+      <button class="nitog" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
       <div class="nibody" id="nb-${n.id}">
         <div class="niinn">${bodyHTML}${hasVids}${prHTML}${signHTML}</div>
       </div>
@@ -1897,13 +1892,14 @@ function toggleNi(id){
   if(open)track('read-'+id);
 }
 
+function calcAge(birth){
+  const now=new Date(); let y=now.getFullYear()-birth.getFullYear(),m=now.getMonth()-birth.getMonth();
+  if(now.getDate()<birth.getDate())m--; if(m<0){y--;m+=12;}
+  if(y>=1)return y+'a'+(m>0?m+'m':''); return m+'m';
+}
 function renderTimeline(){
-  const el = document.getElementById('tlList');
-  if(!el) return;
-  if(!D.timeline.length){
-    el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Carregando linha do tempo...</p>';
-    return;
-  }
+  const el=document.getElementById('tlList'); if(!el)return;
+  if(!D.timeline.length){el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Carregando...</p>';return;}
   const cls={done:'tt-done',active:'tt-active',next:'tt-next'};
   const lbl={done:'Concluído',active:'Em andamento',next:'Próximo passo'};
   const dot={dg:'dg',da:'da',dd:'dd',dn:'dn'};
@@ -1916,12 +1912,8 @@ function renderTimeline(){
 
 const prIco=['#ihrt','#im','#if','#igl','#ihands','#isd'];
 function renderPrayer(){
-  const el = document.getElementById('prList');
-  if(!el) return;
-  if(!D.prayers.length){
-    el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Nenhum pedido de oração no momento.</p>';
-    return;
-  }
+  const el=document.getElementById('prList'); if(!el)return;
+  if(!D.prayers.length){el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Nenhum pedido de oração no momento.</p>';return;}
   el.innerHTML=D.prayers.map((p,i)=>`
     <div class="pritem"><div class="prico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--accent)"><use href="${prIco[i%prIco.length]}"/></svg></div>
       <div class="prtxt"><div class="prtitle">${p.title}</div><div class="prbody">${p.body}</div></div>
@@ -1935,17 +1927,25 @@ function renderPrayerPartner(){
 }
 
 function renderAll(){
-  // Update Tom's dynamic age
-  const tomEl = document.getElementById('tomAge');
-  if(tomEl){
-    const age = calcAge(new Date(2024,5,26));
-    // Convert "1a2m" format to "1 ano e 2 meses" for display
-    const ageStr = age.replace(/(\d+)a(\d+)m/,'$1 ano(s) e $2 mês(es)')
-                      .replace(/(\d+)a$/,'$1 ano(s)')
-                      .replace(/^(\d+)m$/,'$1 mês(es)');
-    tomEl.textContent = ageStr;
-  }
+  const tomEl=document.getElementById('tomAge');
+  if(tomEl){const a=calcAge(new Date(2024,5,26));const p=a.match(/(\d+)a(\d*)m?/);const y=p?p[1]:0;const m=p?p[2]:a.replace('m','');tomEl.textContent=(y>0?y+' ano'+(y>1?'s':'')+' e ':'')+m+' mês'+(m>1?'es':'');}
   renderNews();renderTimeline();renderPrayer();renderAdmin();
+}
+
+function loadTimelineFromFirebase(){
+  try{
+    getDb().collection('timeline').orderBy('id','asc').get().then(snap=>{
+      if(snap.empty)return;
+      let changed=false;
+      snap.forEach(doc=>{const d=doc.data();if(!D.timeline.find(x=>String(x.id)===String(d.id))){D.timeline.push(d);changed=true;}});
+      if(changed){D.timeline.sort((a,b)=>a.id-b.id);renderTimeline();}
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+function shareNews(id,title,summary){
+  if(!navigator.share)return;
+  navigator.share({title:'Projeto Grão — '+title,text:summary,url:'https://projetograo.github.io/grao/'}).catch(()=>{});
 }
 
 function loadMensais(filter){
@@ -2040,6 +2040,9 @@ function loadPending(){
   try{
     getDb().collection('pending_partners').where('status','==','pending').get()
     .then(snap=>{
+      // Update badge on admin button
+      const badge = document.getElementById('pendingBadge');
+      if(badge){ badge.textContent = snap.size; badge.style.display = snap.size>0 ? 'flex' : 'none'; }
       if(snap.empty){
         el.innerHTML = '<p style="font-size:0.82rem;color:var(--text3)">Nenhuma solicitação pendente.</p>';
         return;
@@ -2051,6 +2054,7 @@ function loadPending(){
             <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${d.nome}</div>
             <div style="font-size:0.74rem;color:var(--text3)">${d.email}</div>
             ${d.how ? `<div style="font-size:0.74rem;color:var(--text3)">Como conheceu: ${d.how}</div>` : ''}
+            <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
           </div>
           <div style="display:flex;gap:8px">
             <button onclick="approvePending('${doc.id}','${d.nome.replace(/'/g,"\\'")}','${d.email}','${d.pass}')"
@@ -2069,12 +2073,13 @@ function loadPending(){
   }catch(e){ el.innerHTML = '<p style="font-size:0.82rem;color:var(--red)">Firebase não disponível.</p>'; }
 }
 
-function approvePending(docId, nome, email, pass){
-  // Move to partners collection
-  getDb().collection('partners').add({email, pass, nome, admin:false, createdAt:new Date().toISOString()})
+async function approvePending(docId, nome, email, pass){
+  const hashed = await hashPass(pass);
+  // Move to partners collection (with hashed password)
+  getDb().collection('partners').add({email, pass:hashed, nome, admin:false, createdAt:new Date().toISOString()})
   .then(()=> getDb().collection('pending_partners').doc(docId).update({status:'approved'}))
   .then(()=>{
-    // Send welcome email
+    // Send welcome email with original pass (user needs to know it)
     emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass})
       .catch(()=>{});
     loadPending();
@@ -2251,60 +2256,39 @@ function contPay(){
   if(!name||!email){ err.textContent='Preencha nome e e-mail.'; err.style.display='block'; return; }
   if(!contValue||contValue<10){ err.textContent='Selecione ou digite um valor mínimo de R$ 10.'; err.style.display='block'; return; }
   err.style.display='none';
-
-  // Disable button to prevent double-click
-  const btn = document.getElementById('contPayBtn');
-  if(btn){ btn.textContent='Aguarde...'; btn.disabled=true; }
-
-  // Save to Firebase
+  const btn=document.getElementById('contPayBtn');
+  if(btn){btn.textContent='Aguarde...';btn.disabled=true;}
   try{
     getDb().collection('parceiros_mensais').add({
-      nome:name, email, phone,
-      valor:'R$ '+contValue,
-      tipo:contType,
-      data:new Date().toLocaleDateString('pt-BR'),
-      timestamp:new Date().toISOString()
+      nome:name,email,phone,valor:'R$ '+contValue,tipo:contType,
+      data:new Date().toLocaleDateString('pt-BR'),timestamp:new Date().toISOString()
     }).catch(()=>{});
   }catch(e){}
-
-  // Send thank-you email
-  emailjs.send('service_grao','template_parceiro_mensal',{
-    nome:name, email_parceiro:email, valor:'R$ '+contValue, cidade:''
-  }).catch(()=>{});
-
-  // Notify Bruno/Malu
+  emailjs.send('service_grao','template_parceiro_mensal',{nome:name,email_parceiro:email,valor:'R$ '+contValue,cidade:''}).catch(()=>{});
   emailjs.send('service_grao','template_grao_1',{
-    nome:`Contribuição ${contType}: ${name}`,
-    email_parceiro:'nossoprojetograo@gmail.com',
+    nome:`Contribuição ${contType}: ${name}`,email_parceiro:'nossoprojetograo@gmail.com',
     senha:`Valor: R$ ${contValue} | E-mail: ${email} | Tel: ${phone||'—'} | Via: ${contType}`
   }).catch(()=>{});
-
   track('contribuicao-'+contType);
-
   if(contType==='cartao'){
-    const stripeLink = STRIPE_LINKS && STRIPE_LINKS.geral ? STRIPE_LINKS.geral : null;
+    const stripeLink=STRIPE_LINKS&&STRIPE_LINKS.geral?STRIPE_LINKS.geral:null;
     if(stripeLink){
-      // Show brief success, then redirect in same tab (avoids popup blocker on mobile)
       document.getElementById('contForm').style.display='none';
       document.getElementById('contSuccess').style.display='block';
-      document.getElementById('contSuccessMsg').textContent =
-        'Redirecionando para o pagamento seguro... Se não redirecionar, toque no botão abaixo.';
-      // Add a manual link in case redirect is slow
-      const manualBtn = document.createElement('a');
-      manualBtn.href = stripeLink+'?prefilled_email='+encodeURIComponent(email);
-      manualBtn.textContent = '💳 Ir para o pagamento';
-      manualBtn.style.cssText = 'display:inline-block;margin-top:16px;background:var(--accent);color:var(--bg-deep);padding:12px 28px;border-radius:var(--r-md);font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;text-decoration:none;font-family:Inter,sans-serif';
-      document.getElementById('contSuccessMsg').after(manualBtn);
-      setTimeout(()=>{ window.location.href = stripeLink+'?prefilled_email='+encodeURIComponent(email); }, 1500);
+      const msgEl=document.getElementById('contSuccessMsg');
+      msgEl.innerHTML='Redirecionando para o pagamento seguro...<br><br>'+
+        '<a href="'+stripeLink+'?prefilled_email='+encodeURIComponent(email)+'" '+
+        'style="display:inline-block;margin-top:8px;background:var(--accent);color:var(--bg-deep);padding:11px 24px;border-radius:var(--r-md);font-size:0.78rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;text-decoration:none">'+
+        '💳 Ir para o pagamento</a>';
+      setTimeout(()=>{ window.location.href=stripeLink+'?prefilled_email='+encodeURIComponent(email); },1500);
     } else {
-      if(btn){ btn.textContent='Confirmar e continuar'; btn.disabled=false; }
-      err.textContent='Link de pagamento não configurado. Use o Pix por enquanto.'; err.style.display='block';
+      if(btn){btn.textContent='Confirmar e continuar';btn.disabled=false;}
+      err.textContent='Link de pagamento não configurado. Use o Pix por enquanto.';err.style.display='block';
     }
   } else {
-    // PIX — show success with key
     document.getElementById('contForm').style.display='none';
     document.getElementById('contSuccess').style.display='block';
-    document.getElementById('contSuccessMsg').innerHTML =
+    document.getElementById('contSuccessMsg').innerHTML=
       'E-mail de confirmação enviado para <strong>'+email+'</strong>.<br><br>'+
       '<strong>Chave Pix:</strong> nossoprojetograo@gmail.com<br>'+
       'Banco Bradesco · Bruno Ramires Baracho<br>'+
@@ -2332,15 +2316,6 @@ function copyPix(){
     document.execCommand('copy'); document.body.removeChild(el);
     toast('Chave copiada!');
   });
-}
-
-function shareNews(id, title, summary){
-  if(!navigator.share) return;
-  navigator.share({
-    title: 'Projeto Grão — '+title,
-    text: summary,
-    url: 'https://projetograo.github.io/grao/'
-  }).catch(()=>{});
 }
 
 function g(id){return(document.getElementById(id)?.value||'').trim();}
