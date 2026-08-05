@@ -267,6 +267,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 .adta{min-height:90px;resize:vertical;line-height:1.65}
 .adsel{appearance:none;cursor:pointer}
 .adbtn{background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;transition:background 0.2s;width:100%}
+.etbtn{background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:6px;padding:6px 9px;font-size:0.72rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s}
+.etbtn:hover{border-color:var(--accent);color:var(--accent)}
+.etsep{width:1px;background:var(--border-md);margin:2px 2px}
+#nEditor h3{font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin:10px 0 6px}
+#nEditor h4{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--accent);margin:10px 0 4px}
+#nEditor p{margin-bottom:10px}
+#nEditor img{max-width:100%;border-radius:10px;margin:8px 0;display:block}
+#nEditor a{color:var(--accent);text-decoration:underline}
+#nEditor ul{margin:8px 0 8px 20px}
+#nEditor hr{border:none;border-top:1px solid var(--border-md);margin:16px 0}
+#nEditor .nvidwrap{position:relative;padding-bottom:56.25%;height:0;margin:10px 0;border-radius:10px;overflow:hidden}
+#nEditor .nvidwrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.eniwrap{position:relative;margin:10px 0}
+.enitem{background:var(--card-lo);border-radius:var(--r-sm);padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
 .adrow{background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .adri{flex:1}
 .adrt{font-size:0.88rem;font-weight:500;color:var(--text);margin-bottom:2px}
@@ -470,6 +484,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <span class="qstag">Maceió-AL</span><span class="qstag">IPT · PRAL</span>
           <span class="qstag">APMT & Pioneiros</span><span class="qstag">Norte da África · SE Asiático</span>
         </div>
+        <button onclick="shareApp('Projeto Grão — Família Baracho','Conheça nossa caminhada rumo ao campo missionário e faça parte dessa jornada com a gente.')" style="display:flex;align-items:center;gap:6px;margin:16px auto 0;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:50px;padding:9px 18px;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">↗ Compartilhar o Projeto Grão</button>
       </div>
       <div class="vpad">
         <div class="qsblk" style="margin-bottom:10px">
@@ -677,8 +692,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div style="display:flex;gap:6px;margin-bottom:20px" id="newsSteps">
         <div onclick="newsGoStep(1)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:var(--accent);color:var(--bg-deep);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep1">1. Básico</div>
         <div onclick="newsGoStep(2)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep2">2. Conteúdo</div>
-        <div onclick="newsGoStep(3)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep3">3. Fotos</div>
-        <div onclick="newsGoStep(4)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep4">4. Oração</div>
+        <div onclick="newsGoStep(3)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep3">3. Oração</div>
+      </div>
+      <div id="newsEditingBadge" style="display:none;background:rgba(232,168,112,0.15);border:1px solid var(--accent);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:14px;font-size:0.75rem;color:var(--accent);display:flex;justify-content:space-between;align-items:center">
+        <span>✎ Editando informativo publicado</span>
+        <span style="cursor:pointer;text-decoration:underline" onclick="cancelNewsEdit()">cancelar</span>
       </div>
 
       <!-- STEP 1: Basic info -->
@@ -690,62 +708,55 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <button class="adbtn" onclick="newsGoStep(2)">Próximo → Conteúdo</button>
       </div>
 
-      <!-- STEP 2: Content with blocks -->
+      <!-- STEP 2: Rich text content editor -->
       <div id="newsStep2" style="display:none" class="adform">
-        <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Adicione blocos de conteúdo em qualquer ordem — texto, foto ou vídeo.</p>
-        <div id="newsBlocks" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:16px">
-          <button onclick="addNewsBlock('text')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">📝 Texto</button>
-          <button onclick="addNewsBlock('photo')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">📷 Foto</button>
-          <button onclick="addNewsBlock('video')" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:var(--r-sm);padding:10px 6px;font-size:0.7rem;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">▶ Vídeo</button>
+        <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Escreva o conteúdo livremente. Use a barra de ferramentas — sem precisar saber nenhuma sintaxe.</p>
+        <div id="nEditorToolbar" style="display:flex;flex-wrap:wrap;gap:4px;background:var(--card-lo);border:1px solid var(--border-md);border-radius:10px 10px 0 0;padding:6px;position:sticky;top:0;z-index:2">
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('bold')" title="Negrito"><b>N</b></button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('italic')" title="Itálico"><i>I</i></button>
+          <span class="etsep"></span>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('formatBlock','H3')" title="Título">Título</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('formatBlock','H4')" title="Subtítulo">Subtít.</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('formatBlock','P')" title="Texto normal">Texto</button>
+          <span class="etsep"></span>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('insertUnorderedList')" title="Lista">• Lista</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edLink()" title="Link">🔗 Link</button>
+          <span class="etsep"></span>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="openImagePicker()" title="Inserir foto">📷 Foto</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edVideo()" title="Inserir vídeo do YouTube">▶ Vídeo</button>
+          <span class="etsep"></span>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('insertHorizontalRule')" title="Separador de seção">— Separador</button>
         </div>
-        <!-- Preview -->
-        <div id="newsPreviewWrap" style="display:none;margin-bottom:16px">
-          <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Pré-visualização</div>
-          <div id="newsPreview" style="background:var(--card-lo);border-radius:var(--r-sm);padding:14px;max-height:200px;overflow-y:auto;font-size:0.85rem;color:var(--text2);line-height:1.7"></div>
-        </div>
+        <input type="file" id="nEditorImgInput" accept="image/*" multiple style="display:none" onchange="edInsertImages(this.files)">
+        <div id="nEditor" contenteditable="true" style="min-height:220px;max-height:420px;overflow-y:auto;background:rgba(255,255,255,0.05);border:1px solid var(--border-md);border-top:none;border-radius:0 0 10px 10px;padding:14px;font-size:0.92rem;color:var(--text);line-height:1.7;outline:none;margin-bottom:6px"></div>
+        <div id="nEditorUploadStatus" style="font-size:0.72rem;color:var(--accent);min-height:16px;margin-bottom:10px"></div>
         <div style="display:flex;gap:8px">
           <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(1)">← Voltar</button>
-          <button class="adbtn" style="flex:2" onclick="newsGoStep(3)">Próximo → Fotos</button>
+          <button class="adbtn" style="flex:2" onclick="newsGoStep(3)">Próximo → Oração</button>
         </div>
       </div>
 
-      <!-- STEP 3: Photos upload -->
+      <!-- STEP 3: Prayer requests + publish -->
       <div id="newsStep3" style="display:none" class="adform">
-        <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:12px">Faça upload das fotos do informativo. Elas aparecerão na ordem que você adicionar.</p>
-        <div id="photoDropZone" onclick="document.getElementById('photoFileInput').click()"
-          style="border:2px dashed var(--border-md);border-radius:var(--r-lg);padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s;margin-bottom:12px"
-          ondragover="event.preventDefault();this.style.borderColor='var(--accent)'"
-          ondragleave="this.style.borderColor='var(--border-md)'"
-          ondrop="handlePhotoDrop(event)">
-          <div style="font-size:2rem;margin-bottom:8px">📷</div>
-          <div style="font-size:0.85rem;color:var(--text2);margin-bottom:4px">Toque para selecionar fotos</div>
-          <div style="font-size:0.72rem;color:var(--text3)">ou arraste aqui — JPG, PNG</div>
-        </div>
-        <input type="file" id="photoFileInput" accept="image/*" multiple style="display:none" onchange="handlePhotoFiles(this.files)">
-        <div id="photoPreviewGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px"></div>
-        <div style="display:flex;gap:8px">
-          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(2)">← Voltar</button>
-          <button class="adbtn" style="flex:2" onclick="newsGoStep(4)">Próximo → Oração</button>
-        </div>
-      </div>
-
-      <!-- STEP 4: Prayer requests + publish -->
-      <div id="newsStep4" style="display:none" class="adform">
         <div><label class="adlbl">Pedidos de oração (um por linha)</label>
           <textarea class="adta" id="nIPr" style="min-height:80px" placeholder="Pela saúde de Malu e Cauê&#10;Pelo processo com a APMT&#10;..."></textarea>
         </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text2);margin-top:8px;cursor:pointer">
+          <input type="checkbox" id="nNotifyPartners" checked style="width:16px;height:16px">
+          Avisar todos os parceiros por e-mail ao publicar
+        </label>
         <div style="background:var(--card-lo);border-radius:var(--r-md);padding:14px;margin-top:4px">
           <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Resumo do informativo</div>
           <div id="newsSummaryFinal" style="font-size:0.82rem;color:var(--text2);line-height:1.65"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(3)">← Voltar</button>
-          <button class="adbtn" style="flex:2;background:var(--green)" onclick="addNews()">🌱 Publicar</button>
+          <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(2)">← Voltar</button>
+          <button class="adbtn" style="flex:2;background:var(--green)" id="newsPublishBtn" onclick="addNews()">🌱 Publicar</button>
         </div>
       </div>
     </div>
-    <div id="existingNews"></div>
+    <div class="adsl">Informativos publicados</div>
+    <div id="existingNews" class="adcard"></div>
     <div class="adsl">Pedidos de oração gerais</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Título</label><input class="adinp" id="nPT"></div>
@@ -1149,6 +1160,7 @@ function renderAdmin(){
   loadMensais();
   loadAdmins();
   renderUserList();
+  renderAdminNewsList();
   // Metrics: always use Firebase as source of truth
   const today = new Date().toISOString().split('T')[0];
   function showM(data){
@@ -1340,39 +1352,136 @@ function saveMusic(){
   if(vid && ytPlayer && ytPlayer.loadVideoById){ ytPlayer.loadVideoById({videoId:vid}); ytPlayer.playVideo(); mPlaying=true; document.getElementById('micon').setAttribute('href','#ipause'); }
 }
 
-function addNews(){
+let newsEditId=null;
+
+function clearNewsForm(){
+  ['nIT','nID','nIS','nISg','nIPr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const ed=document.getElementById('nEditor'); if(ed) ed.innerHTML='';
+  newsEditId=null;
+  const badge=document.getElementById('newsEditingBadge'); if(badge) badge.style.display='none';
+  const btn=document.getElementById('newsPublishBtn'); if(btn) btn.textContent='🌱 Publicar';
+}
+
+function cancelNewsEdit(){ clearNewsForm(); newsGoStep(1); toast('Edição cancelada.'); }
+
+async function markOldNewsAsRead(exceptId){
+  // Clears the "Novo" badge from every other informativo when a new one is published.
+  D.news.forEach(n=>{ if(n.id!==exceptId) n.isNew=false; });
+  saveNews();
+  try{
+    const snap=await getDb().collection('news').where('isNew','==',true).get();
+    const batch=getDb().batch();
+    snap.forEach(doc=>{ if(String(doc.id)!==String(exceptId)) batch.update(doc.ref,{isNew:false}); });
+    await batch.commit();
+  }catch(e){}
+}
+
+async function notifyPartnersOfNews(n){
+  try{
+    const partners=D.users.filter(u=>!u.admin && u.email);
+    for(const p of partners){
+      try{
+        await emailjs.send('service_grao','template_novo_informativo',{
+          nome:p.nome||'Parceiro',
+          email_parceiro:p.email,
+          titulo_informativo:n.name,
+          resumo_informativo:n.summary,
+          link_app:'https://projetograo.github.io/grao/'
+        });
+      }catch(e){}
+    }
+  }catch(e){}
+}
+
+async function addNews(){
   const name=g('nIT'), date=g('nID'), summary=g('nIS');
   if(!name||!summary) return toast('Preencha nome e resumo.');
-  let contentText='', photos=[], videos=[];
-  document.querySelectorAll('[data-block]').forEach(el=>{
-    const type=el.dataset.type, val=(el.value||'').trim();
-    if(type==='text'&&val) contentText+=val+'\n\n';
-    else if(type==='photo'&&val!==''){
-      const idx=parseInt(val);
-      if(newsPhotos[idx]){ photos.push(newsPhotos[idx].dataUrl); contentText+='[FOTO:'+(photos.length-1)+']\n\n'; }
-    } else if(type==='video'&&val){
-      const vid=ytId(val);
-      if(vid){ videos.push({url:val,id:vid}); contentText+='[VIDEO:'+vid+']\n\n'; }
-    }
-  });
+  const contentHtml=(document.getElementById('nEditor')||{}).innerHTML||'';
   const prayers=g('nIPr').split('\n').map(s=>s.trim()).filter(Boolean);
   const sign=g('nISg');
-  const vid1=videos[0]||{}, vid2=videos[1]||{};
-  const n={id:Date.now(),name,date,summary,content:contentText.trim(),photos,photoCaps:photos.map(()=>''),video:vid1.url||'',videoLabel:'',video2:vid2.url||'',video2Label:'',prayers,sign,isNew:true};
+  const notify=(document.getElementById('nNotifyPartners')||{}).checked;
+  const btn=document.getElementById('newsPublishBtn');
+  if(btn){ btn.disabled=true; btn.textContent='Publicando...'; }
+
+  if(newsEditId){
+    // Editing an existing, already-published informativo
+    const idx=D.news.findIndex(x=>x.id===newsEditId);
+    if(idx>-1){ D.news[idx]={...D.news[idx],name,date,summary,contentHtml,prayers,sign}; }
+    saveNews();
+    try{ await getDb().collection('news').doc(String(newsEditId)).update({name,date,summary,contentHtml,prayers,sign}); }catch(e){}
+    clearNewsForm();
+    renderAll(); toast('Alterações salvas! ✓');
+    if(btn){ btn.disabled=false; btn.textContent='🌱 Publicar'; }
+    return;
+  }
+
+  const id=Date.now();
+  const n={id,name,date,summary,contentHtml,prayers,sign,isNew:true};
   D.news.unshift(n);
   saveNews();
-  try{ getDb().collection('news').doc(String(n.id)).set({id:n.id,name,date,summary,content:contentText.trim(),video:n.video,video2:n.video2,prayers,sign,isNew:true,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
-  ['nIT','nID','nIS','nISg','nIPr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const nb=document.getElementById('newsBlocks'); if(nb) nb.innerHTML='';
-  newsBlocks=[]; newsPhotos=[];
+  await markOldNewsAsRead(id);
+  try{ await getDb().collection('news').doc(String(id)).set({id,name,date,summary,contentHtml,prayers,sign,isNew:true,createdAt:new Date().toISOString()}); }catch(e){}
+  if(notify) notifyPartnersOfNews(n);
+  clearNewsForm();
   renderAll(); toast('Publicado! 🌱');
+  if(btn){ btn.disabled=false; btn.textContent='🌱 Publicar'; }
+}
+
+function editNews(id){
+  const n=D.news.find(x=>x.id===id);
+  if(!n) return;
+  newsEditId=id;
+  document.getElementById('nIT').value=n.name||'';
+  document.getElementById('nID').value=n.date||'';
+  document.getElementById('nIS').value=n.summary||'';
+  document.getElementById('nISg').value=n.sign||'';
+  document.getElementById('nIPr').value=(n.prayers||[]).join('\n');
+  const ed=document.getElementById('nEditor');
+  if(ed) ed.innerHTML = n.contentHtml || legacyNewsToHtml(n);
+  const badge=document.getElementById('newsEditingBadge'); if(badge) badge.style.display='flex';
+  const btn=document.getElementById('newsPublishBtn'); if(btn) btn.textContent='💾 Salvar alterações';
+  newsGoStep(1);
+  const admin=document.getElementById('adminScreen'); if(admin) admin.scrollTop=0;
+  toast('Editando "'+n.name+'"');
+}
+
+// Converts an older informativo (built with the legacy [FOTO:n]/markdown format)
+// into HTML so it can be opened in the new rich text editor.
+function legacyNewsToHtml(n){
+  if(!n.content) return '';
+  const photos=(n.photos||[]).filter(Boolean);
+  let html=md(n.content);
+  photos.forEach((src,i)=>{ html=html.split('[FOTO:'+i+']').join('<img src="'+src+'">'); });
+  if(n.video && ytId(n.video)) html+='<div class="nvidwrap"><iframe src="https://www.youtube.com/embed/'+ytId(n.video)+'" allowfullscreen></iframe></div>';
+  if(n.video2 && ytId(n.video2)) html+='<div class="nvidwrap"><iframe src="https://www.youtube.com/embed/'+ytId(n.video2)+'" allowfullscreen></iframe></div>';
+  return html;
 }
 
 function delNews(id){
+  if(!confirm('Remover este informativo? Essa ação não pode ser desfeita.')) return;
   D.news=D.news.filter(n=>n.id!==id);
   saveNews();
   try{ getDb().collection('news').doc(String(id)).delete().catch(()=>{}); }catch(e){}
+  if(newsEditId===id) clearNewsForm();
   renderAll(); toast('Removido.');
+}
+
+function renderAdminNewsList(){
+  const el=document.getElementById('existingNews');
+  if(!el) return;
+  if(!D.news.length){ el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum informativo publicado ainda.</p>'; return; }
+  el.innerHTML=D.news.map(n=>`
+    <div class="enitem">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.88rem;color:var(--text);font-weight:500">${n.name}${n.isNew?' <span style="color:var(--accent);font-size:0.65rem;text-transform:uppercase">· novo</span>':''}</div>
+        <div style="font-size:0.74rem;color:var(--text3);margin-top:2px">${n.date||''}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick="editNews(${n.id})" title="Editar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer">✎</button>
+        <button onclick="shareNews(${n.id},${attrJson(n.name)},${attrJson(n.summary)})" title="Compartilhar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer">↗</button>
+        <button onclick="delNews(${n.id})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;color:var(--red);cursor:pointer">✕</button>
+      </div>
+    </div>`).join('');
 }
 
 function addPrayer(){
@@ -1425,71 +1534,96 @@ function delUser(i){
   D.users.splice(i,1); renderAdmin(); toast('Removido.');
 }
 
-let newsBlocks=[], newsPhotos=[], currentNewsStep=1;
+let currentNewsStep=1;
 
 function newsGoStep(n){
   currentNewsStep=n;
-  [1,2,3,4].forEach(i=>{
+  [1,2,3].forEach(i=>{
     const step=document.getElementById('newsStep'+i);
     const btn=document.getElementById('nStep'+i);
     if(step) step.style.display=i===n?'flex':'none';
     if(btn){ btn.style.background=i===n?'var(--accent)':'rgba(255,255,255,0.07)'; btn.style.color=i===n?'var(--bg-deep)':'var(--text3)'; }
   });
-  if(n===4) updateNewsSummary();
+  if(n===3) updateNewsSummary();
 }
-
-function addNewsBlock(type){
-  const id='nb_'+Date.now();
-  const container=document.getElementById('newsBlocks');
-  if(!container) return;
-  let html='';
-  if(type==='text'){
-    html=`<div id="${id}" style="background:var(--card-lo);border-radius:10px;padding:12px;margin-bottom:6px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">📝 Texto</span><button onclick="removeBlock('${id}')" style="background:transparent;border:none;color:var(--red);cursor:pointer">✕</button></div>
-      <textarea placeholder="Conteúdo... Use # para título, ## subtítulo, **negrito**" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border-md);border-radius:8px;padding:10px;font-size:0.88rem;color:var(--text);font-family:'Inter',sans-serif;min-height:80px;resize:vertical;outline:none" data-block="${id}" data-type="text"></textarea></div>`;
-  } else if(type==='photo'){
-    html=`<div id="${id}" style="background:var(--card-lo);border-radius:10px;padding:12px;margin-bottom:6px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">📷 Foto</span><button onclick="removeBlock('${id}')" style="background:transparent;border:none;color:var(--red);cursor:pointer">✕</button></div>
-      <select style="width:100%;background:var(--card);border:1px solid var(--border-md);border-radius:8px;padding:10px;font-size:0.88rem;color:var(--text);font-family:'Inter',sans-serif;outline:none" data-block="${id}" data-type="photo">
-        <option value="">— Selecione a foto (faça upload no passo 3) —</option></select></div>`;
-  } else if(type==='video'){
-    html=`<div id="${id}" style="background:var(--card-lo);border-radius:10px;padding:12px;margin-bottom:6px">
-      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em">▶ Vídeo YouTube</span><button onclick="removeBlock('${id}')" style="background:transparent;border:none;color:var(--red);cursor:pointer">✕</button></div>
-      <input type="text" placeholder="Link do YouTube" style="width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border-md);border-radius:8px;padding:10px;font-size:0.88rem;color:var(--text);font-family:'Inter',sans-serif;outline:none" data-block="${id}" data-type="video"></div>`;
-  }
-  container.insertAdjacentHTML('beforeend',html);
-  newsBlocks.push({id,type});
-}
-
-function removeBlock(id){ const el=document.getElementById(id); if(el) el.remove(); newsBlocks=newsBlocks.filter(b=>b.id!==id); }
-
-function handlePhotoFiles(files){
-  Array.from(files).forEach(file=>{
-    const reader=new FileReader();
-    reader.onload=e=>{ newsPhotos.push({name:file.name,dataUrl:e.target.result}); renderPhotoGrid(); };
-    reader.readAsDataURL(file);
-  });
-}
-
-function handlePhotoDrop(e){ e.preventDefault(); handlePhotoFiles(e.dataTransfer.files); }
-
-function renderPhotoGrid(){
-  const grid=document.getElementById('photoPreviewGrid');
-  if(!grid) return;
-  grid.innerHTML=newsPhotos.map((p,i)=>`<div style="position:relative;border-radius:8px;overflow:hidden;aspect-ratio:1"><img src="${p.dataUrl}" style="width:100%;height:100%;object-fit:cover"><button onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.7);border:none;border-radius:50%;width:22px;height:22px;color:white;cursor:pointer;font-size:0.8rem">✕</button><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.5);padding:4px;font-size:0.6rem;color:white">${i+1}. ${p.name.substring(0,15)}</div></div>`).join('');
-  // Update photo selects
-  document.querySelectorAll('[data-type="photo"]').forEach(sel=>{
-    const cur=sel.value;
-    sel.innerHTML='<option value="">— Selecione —</option>'+newsPhotos.map((p,i)=>`<option value="${i}" ${cur==i?'selected':''}>${i+1}. ${p.name}</option>`).join('');
-  });
-}
-
-function removePhoto(i){ newsPhotos.splice(i,1); renderPhotoGrid(); }
 
 function updateNewsSummary(){
   const el=document.getElementById('newsSummaryFinal');
   if(!el) return;
-  el.innerHTML=`<strong>${g('nIT')||'—'}</strong> · ${g('nID')||'—'}<br>${newsBlocks.length} bloco(s) · ${newsPhotos.length} foto(s)`;
+  const ed=document.getElementById('nEditor');
+  const imgs=ed?ed.querySelectorAll('img').length:0;
+  const vids=ed?ed.querySelectorAll('.nvidwrap').length:0;
+  el.innerHTML=`<strong>${g('nIT')||'—'}</strong> · ${g('nID')||'—'}<br>${imgs} foto(s) · ${vids} vídeo(s)`;
+}
+
+// ---- Rich text editor (Passo 2) ----
+let savedEditorRange=null;
+
+function saveEditorSelection(){
+  const sel=window.getSelection();
+  const ed=document.getElementById('nEditor');
+  if(sel && sel.rangeCount>0 && ed && ed.contains(sel.getRangeAt(0).commonAncestorContainer)){
+    savedEditorRange=sel.getRangeAt(0).cloneRange();
+  }
+}
+
+function restoreEditorSelection(){
+  const ed=document.getElementById('nEditor');
+  ed.focus();
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  if(savedEditorRange){ sel.addRange(savedEditorRange); }
+  else { const r=document.createRange(); r.selectNodeContents(ed); r.collapse(false); sel.addRange(r); }
+}
+
+function edCmd(cmd,val){
+  document.getElementById('nEditor').focus();
+  document.execCommand(cmd,false,val||null);
+}
+
+function edLink(){
+  saveEditorSelection();
+  const url=prompt('Link (https://...)');
+  if(!url) return;
+  restoreEditorSelection();
+  document.execCommand('createLink',false,url);
+}
+
+function edVideo(){
+  const url=prompt('Cole o link do vídeo do YouTube');
+  if(!url) return;
+  const vid=ytId(url);
+  if(!vid) return toast('Link do YouTube inválido.');
+  restoreEditorSelection();
+  document.execCommand('insertHTML',false,'<div class="nvidwrap" contenteditable="false"><iframe src="https://www.youtube.com/embed/'+vid+'" allowfullscreen></iframe></div><p><br></p>');
+}
+
+function openImagePicker(){
+  saveEditorSelection();
+  document.getElementById('nEditorImgInput').click();
+}
+
+async function edInsertImages(files){
+  const list=Array.from(files||[]);
+  if(!list.length) return;
+  const status=document.getElementById('nEditorUploadStatus');
+  for(let i=0;i<list.length;i++){
+    const file=list[i];
+    if(status) status.textContent=`Enviando foto ${i+1}/${list.length}...`;
+    try{
+      const path='news_images/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'');
+      const ref=getStorage().ref().child(path);
+      await ref.put(file);
+      const url=await ref.getDownloadURL();
+      restoreEditorSelection();
+      document.execCommand('insertHTML',false,'<img src="'+url+'"><p><br></p>');
+    }catch(e){
+      toast('Erro ao enviar foto: '+(e.message||'tente novamente'));
+    }
+  }
+  if(status) status.textContent='Fotos enviadas ✓';
+  setTimeout(()=>{ if(status) status.textContent=''; },2500);
+  document.getElementById('nEditorImgInput').value='';
 }
 
 async function changeMyPassword(){
@@ -1861,24 +1995,25 @@ function renderNews(){
       return html;
     }
 
-    // Check if content has inline photo markers
-    const hasInlinePhotos = n.content && n.content.includes('[FOTO:');
-    
-    let bodyHTML;
-    if(hasInlinePhotos){
-      bodyHTML = renderContentWithPhotos(n.content);
-      // Add any remaining photos not referenced
+    let bodyHTML, hasVids='';
+    if(n.contentHtml){
+      // New format: rich text HTML built in the admin editor (photos/videos already embedded)
+      bodyHTML = n.contentHtml;
     } else {
-      // Original: text then all photos at end
-      bodyHTML = '<p>' + md(n.content) + '</p>';
-      if(photos.length){
-        bodyHTML += `<div class="phsep">Fotos</div><div class="niphotos">${photos.map(src=>`<div class="niphoto"><img src="${src}" loading="lazy"></div>`).join('')}</div>`;
+      // Legacy formats from before the rich text editor existed
+      const hasInlinePhotos = n.content && n.content.includes('[FOTO:');
+      if(hasInlinePhotos){
+        bodyHTML = renderContentWithPhotos(n.content);
+      } else {
+        bodyHTML = '<p>' + md(n.content) + '</p>';
+        if(photos.length){
+          bodyHTML += `<div class="phsep">Fotos</div><div class="niphotos">${photos.map(src=>`<div class="niphoto"><img src="${src}" loading="lazy"></div>`).join('')}</div>`;
+        }
       }
+      const vid1=n.video&&ytId(n.video)?`<div class="nvlbl">${n.videoLabel||'Vídeo'}</div><div class="nvid"><iframe src="https://www.youtube.com/embed/${ytId(n.video)}" allowfullscreen loading="lazy"></iframe></div>`:'';
+      const vid2=n.video2&&ytId(n.video2)?`<div class="nvlbl">${n.video2Label||'Vídeo 2'}</div><div class="nvid"><iframe src="https://www.youtube.com/embed/${ytId(n.video2)}" allowfullscreen loading="lazy"></iframe></div>`:'';
+      hasVids=vid1||vid2?`<div class="phsep">Vídeos</div>${vid1}${vid2}`:'';
     }
-
-    const vid1=n.video&&ytId(n.video)?`<div class="nvlbl">${n.videoLabel||'Vídeo'}</div><div class="nvid"><iframe src="https://www.youtube.com/embed/${ytId(n.video)}" allowfullscreen loading="lazy"></iframe></div>`:'';
-    const vid2=n.video2&&ytId(n.video2)?`<div class="nvlbl">${n.video2Label||'Vídeo 2'}</div><div class="nvid"><iframe src="https://www.youtube.com/embed/${ytId(n.video2)}" allowfullscreen loading="lazy"></iframe></div>`:'';
-    const hasVids=vid1||vid2?`<div class="phsep">Vídeos</div>${vid1}${vid2}`:'';
     const prHTML=n.prayers&&n.prayers.length?`<div class="nipr"><h5>Pedidos de oração</h5><ul>${n.prayers.map(p=>`<li>${p}</li>`).join('')}</ul></div>`:'';
     const signHTML=n.sign?`<div class="nisign">${n.sign.replace(/\n/g,'<br>')}</div>`:`<div class="nisign">Com carinho, Bruno e Malu 🌱</div>`;
     return `<div class="ni" id="ni-${n.id}">
@@ -1890,6 +2025,7 @@ function renderNews(){
       <button class="nitog" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
       <div class="nibody" id="nb-${n.id}">
         <div class="niinn">${bodyHTML}${hasVids}${prHTML}${signHTML}</div>
+        <button onclick="shareNews(${n.id},${attrJson(n.name)},${attrJson(n.summary)})" style="display:flex;align-items:center;gap:6px;margin-top:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border-md);border-radius:50px;padding:9px 16px;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">↗ Compartilhar este informativo</button>
       </div>
     </div>`;
   }).join('');
@@ -1956,9 +2092,21 @@ function loadTimelineFromFirebase(){
   }catch(e){}
 }
 
+function attrJson(v){ return JSON.stringify(v).replace(/"/g,'&quot;'); }
+
+function shareApp(title,text){
+  const shareData={title:title||'Projeto Grão',text:text||'Acompanhe a caminhada da família Baracho rumo ao campo missionário.',url:'https://projetograo.github.io/grao/'};
+  if(navigator.share){
+    navigator.share(shareData).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(shareData.url).then(()=>toast('Link copiado! Cole para compartilhar.')).catch(()=>toast(shareData.url));
+  } else {
+    toast(shareData.url);
+  }
+}
+
 function shareNews(id,title,summary){
-  if(!navigator.share)return;
-  navigator.share({title:'Projeto Grão — '+title,text:summary,url:'https://projetograo.github.io/grao/'}).catch(()=>{});
+  shareApp('Projeto Grão — '+title, summary);
 }
 
 function loadMensais(filter){
@@ -2338,6 +2486,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyBofyU6uNSSJu2Y3iNF0ZpkPzITbfAwgyY",
@@ -2349,8 +2498,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore();
+window.storage = firebase.storage();
 emailjs.init("KntRzGvrjbRuUiVZn");
 console.log("Firebase + EmailJS prontos");
+function getStorage(){ return window.storage; }
 </script>
 
 <script>
