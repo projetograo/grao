@@ -50,8 +50,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 }
 .screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--bg)}
 .screen.active{display:flex}
-#loginScreen{background:radial-gradient(ellipse at 25% 25%,rgba(232,168,112,0.13) 0%,transparent 55%),radial-gradient(ellipse at 75% 75%,rgba(122,158,120,0.07) 0%,transparent 50%),var(--bg-deep);align-items:center;justify-content:center}
-.login-box{width:100%;max-width:380px;padding:0 32px}
+#loginScreen{background:radial-gradient(ellipse at 25% 25%,rgba(232,168,112,0.13) 0%,transparent 55%),radial-gradient(ellipse at 75% 75%,rgba(122,158,120,0.07) 0%,transparent 50%),var(--bg-deep);align-items:center;justify-content:flex-start;overflow-y:auto;padding:48px 0;-webkit-overflow-scrolling:touch}
+.login-box{width:100%;max-width:380px;padding:0 32px;margin:auto 0}
 .login-brand{text-align:center;margin-bottom:52px}
 .login-mark{font-family:'Playfair Display',serif;font-size:5rem;font-weight:400;color:var(--text);letter-spacing:0.06em;line-height:1}
 .login-mark em{color:var(--accent);font-style:italic}
@@ -332,9 +332,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 <div class="screen active" id="loginScreen">
   <div class="login-box">
     <div class="login-brand">
-      <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
-        <button onclick="toggleLang()" id="langBtnLogin" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:50px;padding:4px 14px;font-size:0.68rem;letter-spacing:0.1em;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">EN</button>
-      </div>
       <div style="display:flex;justify-content:center;margin-bottom:12px">
         <div style="background:rgba(107,79,42,0.15);border-radius:20px;padding:14px;display:inline-flex">
           <svg width="40" height="40" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -437,7 +434,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div style="width:1px;height:14px;background:var(--border-md)"></div>
         <button onclick="changeFontSize(1)" style="background:transparent;border:none;color:var(--text2);cursor:pointer;font-size:1rem;font-weight:600;padding:2px 6px;font-family:'Inter',sans-serif" title="Aumentar fonte">A+</button>
       </div>
-      <button class="hbtn" onclick="toggleLang()" id="langBtn">EN</button>
       <button class="hbtn" onclick="doLogout()" id="logoutBtn">Sair</button>
     </div>
   </div>
@@ -669,19 +665,19 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 <!-- ADMIN -->
 <div class="screen" id="adminScreen">
-  <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" onclick="closeAdmin()">← Voltar</button></div>
+  <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" id="adminBackBtn" onclick="adminBackClick()">← Voltar</button></div>
   <div class="adcont">
-    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px" id="adminTabBar">
-      <button id="atab_parceiros" onclick="showAdminTab('parceiros')" style="flex:0 0 auto;background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:7px 16px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Parceiros</button>
-      <button id="atab_config" onclick="showAdminTab('config')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Configuração geral</button>
-      <button id="atab_novo" onclick="showAdminTab('novo')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Novo informativo</button>
-      <button id="atab_antigos" onclick="showAdminTab('antigos')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Informativos antigos</button>
-      <button id="atab_oracao" onclick="showAdminTab('oracao')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Oração</button>
-      <button id="atab_caminhada" onclick="showAdminTab('caminhada')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Linha do tempo</button>
-      <button id="atab_metricas" onclick="showAdminTab('metricas')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Métricas</button>
+    <div class="qgrid" id="adminMenu" style="margin-bottom:10px">
+      <div class="qcard qa" onclick="showAdminTab('parceiros')"><div style="font-size:1.5rem;margin-bottom:8px">👥</div><div class="qlbl">Parceiros</div><div class="qsub">Pedidos, lista, contribuições</div></div>
+      <div class="qcard qg" onclick="showAdminTab('config')"><div style="font-size:1.5rem;margin-bottom:8px">🏠</div><div class="qlbl">Tela de início</div><div class="qsub">Versículo, música, foto</div></div>
+      <div class="qcard qw" onclick="showAdminTab('novo')"><div style="font-size:1.5rem;margin-bottom:8px">📰</div><div class="qlbl">Novo informativo</div><div class="qsub">Publicar</div></div>
+      <div class="qcard qp" onclick="showAdminTab('antigos')"><div style="font-size:1.5rem;margin-bottom:8px">📚</div><div class="qlbl">Informativos antigos</div><div class="qsub">Editar, avisar parceiros</div></div>
+      <div class="qcard qa" onclick="showAdminTab('oracao')"><div style="font-size:1.5rem;margin-bottom:8px">🙏</div><div class="qlbl">Oração</div><div class="qsub">Motivos gerais</div></div>
+      <div class="qcard qg" onclick="showAdminTab('caminhada')"><div style="font-size:1.5rem;margin-bottom:8px">🗺️</div><div class="qlbl">Linha do tempo</div><div class="qsub">Caminhada e marcos</div></div>
+      <div class="qcard qw" onclick="showAdminTab('metricas')"><div style="font-size:1.5rem;margin-bottom:8px">📊</div><div class="qlbl">Métricas</div><div class="qsub">Uso, compartilhamentos, GA</div></div>
     </div>
 
-    <div class="adtabsec" data-tab="parceiros">
+    <div class="adtabsec" data-tab="parceiros" style="display:none">
     <div class="adsl">Parceiros & Contribuições</div>
     <div class="adcard">
       <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
@@ -710,6 +706,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     </div><!-- /tab parceiros -->
 
     <div class="adtabsec" data-tab="config" style="display:none">
+    <div class="adsl">Versículo da página inicial</div>
+    <div class="adcard"><div class="adform">
+      <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Aparece logo abaixo do título "Você faz parte dessa jornada", na tela de início do app.</p>
+      <div><label class="adlbl">Texto em português (com a referência)</label><textarea class="adta" id="homeVerseInput" style="min-height:70px" placeholder='"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24'></textarea></div>
+      <div><label class="adlbl">Texto em inglês (opcional — some se o app estiver em EN)</label><textarea class="adta" id="homeVerseInputEn" style="min-height:70px" placeholder='"Unless a grain of wheat falls into the earth and dies, it remains alone." — John 12.24'></textarea></div>
+      <button class="adbtn" onclick="saveHomeVerse()">Salvar versículo</button>
+    </div></div>
+
     <div class="adsl">Música de fundo</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Nome da música (aparece na barra)</label><input class="adinp" id="musicName" placeholder="Ex: Seguro — Shirley Carvalhaes"></div>
@@ -1322,25 +1326,36 @@ function renderShares(){
 }
 
 const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas'];
+let adminCurrentTab = null;
+
 function showAdminTab(tab){
+  document.getElementById('adminMenu').style.display = 'none';
   ADMIN_TABS.forEach(t=>{
     document.querySelectorAll('.adtabsec[data-tab="'+t+'"]').forEach(el=>{ el.style.display = t===tab?'block':'none'; });
-    const btn=document.getElementById('atab_'+t);
-    if(btn){
-      btn.style.background = t===tab ? 'var(--accent)' : 'rgba(255,255,255,0.07)';
-      btn.style.color = t===tab ? 'var(--bg-deep)' : 'var(--text2)';
-      btn.style.border = t===tab ? 'none' : '1px solid var(--border-md)';
-      btn.style.fontWeight = t===tab ? '600' : '400';
-    }
   });
-  localStorage.setItem('grao_admin_tab', tab);
+  adminCurrentTab = tab;
+  document.getElementById('adminBackBtn').textContent = '← Menu';
+}
+
+function showAdminMenu(){
+  document.getElementById('adminMenu').style.display = 'grid';
+  ADMIN_TABS.forEach(t=>{
+    document.querySelectorAll('.adtabsec[data-tab="'+t+'"]').forEach(el=>{ el.style.display = 'none'; });
+  });
+  adminCurrentTab = null;
+  document.getElementById('adminBackBtn').textContent = '← Voltar';
+}
+
+function adminBackClick(){
+  if(adminCurrentTab) showAdminMenu();
+  else closeAdmin();
 }
 
 function openAdmin(){
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('adminScreen').classList.add('active');
   renderAdmin();
-  showAdminTab(localStorage.getItem('grao_admin_tab') || 'parceiros');
+  showAdminMenu();
 }
 
 function closeAdmin(){
@@ -1460,6 +1475,25 @@ function loadSavedSettings(){
   const muEl = document.getElementById('musicUrl');
   if(gaId && gaEl) gaEl.value = gaId;
   renderGA();
+  // Home verse — paint from cache immediately, fill admin fields, then confirm from Firebase
+  const savedVerse = localStorage.getItem('grao_home_verse');
+  const savedVerseEn = localStorage.getItem('grao_home_verse_en');
+  const verseInput = document.getElementById('homeVerseInput');
+  const verseInputEn = document.getElementById('homeVerseInputEn');
+  if(verseInput) verseInput.value = savedVerse || '';
+  if(verseInputEn) verseInputEn.value = savedVerseEn || '';
+  displayHomeVerse();
+  try{
+    getDb().collection('settings').doc('home').get()
+    .then(doc=>{
+      if(doc.exists){
+        const d = doc.data();
+        if(d.verse){ localStorage.setItem('grao_home_verse', d.verse); if(verseInput) verseInput.value = d.verse; }
+        if(d.verseEn){ localStorage.setItem('grao_home_verse_en', d.verseEn); if(verseInputEn) verseInputEn.value = d.verseEn; }
+        displayHomeVerse();
+      }
+    }).catch(()=>{});
+  }catch(e){}
   if(mName){
     document.querySelector('.mname').textContent = mName;
     if(mnEl) mnEl.value = mName;
@@ -1536,6 +1570,29 @@ function editGA(){
   const el = document.getElementById('gaId');
   if(el) el.value = localStorage.getItem('grao_ga_id') || '';
 }
+function displayHomeVerse(){
+  const pt = localStorage.getItem('grao_home_verse');
+  const en = localStorage.getItem('grao_home_verse_en');
+  const hverse = document.querySelector('.hverse');
+  if(!hverse) return;
+  if(currentLang==='en'){ hverse.textContent = en || pt || t('verse'); }
+  else { hverse.textContent = pt || t('verse'); }
+}
+
+function saveHomeVerse(){
+  const pt = ((document.getElementById('homeVerseInput')||{}).value||'').trim();
+  const en = ((document.getElementById('homeVerseInputEn')||{}).value||'').trim();
+  if(!pt) return toast('Digite ao menos o versículo em português.');
+  localStorage.setItem('grao_home_verse', pt);
+  if(en) localStorage.setItem('grao_home_verse_en', en);
+  else localStorage.removeItem('grao_home_verse_en');
+  displayHomeVerse();
+  try{
+    getDb().collection('settings').doc('home').set({verse:pt, verseEn:en||null, updatedAt:new Date().toISOString()},{merge:true}).catch(()=>{});
+  }catch(e){}
+  toast('Versículo salvo para todos! ✓');
+}
+
 function saveGA(){
   const id = (document.getElementById('gaId')||{}).value||'';
   if(!id) return toast('Informe o ID.');
@@ -2156,21 +2213,11 @@ const T = {
 };
 function t(key){ return (T[currentLang]||T.pt)[key] || (T.pt)[key] || key; }
 
-function toggleLang(){
-  currentLang = currentLang === 'pt' ? 'en' : 'pt';
-  localStorage.setItem('grao_lang', currentLang);
-  ['langBtn','langBtnLogin'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.textContent = currentLang==='pt'?'EN':'PT';
-  });
-  applyTranslations();
-}
-
 function loadLang(){
-  const saved = localStorage.getItem('grao_lang');
-  if(saved) currentLang = saved;
-  const btn = document.getElementById('langBtn');
-  if(btn) btn.textContent = currentLang === 'pt' ? 'EN' : 'PT';
+  // Language switching was removed (translation coverage was incomplete) —
+  // the app always runs in Portuguese now, regardless of any old saved preference.
+  currentLang = 'pt';
+  localStorage.removeItem('grao_lang');
 }
 
 function applyTranslations(){
@@ -2179,12 +2226,8 @@ function applyTranslations(){
   // Login screen
   const loginTag = document.getElementById('loginTag');
   const loginChip = document.getElementById('loginChip');
-  const langBtnLogin = document.getElementById('langBtnLogin');
-  const langBtn = document.getElementById('langBtn');
   if(loginTag) loginTag.textContent = t('login_tag');
   if(loginChip) loginChip.textContent = t('login_chip');
-  if(langBtnLogin) langBtnLogin.textContent = lang==='pt'?'EN':'PT';
-  if(langBtn) langBtn.textContent = lang==='pt'?'EN':'PT';
 
   // Login form labels
   document.querySelectorAll('[data-t]').forEach(el=>{
@@ -2208,8 +2251,7 @@ function applyTranslations(){
   if(hgreet) hgreet.textContent = t('welcome');
   const htitle = document.querySelector('.htitle');
   if(htitle) htitle.innerHTML = t('home_title')+'<br><em>'+t('home_italic')+'</em>';
-  const hverse = document.querySelector('.hverse');
-  if(hverse) hverse.textContent = t('verse');
+  displayHomeVerse();
   if(hgreet){
     if(lang==='pt') hgreet.textContent = (me && me.genero==='F') ? 'Bem-vinda, parceira' : t('welcome');
     else hgreet.textContent = t('welcome');
