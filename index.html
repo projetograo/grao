@@ -390,7 +390,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <div>
         <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Crie sua senha *</label>
         <div style="position:relative;display:flex;align-items:center">
-          <input id="regPass" type="password" placeholder="Mínimo 4 caracteres" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 44px 12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+          <input id="regPass" type="password" placeholder="Mínimo 6 caracteres" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 44px 12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
           <button type="button" onclick="toggleEye('regPass',this)" style="position:absolute;right:14px;background:transparent;border:none;cursor:pointer;color:var(--text3);display:flex;align-items:center" tabindex="-1">
             <svg width="18" height="18"><use href="#ieye" id="eyeIcon_regPass"/></svg>
           </button>
@@ -409,7 +409,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <input id="regHow" type="text" placeholder="Ex: indicação de um amigo, redes sociais..." style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
       </div>
       <div id="regErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
-      <button onclick="submitRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px">Quero ter acesso</button>
+      <button id="regSubmitBtn" onclick="submitRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px">Quero ter acesso</button>
       <p style="font-size:0.75rem;color:var(--text3);text-align:center;line-height:1.6">Após o envio, nossa equipe vai revisar e ativar sua participação em breve.</p>
     </div>
     <div id="regSuccess" style="display:none;text-align:center;padding:32px 0">
@@ -1093,121 +1093,116 @@ function loadPrayersFromFirebase(){
 }
 
 function loadPartnersFromFirebase(){
-  getDb().collection('partners').get().then(snap => {
+  // Mantido só para compatibilidade com telas antigas de admin — não carrega mais senhas.
+  getDb().collection('profiles').where('status','==','approved').get().then(snap => {
     snap.forEach(doc => {
       const u = doc.data();
-      if(!D.users.find(x => x.email.toLowerCase() === u.email.toLowerCase())){
-        D.users.push({email:u.email, pass:u.pass, admin:false, nome:u.nome, genero:u.genero||'', id:doc.id});
+      if(u.admin) return;
+      if(!D.users.find(x => x.email.toLowerCase() === (u.email||'').toLowerCase())){
+        D.users.push({email:u.email, admin:false, nome:u.nome, genero:u.genero||'', id:doc.id});
       }
     });
   }).catch(e => console.log('Firebase load error:', e));
+}
+
+function loginErr(msg){
+  const el=document.getElementById('lErr');
+  el.textContent = msg || 'E-mail ou senha inválidos.';
+  el.style.display='block';
+}
+
+function successLogin(user){
+  me=user;
+  document.getElementById('loginScreen').classList.remove('active');
+  document.getElementById('appScreen').classList.add('active');
+  const greetEl=document.querySelector('.hgreet');
+  if(greetEl) greetEl.textContent = user.genero==='F' ? 'Bem-vinda, parceira' : 'Bem-vindo, parceiro';
+  if(user.admin){
+    document.getElementById('adminBtn').style.display='flex';
+    try{
+      getDb().collection('profiles').where('status','==','pending').get()
+      .then(snap=>{
+        const badge=document.getElementById('pendingBadge');
+        if(badge){ badge.textContent=snap.size; badge.style.display=snap.size>0?'flex':'none'; }
+      }).catch(()=>{});
+    }catch(e){}
+  }
+  initMusic(); renderAll(); loadSavedSettings(); track('login');
 }
 
 async function doLogin(){
   const email=g('lE').toLowerCase(), pass=g('lP');
   document.getElementById('lErr').style.display='none';
 
-  function successLogin(user){
-    me=user;
-    document.getElementById('loginScreen').classList.remove('active');
-    document.getElementById('appScreen').classList.add('active');
-    const greetEl=document.querySelector('.hgreet');
-    if(greetEl) greetEl.textContent = user.genero==='F' ? 'Bem-vinda, parceira' : 'Bem-vindo, parceiro';
-    if(user.admin){
-      document.getElementById('adminBtn').style.display='flex';
-      // Carrega contagem de pendentes para o badge imediatamente
-      try{
-        getDb().collection('pending_partners').where('status','==','pending').get()
-        .then(snap=>{
-          const badge=document.getElementById('pendingBadge');
-          if(badge){ badge.textContent=snap.size; badge.style.display=snap.size>0?'flex':'none'; }
-        }).catch(()=>{});
-      }catch(e){}
-    }
-    initMusic(); renderAll(); loadSavedSettings(); track('login');
-  }
-
-  // Admin hardcoded (acesso garantido offline) — compara com hash ou texto puro
-  const localAdmin = D.users.find(u=>u.email.toLowerCase()===email && u.admin);
-  if(localAdmin){
-    const ok = await checkPass(pass, localAdmin.pass);
-    if(ok){ successLogin(localAdmin); return; }
-  }
-
-  // Check Firebase admins
   try{
-    const adminSnap = await getDb().collection('admins').where('email','==',email).get();
-    if(!adminSnap.empty){
-      const u=adminSnap.docs[0].data();
-      const ok = await checkPass(pass, u.pass);
-      if(ok){
-        // Se senha ainda é texto puro, migra para hash
-        if(u.pass.length!==64){ const h=await hashPass(pass); getDb().collection('admins').doc(adminSnap.docs[0].id).update({pass:h}).catch(()=>{}); }
-        successLogin({...u,admin:true,id:adminSnap.docs[0].id}); return;
-      }
+    const cred = await getAuth().signInWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    const profSnap = await getDb().collection('profiles').doc(uid).get();
+    if(!profSnap.exists){
+      loginErr('Sua conta não tem um perfil cadastrado. Fale com a família Baracho.');
+      await getAuth().signOut();
+      return;
     }
-    // Check Firebase partners
-    const partSnap = await getDb().collection('partners').where('email','==',email).get();
-    if(partSnap.empty){ document.getElementById('lErr').style.display='block'; return; }
-    const u=partSnap.docs[0].data();
-    const ok = await checkPass(pass, u.pass);
-    if(ok){
-      if(u.pass.length!==64){ const h=await hashPass(pass); getDb().collection('partners').doc(partSnap.docs[0].id).update({pass:h}).catch(()=>{}); }
-      successLogin({...u,admin:false,id:partSnap.docs[0].id});
-    } else { document.getElementById('lErr').style.display='block'; }
-  }catch(e){ document.getElementById('lErr').style.display='block'; }
+    const p = profSnap.data();
+    if(p.status==='pending'){
+      loginErr('Seu cadastro ainda está aguardando aprovação. Assim que for aceito, você recebe um e-mail.');
+      await getAuth().signOut();
+      return;
+    }
+    if(p.status!=='approved'){
+      loginErr('Seu acesso não está mais ativo. Fale com a família Baracho.');
+      await getAuth().signOut();
+      return;
+    }
+    successLogin({email:p.email, nome:p.nome, genero:p.genero||'', admin:!!p.admin, id:uid});
+  }catch(e){
+    if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'){
+      loginErr('E-mail ou senha inválidos.');
+    } else if(e.code==='auth/too-many-requests'){
+      loginErr('Muitas tentativas. Aguarde um pouco e tente de novo.');
+    } else {
+      loginErr('Não foi possível entrar. Tente novamente em instantes.');
+    }
+  }
 }
 ['lE','lP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
-function doLogout(){me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
+function doLogout(){try{getAuth().signOut();}catch(e){} me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
 
 
 function renderUserList(){
   const el = document.getElementById('userList');
   if(!el) return;
-  // Load from Firebase directly
   try{
-    getDb().collection('partners').get()
+    getDb().collection('profiles').where('status','==','approved').get()
     .then(snap=>{
-      if(snap.empty){
+      const partners = snap.docs.filter(doc=>!doc.data().admin);
+      if(!partners.length){
         el.innerHTML='<p style="font-size:0.82rem;color:var(--text3);margin-bottom:8px">Nenhum parceiro cadastrado ainda.</p>';
         return;
       }
-      el.innerHTML = snap.docs.map((doc,i)=>{
+      el.innerHTML = partners.map(doc=>{
         const u=doc.data();
         return `<div class="adrow">
           <div class="adri">
             <div class="adrt">${u.nome||u.email}</div>
             <div class="adrm">${u.email}</div>
           </div>
-          <button class="addel" onclick="delUserById('${doc.id}',this)">Remover</button>
+          <button class="addel" onclick="delUserById(${JSON.stringify(doc.id)},this)">Remover</button>
         </div>`;
       }).join('');
     }).catch(()=>{
-      // Fallback to D.users
-      const partners = D.users.filter(u=>!u.admin);
-      if(!partners.length){
-        el.innerHTML='<p style="font-size:0.82rem;color:var(--text3);margin-bottom:8px">Nenhum parceiro cadastrado ainda.</p>';
-        return;
-      }
-      el.innerHTML = partners.map((u,i)=>`<div class="adrow">
-        <div class="adri"><div class="adrt">${u.nome||u.email}</div><div class="adrm">${u.email}</div></div>
-        <button class="addel" onclick="delUser(${D.users.indexOf(u)})">Remover</button>
-      </div>`).join('');
+      el.innerHTML='<p style="font-size:0.82rem;color:var(--text3);margin-bottom:8px">Não foi possível carregar os parceiros.</p>';
     });
   }catch(e){
-    const partners = D.users.filter(u=>!u.admin);
-    el.innerHTML = partners.map((u,i)=>`<div class="adrow">
-      <div class="adri"><div class="adrt">${u.nome||u.email}</div><div class="adrm">${u.email}</div></div>
-      <button class="addel" onclick="delUser(${D.users.indexOf(u)})">Remover</button>
-    </div>`).join('') || '<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
+    el.innerHTML = '<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
   }
 }
 
 function delUserById(docId, btn){
-  if(!confirm('Remover este parceiro?')) return;
+  if(!confirm('Remover o acesso desse parceiro? Ele não vai conseguir mais entrar no app.')) return;
   btn.textContent='...';
-  getDb().collection('partners').doc(docId).delete()
-  .then(()=>{ D.users=D.users.filter(u=>u.id!==docId); renderUserList(); toast('Parceiro removido.'); })
+  getDb().collection('profiles').doc(docId).delete()
+  .then(()=>{ D.users=D.users.filter(u=>u.id!==docId); renderUserList(); toast('Acesso removido.'); })
   .catch(e=>toast('Erro: '+e.message));
 }
 
@@ -1724,21 +1719,33 @@ function delTimeline(id){
 async function addUser(){
   const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro', genero=g('nUG');
   if(!email||!pass) return toast('Preencha e-mail e senha.');
-  if(D.users.find(u=>u.email.toLowerCase()===email.toLowerCase())) return toast('E-mail já existe.');
-  const hashed = await hashPass(pass);
-  getDb().collection('partners').add({email, pass:hashed, nome, genero:genero||'', createdAt:new Date().toISOString()})
-  .then(docRef=>{
-    D.users.push({email, pass:hashed, admin:false, nome, genero:genero||'', id:docRef.id});
+  if(pass.length<6) return toast('A senha precisa ter pelo menos 6 caracteres.');
+  const btn=document.querySelector('#appScreen .adform .adbtn[onclick="addUser()"]');
+  if(btn){btn.disabled=true;}
+  const secAuth = getSecondaryAuth();
+  try{
+    // Create the real Firebase Auth account on the secondary app instance so the
+    // admin's own session (on the primary auth instance) is never touched.
+    const cred = await secAuth.createUserWithEmailAndPassword(email.toLowerCase(), pass);
+    const uid = cred.user.uid;
+    await getDb().collection('profiles').doc(uid).set({
+      email: email.toLowerCase(), nome, genero: genero||'', admin:false, status:'approved',
+      createdAt:new Date().toISOString()
+    });
+    await secAuth.signOut();
+    D.users.push({email:email.toLowerCase(), admin:false, nome, genero:genero||'', id:uid});
     renderAdmin();
     emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass}).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️')).catch(()=>toast('Parceiro adicionado!'));
-  }).catch(e=>{ toast('Erro: '+e.message); });
-  ['nUE','nUP','nUN','nUG'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-}
-
-function delUser(i){
-  const user=D.users[i];
-  if(user&&user.id){ try{ getDb().collection('partners').doc(user.id).delete().catch(()=>{}); }catch(e){} }
-  D.users.splice(i,1); renderAdmin(); toast('Removido.');
+    ['nUE','nUP','nUN','nUG'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){
+    if(e.code==='auth/email-already-in-use'){ toast('Já existe uma conta com esse e-mail.'); }
+    else if(e.code==='auth/weak-password'){ toast('Senha muito fraca. Use pelo menos 6 caracteres.'); }
+    else if(e.code==='auth/invalid-email'){ toast('E-mail inválido.'); }
+    else { toast('Erro: '+e.message); }
+    try{ await secAuth.signOut(); }catch(e2){}
+  } finally {
+    if(btn){btn.disabled=false;}
+  }
 }
 
 let currentNewsStep=1;
@@ -1835,22 +1842,33 @@ async function edInsertImages(files){
 
 async function changeMyPassword(){
   const newPass=(document.getElementById('myNewPass')||{}).value||'';
-  if(!newPass||newPass.length<4) return toast('Mínimo 4 caracteres.');
-  const hashed = await hashPass(newPass);
-  const docId=me.email.replace(/\./g,'_').replace(/@/g,'_at_');
-  getDb().collection('admins').doc(docId).set({email:me.email, pass:hashed, admin:true, nome:me.nome||'Admin'},{merge:true})
-  .then(()=>{ me.pass=hashed; const el=document.getElementById('myNewPass'); if(el) el.value=''; toast('Senha alterada! ✓'); })
-  .catch(e=>toast('Erro: '+e.message));
+  if(!newPass||newPass.length<6) return toast('Mínimo 6 caracteres.');
+  try{
+    await getAuth().currentUser.updatePassword(newPass);
+    const el=document.getElementById('myNewPass'); if(el) el.value='';
+    toast('Senha alterada! ✓');
+  }catch(e){
+    if(e.code==='auth/requires-recent-login'){
+      toast('Por segurança, saia e entre de novo antes de trocar a senha.');
+    } else {
+      toast('Erro: '+e.message);
+    }
+  }
 }
 
 async function addAdmin(){
-  const nome=g('nAN'), email=g('nAE'), pass=g('nAP');
-  if(!nome||!email||!pass) return toast('Preencha todos os campos.');
-  const hashed = await hashPass(pass);
-  const docId=email.replace(/\./g,'_').replace(/@/g,'_at_');
-  getDb().collection('admins').doc(docId).set({email, pass:hashed, admin:true, nome, createdAt:new Date().toISOString()})
-  .then(()=>{ ['nAN','nAE','nAP'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); loadAdmins(); toast('Admin adicionado! ✓'); })
-  .catch(e=>toast('Erro: '+e.message));
+  const email=g('nAE');
+  if(!email) return toast('Digite o e-mail de um parceiro já aprovado.');
+  try{
+    const snap = await getDb().collection('profiles').where('email','==',email.toLowerCase()).get();
+    if(snap.empty) return toast('Não encontrei um parceiro com esse e-mail.');
+    const doc=snap.docs[0];
+    if(doc.data().status!=='approved') return toast('Esse cadastro ainda não foi aprovado.');
+    await getDb().collection('profiles').doc(doc.id).update({admin:true});
+    const el=document.getElementById('nAE'); if(el) el.value='';
+    loadAdmins(); renderUserList();
+    toast('Agora essa pessoa também é admin! ✓');
+  }catch(e){ toast('Erro: '+e.message); }
 }
 
 // ── TRANSLATIONS ──
@@ -2447,7 +2465,7 @@ function loadPending(){
   if(!el) return;
   el.innerHTML = '<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
   try{
-    getDb().collection('pending_partners').where('status','==','pending').get()
+    getDb().collection('profiles').where('status','==','pending').get()
     .then(snap=>{
       // Update badge on admin button
       const badge = document.getElementById('pendingBadge');
@@ -2466,11 +2484,11 @@ function loadPending(){
             <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
           </div>
           <div style="display:flex;gap:8px">
-            <button onclick="approvePending('${doc.id}','${d.nome.replace(/'/g,"\\'")}','${d.email}','${d.pass}','${d.genero||''}')"
+            <button onclick="approvePending(${JSON.stringify(doc.id)})"
               style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:9px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
               ✓ Aceitar
             </button>
-            <button onclick="rejectPending('${doc.id}')"
+            <button onclick="rejectPending(${JSON.stringify(doc.id)})"
               style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:9px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif">
               ✕ Recusar
             </button>
@@ -2482,26 +2500,27 @@ function loadPending(){
   }catch(e){ el.innerHTML = '<p style="font-size:0.82rem;color:var(--red)">Firebase não disponível.</p>'; }
 }
 
-async function approvePending(docId, nome, email, pass, genero){
-  const hashed = await hashPass(pass);
-  // Move to partners collection (with hashed password)
-  getDb().collection('partners').add({email, pass:hashed, nome, genero:genero||'', admin:false, createdAt:new Date().toISOString()})
-  .then(()=> getDb().collection('pending_partners').doc(docId).update({status:'approved'}))
-  .then(()=>{
-    // Send welcome email with original pass (user needs to know it)
-    emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass})
-      .catch(()=>{});
-    loadPending();
-    loadPartnersFromFirebase();
-    renderAdmin();
-    toast('Bem-vindo à equipe! E-mail enviado ✓');
+function approvePending(docId){
+  getDb().collection('profiles').doc(docId).get()
+  .then(doc=>{
+    if(!doc.exists) throw new Error('Perfil não encontrado.');
+    const d=doc.data();
+    return getDb().collection('profiles').doc(docId).update({status:'approved'})
+      .then(()=>{
+        emailjs.send('service_grao','template_grao_1',{nome:d.nome, email_parceiro:d.email, senha:'Sua conta já está liberada — entre com o e-mail e a senha que você cadastrou.'})
+          .catch(()=>{});
+        loadPending();
+        loadPartnersFromFirebase();
+        renderAdmin();
+        toast('Bem-vindo à equipe! E-mail enviado ✓');
+      });
   })
   .catch(e=>toast('Erro: '+e.message));
 }
 
 function rejectPending(docId){
   if(!confirm('Recusar esta solicitação?')) return;
-  getDb().collection('pending_partners').doc(docId).update({status:'rejected'})
+  getDb().collection('profiles').doc(docId).update({status:'rejected'})
   .then(()=>{ loadPending(); toast('Solicitação recusada.'); })
   .catch(e=>toast('Erro: '+e.message));
 }
@@ -2509,7 +2528,7 @@ function rejectPending(docId){
 function loadAdmins(){
   const el=document.getElementById('adminList');
   if(!el) return;
-  getDb().collection('admins').get()
+  getDb().collection('profiles').where('admin','==',true).get()
   .then(snap=>{
     if(snap.empty){ el.innerHTML='<p style="font-size:0.8rem;color:var(--text3);padding:8px 0">Nenhum admin adicional cadastrado.</p>'; return; }
     const rows = snap.docs
@@ -2526,11 +2545,12 @@ function loadAdmins(){
 }
 
 function delAdmin(docId, email){
-  if(!confirm('Remover admin ' + email + '?')) return;
-  getDb().collection('admins').doc(docId).delete()
+  // Demotes the profile back to a regular partner — does not delete their account/access.
+  if(!confirm('Remover privilégios de admin de ' + email + '?')) return;
+  getDb().collection('profiles').doc(docId).update({admin:false})
   .then(()=>{
-    D.users = D.users.filter(u=>u.email!==email);
     loadAdmins();
+    renderUserList();
     toast('Admin removido.');
   }).catch(e=>{ console.log(e); toast('Erro ao remover.'); });
 }
@@ -2564,40 +2584,45 @@ function closeRegister(){
   m.style.display = 'none';
   document.body.style.overflow = 'hidden';
 }
-function submitRegister(){
+async function submitRegister(){
   const name  = document.getElementById('regName').value.trim();
   const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('regPass').value.trim();
   const genero= document.getElementById('regGenero').value;
   const how   = document.getElementById('regHow').value.trim();
   const err   = document.getElementById('regErr');
+  const btn   = document.getElementById('regSubmitBtn');
   if(!name||!email||!pass){ err.textContent='Preencha nome, e-mail e senha.'; err.style.display='block'; return; }
-  if(pass.length < 4){ err.textContent='Senha muito curta — mínimo 4 caracteres.'; err.style.display='block'; return; }
+  if(pass.length < 6){ err.textContent='Senha muito curta — mínimo 6 caracteres.'; err.style.display='block'; return; }
   err.style.display='none';
+  if(btn){ btn.disabled=true; btn.textContent='Enviando...'; }
 
-  // Check if already exists
-  getDb().collection('partners').where('email','==',email).get()
-  .then(snap=>{
-    if(!snap.empty){ err.textContent='Este e-mail já está cadastrado.'; err.style.display='block'; return; }
-    // Save as pending partner
-    return getDb().collection('pending_partners').add({
-      nome: name, email, pass, genero, how,
-      status: 'pending',
+  try{
+    const cred = await getAuth().createUserWithEmailAndPassword(email, pass);
+    const uid = cred.user.uid;
+    await getDb().collection('profiles').doc(uid).set({
+      nome: name, email, genero, how,
+      admin:false, status:'pending',
       requestedAt: new Date().toISOString()
     });
-  })
-  .then(ref=>{
-    if(!ref) return; // already existed
-    // Notify via email
+    // Notifica a família por e-mail
     emailjs.send('service_grao','template_grao_1',{
       nome: `Nova solicitação: ${name}`,
       email_parceiro: 'nossoprojetograo@gmail.com',
       senha: `E-mail: ${email} | Como conheceu: ${how||'Não informado'} | Aprovar no painel admin.`
     }).catch(()=>{});
+    await getAuth().signOut(); // criar conta já loga automaticamente — precisamos deslogar até aprovar
     document.getElementById('regForm').style.display='none';
     document.getElementById('regSuccess').style.display='block';
-  })
-  .catch(e=>{ err.textContent='Erro: '+e.message; err.style.display='block'; });
+  }catch(e){
+    if(e.code==='auth/email-already-in-use'){ err.textContent='Este e-mail já está cadastrado. Tente fazer login.'; }
+    else if(e.code==='auth/invalid-email'){ err.textContent='E-mail inválido.'; }
+    else if(e.code==='auth/weak-password'){ err.textContent='Senha muito fraca — use pelo menos 6 caracteres.'; }
+    else { err.textContent='Erro: '+e.message; }
+    err.style.display='block';
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent='Quero ter acesso'; }
+  }
 }
 
 // ── CONTRIBUIÇÃO ──
@@ -2734,6 +2759,7 @@ function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t
 <!-- External SDKs loaded here to ensure correct order -->
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <script>
@@ -2748,9 +2774,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 window.db = firebase.firestore();
 window.storage = firebase.storage();
+window.auth = firebase.auth();
 emailjs.init("KntRzGvrjbRuUiVZn");
 console.log("Firebase + EmailJS prontos");
 function getStorage(){ return window.storage; }
+function getAuth(){ return window.auth; }
+// Secondary app instance used ONLY to create new Auth accounts from the admin panel
+// without kicking the admin out of their own session (createUserWithEmailAndPassword
+// signs in as the new user on whichever auth instance it's called on).
+function getSecondaryAuth(){
+  const existing = firebase.apps.find(a=>a.name==='Secondary');
+  const secApp = existing || firebase.initializeApp(firebaseConfig, 'Secondary');
+  return secApp.auth();
+}
 </script>
 
 <script>
