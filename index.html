@@ -817,24 +817,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
       <div class="adform">
-        <div><label class="adlbl">Nome do parceiro</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
+        <div><label class="adlbl">Nome (opcional, só pro e-mail)</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
         <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE" placeholder="parceiro@email.com"></div>
-        <div><label class="adlbl">Gênero (define a saudação no app)</label>
-          <select class="adinp" id="nUG">
-            <option value="">Prefiro não dizer</option>
-            <option value="F">Feminino</option>
-            <option value="M">Masculino</option>
-          </select>
-        </div>
-        <div><label class="adlbl">Senha</label>
-  <div class="pass-wrap">
-    <input type="password" class="adinp" id="nUP" placeholder="Crie uma senha">
-    <button class="pass-eye" type="button" onclick="toggleEye('nUP',this)" tabindex="-1">
-      <svg><use href="#ieye" id="eyeIcon_nUP"/></svg>
-    </button>
-  </div>
-</div>
-        <button class="adbtn" onclick="addUser()">Adicionar parceiro & enviar e-mail</button>
+        <button class="adbtn" onclick="addUser()">Convidar por e-mail</button>
       </div>
     </div>
   </div>
@@ -1716,36 +1701,19 @@ function delTimeline(id){
   renderTimeline(); renderAdminTimeline(); toast('Removido.');
 }
 
-async function addUser(){
-  const email=g('nUE'), pass=g('nUP'), nome=g('nUN')||'Parceiro', genero=g('nUG');
-  if(!email||!pass) return toast('Preencha e-mail e senha.');
-  if(pass.length<6) return toast('A senha precisa ter pelo menos 6 caracteres.');
+function addUser(){
+  const email=g('nUE'), nome=g('nUN')||'Parceiro';
+  if(!email) return toast('Preencha o e-mail.');
   const btn=document.querySelector('#appScreen .adform .adbtn[onclick="addUser()"]');
   if(btn){btn.disabled=true;}
-  const secAuth = getSecondaryAuth();
-  try{
-    // Create the real Firebase Auth account on the secondary app instance so the
-    // admin's own session (on the primary auth instance) is never touched.
-    const cred = await secAuth.createUserWithEmailAndPassword(email.toLowerCase(), pass);
-    const uid = cred.user.uid;
-    await getDb().collection('profiles').doc(uid).set({
-      email: email.toLowerCase(), nome, genero: genero||'', admin:false, status:'approved',
-      createdAt:new Date().toISOString()
-    });
-    await secAuth.signOut();
-    D.users.push({email:email.toLowerCase(), admin:false, nome, genero:genero||'', id:uid});
-    renderAdmin();
-    emailjs.send('service_grao','template_grao_1',{nome, email_parceiro:email, senha:pass}).then(()=>toast('Parceiro adicionado e e-mail enviado! ✉️')).catch(()=>toast('Parceiro adicionado!'));
-    ['nUE','nUP','nUN','nUG'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  }catch(e){
-    if(e.code==='auth/email-already-in-use'){ toast('Já existe uma conta com esse e-mail.'); }
-    else if(e.code==='auth/weak-password'){ toast('Senha muito fraca. Use pelo menos 6 caracteres.'); }
-    else if(e.code==='auth/invalid-email'){ toast('E-mail inválido.'); }
-    else { toast('Erro: '+e.message); }
-    try{ await secAuth.signOut(); }catch(e2){}
-  } finally {
-    if(btn){btn.disabled=false;}
-  }
+  emailjs.send('service_grao','template_grao_1',{
+    nome, email_parceiro:email,
+    senha:'Você foi convidado(a) para fazer parte da equipe do GRÃO! Acesse https://projetograo.github.io/grao/ e clique em "Quero ter acesso" para se cadastrar — depois é só aguardar a aprovação.'
+  }).then(()=>{
+    toast('Convite enviado! ✉️');
+    ['nUE','nUN'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }).catch(e=>toast('Erro ao enviar convite: '+(e.message||'tente novamente')))
+  .finally(()=>{ if(btn){btn.disabled=false;} });
 }
 
 let currentNewsStep=1;
@@ -2779,14 +2747,6 @@ emailjs.init("KntRzGvrjbRuUiVZn");
 console.log("Firebase + EmailJS prontos");
 function getStorage(){ return window.storage; }
 function getAuth(){ return window.auth; }
-// Secondary app instance used ONLY to create new Auth accounts from the admin panel
-// without kicking the admin out of their own session (createUserWithEmailAndPassword
-// signs in as the new user on whichever auth instance it's called on).
-function getSecondaryAuth(){
-  const existing = firebase.apps.find(a=>a.name==='Secondary');
-  const secApp = existing || firebase.initializeApp(firebaseConfig, 'Secondary');
-  return secApp.auth();
-}
 </script>
 
 <script>
