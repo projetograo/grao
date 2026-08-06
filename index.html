@@ -499,7 +499,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div class="qsbh"><svg><use href="#isd"/></svg><h3>Sobre o projeto</h3></div>
           <p>Somos Bruno, Malu, Tom e Cauê, uma família chamada para testemunhar a Cristo e discipular pessoas entre os povos não alcançados. Nosso coração arde pelo avanço do Reino, e caminhamos em obediência ao chamado de Deus, servindo e nos preparando para o campo missionário.</p>
           <p>Bruno está atualmente licenciado pelo Presbitério de Alagoas (PRAL) e servindo na Primeira Igreja Presbiteriana do Tabuleiro (IPT), onde participamos ativamente da mobilização missionária e da exposição da Palavra. Malu trabalha na System e na Vila Materna, enquanto buscamos o equilíbrio entre nosso sustento e a dedicação ao ministério.</p>
-          <p>Nosso filho Tom nos acompanha nessa jornada, crescendo em um ambiente de fé, cuidado e missão. E a família está aumentando — a gestação do Cauê já está no último trimestre, com chegada prevista para julho. Já já ele chega para aumentar a equipe! Nosso objetivo é que, em <strong>2027</strong>, estejamos prontos para sermos enviados ao campo missionário.</p>
+          <p>Nossos filhos, Tom e Cauê, nos acompanham nessa jornada, crescendo em um ambiente de fé, cuidado e missão. Nosso objetivo é que, em <strong>2027</strong>, estejamos prontos para sermos enviados ao campo missionário.</p>
           <p>Criamos este espaço para compartilhar nossa caminhada, desafios e testemunhos, permitindo que você faça parte ativa dessa missão. Ore por nós, caminhe conosco e descubra como você pode fazer parte. Compartilhe com outros irmãos e igrejas!</p>
         </div>
         <div class="mgrid">
@@ -510,7 +510,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         </div>
         <div class="qsblk"><div class="qsbh"><svg><use href="#ihrt"/></svg><h3>Nossa base</h3></div>
           <p>Servimos na <strong>Primeira Igreja Presbiteriana do Tabuleiro</strong>, em Maceió-AL. Bruno prega a série "O Caminho do Senhor Servo" em Marcos. Malu coordena a secretaria de missões da SAF.</p>
-          <p>Em processo com <strong>APMT</strong> (avaliação psicológica aprovada, aguardando entrevista) e <strong>Pioneiros</strong> (Basic Profile enviado, reunião realizada).</p>
+          <p>Em processo com <strong>APMT</strong> (avaliação psicológica aprovada, primeira entrevista com a direção já realizada) e <strong>Pioneiros</strong> (Basic Profile enviado, reunião realizada).</p>
           <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
             <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:600">Acompanhe a IPT</div>
             <p style="font-size:0.88rem;color:var(--text2);line-height:1.7;margin-bottom:14px">Acesse as mensagens da série em Marcos, localização e redes sociais da nossa igreja base.</p>
@@ -527,7 +527,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           </div>
         </div>
         <div class="qsblk"><div class="qsbh"><svg><use href="#igl"/></svg><h3>Para onde vamos</h3></div>
-          <p>O destino exato ainda não está definido. Essa resposta não vai vir das agências, mas do Senhor — elas apenas nos ajudam a discernir os passos que Ele está preparando. O que já é certo é o chamado que sentimos no coração: alcançar os <strong>povos não alcançados</strong>, comunidades com pouca ou nenhuma presença cristã e sem acesso ao Evangelho na própria língua.</p>
+          <p>O destino exato ainda não está definido, e está tudo bem descansar nessa espera. Confiamos que essa resposta vem do Senhor, no tempo dEle — as agências caminham ao nosso lado, nos ajudando a discernir os passos que Ele está preparando. O que já é certo é o chamado que sentimos no coração: alcançar os <strong>povos não alcançados</strong>, comunidades com pouca ou nenhuma presença cristã e sem acesso ao Evangelho na própria língua.</p>
         </div>
       </div>
     </div>
@@ -780,6 +780,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <button class="adbtn" onclick="addPrayer()">Adicionar</button>
     </div></div>
     <div id="existingPr"></div>
+    <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin:6px 0 0">Exclua aqui qualquer motivo de oração antigo ou duplicado — inclusive os que forem colados por engano.</p>
     <div class="adsl">Linha do tempo</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Data</label><input class="adinp" id="nTD"></div>
@@ -1070,7 +1071,7 @@ function loadPrayersFromFirebase(){
           changed = true;
         }
       });
-      if(changed){ renderPrayer(); renderPrayerPartner(); }
+      if(changed){ renderPrayer(); renderPrayerPartner(); renderExistingPr(); }
     }).catch(()=>{});
   } catch(e){}
 }
@@ -1201,6 +1202,7 @@ function renderAdmin(){
   renderUserList();
   renderAdminNewsList();
   renderAdminTimeline();
+  renderExistingPr();
   // Metrics: always use Firebase as source of truth
   const today = new Date().toISOString().split('T')[0];
   function showM(data){
@@ -1455,20 +1457,21 @@ async function markOldNewsAsRead(exceptId){
 }
 
 async function notifyPartnersOfNews(n){
-  try{
-    const partners=D.users.filter(u=>!u.admin && u.email);
-    for(const p of partners){
-      try{
-        await emailjs.send('service_grao','template_novo_informativo',{
-          nome:p.nome||'Parceiro',
-          email_parceiro:p.email,
-          titulo_informativo:n.name,
-          resumo_informativo:n.summary,
-          link_app:'https://projetograo.github.io/grao/'
-        });
-      }catch(e){}
-    }
-  }catch(e){}
+  const partners=D.users.filter(u=>!u.admin && u.email);
+  let ok=0, fail=0;
+  for(const p of partners){
+    try{
+      await emailjs.send('service_grao','template_novo_informativo',{
+        nome:p.nome||'Parceiro',
+        email_parceiro:p.email,
+        titulo_informativo:n.name,
+        resumo_informativo:n.summary,
+        link_app:'https://projetograo.github.io/grao/'
+      });
+      ok++;
+    }catch(e){ fail++; console.error('Falha ao enviar para', p.email, e); }
+  }
+  return {ok, fail, total:partners.length};
 }
 
 async function addNews(){
@@ -1512,12 +1515,20 @@ async function sendNewsEmail(id){
     : `Enviar e-mail avisando sobre "${n.name}" para ${partners.length} parceiro(s)?`;
   if(!confirm(confirmMsg)) return;
   toast('Enviando e-mails...');
-  await notifyPartnersOfNews(n);
-  n.emailSent=true; n.emailSentAt=new Date().toISOString();
-  saveNews();
-  try{ await getDb().collection('news').doc(String(id)).update({emailSent:true,emailSentAt:n.emailSentAt}); }catch(e){}
+  const result=await notifyPartnersOfNews(n);
+  if(result.ok>0){
+    n.emailSent=true; n.emailSentAt=new Date().toISOString();
+    saveNews();
+    try{ await getDb().collection('news').doc(String(id)).update({emailSent:true,emailSentAt:n.emailSentAt}); }catch(e){}
+  }
   renderAdminNewsList();
-  toast('Parceiros avisados! ✉️');
+  if(result.fail>0 && result.ok===0){
+    toast(`Nenhum e-mail foi enviado. Confira se o template "template_novo_informativo" existe no EmailJS.`);
+  }else if(result.fail>0){
+    toast(`Enviado para ${result.ok} de ${result.total}. ${result.fail} falharam — confira o console.`);
+  }else{
+    toast(`Parceiros avisados! ✉️ (${result.ok}/${result.total})`);
+  }
 }
 
 function editNews(id){
@@ -1587,14 +1598,27 @@ function addPrayer(){
   savePrayers();
   try{ getDb().collection('prayers').doc(String(id)).set({title,body,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
   ['nPT','nPB'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  renderPrayer(); renderPrayerPartner(); renderAdmin(); toast('Adicionado!');
+  renderPrayer(); renderPrayerPartner(); renderAdmin(); renderExistingPr(); toast('Adicionado!');
 }
 
 function delPr(id){
   D.prayers=D.prayers.filter(p=>p.id!==id);
   savePrayers();
   try{ getDb().collection('prayers').doc(String(id)).delete().catch(()=>{}); }catch(e){}
-  renderPrayer(); renderPrayerPartner(); renderAdmin(); toast('Removido.');
+  renderPrayer(); renderPrayerPartner(); renderAdmin(); renderExistingPr(); toast('Removido.');
+}
+
+function renderExistingPr(){
+  const el=document.getElementById('existingPr'); if(!el)return;
+  if(!D.prayers.length){el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum motivo de oração ainda.</p>';return;}
+  el.innerHTML=D.prayers.map(p=>`
+    <div class="adcard" style="margin-bottom:8px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.86rem;font-weight:600">${p.title}</div>
+        <div style="font-size:0.78rem;color:var(--text2);margin-top:2px">${p.body}</div>
+      </div>
+      <button onclick="delPr(${JSON.stringify(p.id)})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer">✕</button>
+    </div>`).join('');
 }
 
 function addTimeline(){
