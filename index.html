@@ -363,6 +363,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 </div>
       <div class="lerr" id="lErr">E-mail ou senha incorretos.</div>
       <button class="lbtn" onclick="doLogin()" data-t="enter">Entrar</button>
+      <button type="button" onclick="forgotPassword()" style="width:100%;background:transparent;border:none;padding:10px;margin-top:2px;font-size:0.72rem;color:var(--text3);text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif">Esqueci minha senha</button>
     </div>
     <p class="lhint">Quer fazer parte da equipe?</p>
     <button onclick="openRegister()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border-hi);border-radius:var(--r-md);padding:12px;font-size:0.78rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--text2)'">Quero ter acesso</button>
@@ -670,6 +671,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 <div class="screen" id="adminScreen">
   <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" onclick="closeAdmin()">← Voltar</button></div>
   <div class="adcont">
+    <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px" id="adminTabBar">
+      <button id="atab_parceiros" onclick="showAdminTab('parceiros')" style="flex:0 0 auto;background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:7px 16px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Parceiros</button>
+      <button id="atab_config" onclick="showAdminTab('config')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Configuração geral</button>
+      <button id="atab_novo" onclick="showAdminTab('novo')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Novo informativo</button>
+      <button id="atab_antigos" onclick="showAdminTab('antigos')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Informativos antigos</button>
+      <button id="atab_oracao" onclick="showAdminTab('oracao')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Oração</button>
+      <button id="atab_caminhada" onclick="showAdminTab('caminhada')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Linha do tempo</button>
+      <button id="atab_metricas" onclick="showAdminTab('metricas')" style="flex:0 0 auto;background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:7px 16px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">Métricas</button>
+    </div>
+
+    <div class="adtabsec" data-tab="parceiros">
     <div class="adsl">Parceiros & Contribuições</div>
     <div class="adcard">
       <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
@@ -680,15 +692,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       </div>
       <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
-    <div class="adsl">Métricas</div>
-    <div class="adcard"><div class="mgrid" id="metricsGrid"></div><button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,0.08);color:var(--text2);font-weight:400" onclick="clearMetrics()">Zerar métricas</button></div>
 
-    <div class="adsl">Google Analytics</div>
-    <div class="adcard"><div class="adform">
-      <div><label class="adlbl">ID do Google Analytics (ex: G-XXXXXXXXXX)</label><input class="adinp" id="gaId" placeholder="G-XXXXXXXXXX"></div>
-      <button class="adbtn" onclick="saveGA()">Salvar & ativar</button>
-    </div></div>
+    <div class="adsl">Solicitações de acesso pendentes</div>
+    <div class="adcard">
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Pessoas que querem entrar para a equipe do GRÃO. Aprove para liberar o acesso.</p>
+      <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
+    </div>
 
+    <div class="adsl">Gerenciar parceiros</div>
+    <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
+      <div class="adform">
+        <div><label class="adlbl">Nome (opcional, só pro e-mail)</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
+        <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE" placeholder="parceiro@email.com"></div>
+        <button class="adbtn" onclick="addUser()">Convidar por e-mail</button>
+      </div>
+    </div>
+    </div><!-- /tab parceiros -->
+
+    <div class="adtabsec" data-tab="config" style="display:none">
     <div class="adsl">Música de fundo</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Nome da música (aparece na barra)</label><input class="adinp" id="musicName" placeholder="Ex: Seguro — Shirley Carvalhaes"></div>
@@ -706,7 +727,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <input type="file" id="familyPhotoInput" accept="image/*" style="display:none" onchange="uploadFamilyPhoto(this.files[0])">
       <div id="familyPhotoStatus" style="font-size:0.72rem;color:var(--accent);min-height:16px"></div>
     </div></div>
+    </div><!-- /tab config -->
 
+    <div class="adtabsec" data-tab="novo" style="display:none">
         <div class="adsl">Publicar informativo</div>
     <div class="adcard">
       <!-- Step indicator -->
@@ -762,7 +785,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div><label class="adlbl">Pedidos de oração (um por linha)</label>
           <textarea class="adta" id="nIPr" style="min-height:80px" placeholder="Pela saúde de Malu e Cauê&#10;Pelo processo com a APMT&#10;..."></textarea>
         </div>
-        <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin-top:8px;background:var(--card-lo);border-radius:var(--r-md);padding:10px 12px">✉️ O e-mail aos parceiros não é enviado automaticamente. Depois de publicar, revise como o informativo ficou no app e, quando estiver tudo certo, use o botão "Avisar parceiros" na lista de informativos publicados, logo abaixo.</p>
+        <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin-top:8px;background:var(--card-lo);border-radius:var(--r-md);padding:10px 12px">✉️ O e-mail aos parceiros não é enviado automaticamente. Depois de publicar, revise como o informativo ficou no app e, quando estiver tudo certo, use o botão "Avisar parceiros" na lista de informativos publicados.</p>
         <div style="background:var(--card-lo);border-radius:var(--r-md);padding:14px;margin-top:4px">
           <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Resumo do informativo</div>
           <div id="newsSummaryFinal" style="font-size:0.82rem;color:var(--text2);line-height:1.65"></div>
@@ -773,8 +796,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         </div>
       </div>
     </div>
+    </div><!-- /tab novo -->
+
+    <div class="adtabsec" data-tab="antigos" style="display:none">
     <div class="adsl">Informativos publicados</div>
     <div id="existingNews" class="adcard"></div>
+    </div><!-- /tab antigos -->
+
+    <div class="adtabsec" data-tab="oracao" style="display:none">
     <div class="adsl">Motivos de oração gerais</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Título</label><input class="adinp" id="nPT"></div>
@@ -797,6 +826,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     </div></div>
     <div id="existingPr"></div>
     <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin:6px 0 0">Exclua aqui qualquer motivo de oração antigo ou duplicado — inclusive os que forem colados por engano.</p>
+    </div><!-- /tab oracao -->
+
+    <div class="adtabsec" data-tab="caminhada" style="display:none">
     <div class="adsl">Linha do tempo</div>
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Data</label><input class="adinp" id="nTD"></div>
@@ -808,22 +840,43 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adsl">Itens da Caminhada — reordenar e alterar status</div>
     <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin:-4px 0 10px">Use as setas para mudar a ordem e o menu para mudar o status a qualquer momento. Concluídos sempre aparecem agrupados no topo da Caminhada; os demais seguem abaixo, na ordem definida aqui.</p>
     <div id="existingTimeline"></div>
-    <div class="adsl">Solicitações de acesso pendentes</div>
+    </div><!-- /tab caminhada -->
+
+    <div class="adtabsec" data-tab="metricas" style="display:none">
+    <div class="adsl">Métricas</div>
+    <div class="adcard"><div class="mgrid" id="metricsGrid"></div><button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,0.08);color:var(--text2);font-weight:400" onclick="clearMetrics()">Zerar métricas</button></div>
+
+    <div class="adsl">Compartilhamentos</div>
     <div class="adcard">
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Pessoas que querem entrar para a equipe do GRÃO. Aprove para liberar o acesso.</p>
-      <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
+      <p style="font-size:0.82rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Toda vez que um parceiro compartilha o app ou um informativo (e o compartilhamento é concluído, não só clicado), fica registrado aqui.</p>
+      <div id="sharesList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
 
-    <div class="adsl">Gerenciar parceiros</div>
-    <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>
-      <div class="adform">
-        <div><label class="adlbl">Nome (opcional, só pro e-mail)</label><input type="text" class="adinp" id="nUN" placeholder="Ex: João Silva"></div>
-        <div><label class="adlbl">E-mail</label><input type="email" class="adinp" id="nUE" placeholder="parceiro@email.com"></div>
-        <button class="adbtn" onclick="addUser()">Convidar por e-mail</button>
+    <div class="adsl">Google Analytics</div>
+    <div class="adcard">
+      <div id="gaSavedView" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;background:rgba(120,180,120,0.1);border:1px solid rgba(120,180,120,0.3);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px">
+          <span style="color:var(--green);font-size:1.1rem">✓</span>
+          <div>
+            <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)">Conectado</div>
+            <div id="gaSavedId" style="font-size:0.9rem;color:var(--text);font-family:monospace"></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <a href="https://analytics.google.com/analytics/web/" target="_blank" class="adbtn" style="flex:2;text-decoration:none;text-align:center;display:block">📊 Abrir no Google Analytics</a>
+          <button class="adbtn" style="flex:1;background:rgba(255,255,255,0.08);color:var(--text2)" onclick="editGA()">Editar</button>
+        </div>
+      </div>
+      <div id="gaEditView" class="adform">
+        <div><label class="adlbl">ID do Google Analytics (ex: G-XXXXXXXXXX)</label><input class="adinp" id="gaId" placeholder="G-XXXXXXXXXX"></div>
+        <button class="adbtn" onclick="saveGA()">Salvar & ativar</button>
       </div>
     </div>
+    </div><!-- /tab metricas -->
+
   </div>
 </div>
+
 
 <div id="ytFr" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none"></div>
 <div class="toast" id="toast"></div>
@@ -1151,6 +1204,21 @@ async function doLogin(){
   }
 }
 ['lE','lP'].forEach(id=>document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()}));
+
+function forgotPassword(){
+  const email=g('lE');
+  if(!email){ toast('Digite seu e-mail no campo acima primeiro.'); document.getElementById('lE').focus(); return; }
+  getAuth().sendPasswordResetEmail(email.toLowerCase())
+  .then(()=>{
+    toast('Enviamos um e-mail de redefinição. Confira sua caixa de entrada (e o spam).');
+  }).catch(e=>{
+    if(e.code==='auth/invalid-email'){ toast('Digite um e-mail válido.'); return; }
+    // auth/user-not-found (and anything else unexpected) shows the SAME message
+    // as success on purpose — this prevents someone from using this form to
+    // check which e-mails have an account here.
+    toast('Enviamos um e-mail de redefinição. Confira sua caixa de entrada (e o spam).');
+  });
+}
 function doLogout(){try{getAuth().signOut();}catch(e){} me=null;pauseMusic();document.getElementById('appScreen').classList.remove('active');document.getElementById('loginScreen').classList.add('active');document.getElementById('lE').value='';document.getElementById('lP').value='';document.getElementById('adminBtn').style.display='none';}
 
 
@@ -1199,6 +1267,7 @@ function renderAdmin(){
   renderAdminNewsList();
   renderAdminTimeline();
   renderExistingPr();
+  renderShares();
   // Metrics: always use Firebase as source of truth
   const today = new Date().toISOString().split('T')[0];
   function showM(data){
@@ -1209,7 +1278,8 @@ function renderAdmin(){
       <div class="mcard2"><div class="mnum">${data.t||data.total||0}</div><div class="mlbl2">Interações</div></div>
       <div class="mcard2"><div class="mnum">${data.s||data.sessions||0}</div><div class="mlbl2">Logins</div></div>
       <div class="mcard2"><div class="mnum">${d[today]||0}</div><div class="mlbl2">Hoje</div></div>
-      <div class="mcard2"><div class="mnum">${Object.keys(d).length}</div><div class="mlbl2">Dias ativos</div></div>`;
+      <div class="mcard2"><div class="mnum">${Object.keys(d).length}</div><div class="mlbl2">Dias ativos</div></div>
+      <div class="mcard2"><div class="mnum">${data.shares||0}</div><div class="mlbl2">Compartilhamentos</div></div>`;
   }
   // Show localStorage immediately as placeholder, then replace with Firebase
   const local = JSON.parse(localStorage.getItem('gm')||'{}');
@@ -1231,10 +1301,46 @@ function clearMetrics(){
   toast('Métricas zeradas.');
 }
 
+function renderShares(){
+  const el = document.getElementById('sharesList');
+  if(!el) return;
+  getDb().collection('shares').orderBy('at','desc').limit(20).get()
+  .then(snap=>{
+    if(snap.empty){ el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum compartilhamento ainda.</p>'; return; }
+    el.innerHTML = snap.docs.map(doc=>{
+      const s = doc.data();
+      const when = new Date(s.at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      const what = s.kind==='news' ? ('informativo "'+(s.label||'')+'"') : 'o Projeto Grão';
+      return `<div class="adrow">
+        <div class="adri">
+          <div class="adrt">${s.nome||s.email}</div>
+          <div class="adrm">compartilhou ${what} · ${when}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }).catch(e=>{ console.log('renderShares error:',e); el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Não foi possível carregar.</p>'; });
+}
+
+const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas'];
+function showAdminTab(tab){
+  ADMIN_TABS.forEach(t=>{
+    document.querySelectorAll('.adtabsec[data-tab="'+t+'"]').forEach(el=>{ el.style.display = t===tab?'block':'none'; });
+    const btn=document.getElementById('atab_'+t);
+    if(btn){
+      btn.style.background = t===tab ? 'var(--accent)' : 'rgba(255,255,255,0.07)';
+      btn.style.color = t===tab ? 'var(--bg-deep)' : 'var(--text2)';
+      btn.style.border = t===tab ? 'none' : '1px solid var(--border-md)';
+      btn.style.fontWeight = t===tab ? '600' : '400';
+    }
+  });
+  localStorage.setItem('grao_admin_tab', tab);
+}
+
 function openAdmin(){
   document.getElementById('appScreen').classList.remove('active');
   document.getElementById('adminScreen').classList.add('active');
   renderAdmin();
+  showAdminTab(localStorage.getItem('grao_admin_tab') || 'parceiros');
 }
 
 function closeAdmin(){
@@ -1353,6 +1459,7 @@ function loadSavedSettings(){
   const mnEl = document.getElementById('musicName');
   const muEl = document.getElementById('musicUrl');
   if(gaId && gaEl) gaEl.value = gaId;
+  renderGA();
   if(mName){
     document.querySelector('.mname').textContent = mName;
     if(mnEl) mnEl.value = mName;
@@ -1409,11 +1516,32 @@ async function uploadFamilyPhoto(file){
   const input=document.getElementById('familyPhotoInput'); if(input) input.value='';
 }
 
+function renderGA(){
+  const id = localStorage.getItem('grao_ga_id');
+  const saved = document.getElementById('gaSavedView');
+  const edit = document.getElementById('gaEditView');
+  if(!saved || !edit) return;
+  if(id){
+    document.getElementById('gaSavedId').textContent = id;
+    saved.style.display = 'block';
+    edit.style.display = 'none';
+  } else {
+    saved.style.display = 'none';
+    edit.style.display = 'flex';
+  }
+}
+function editGA(){
+  document.getElementById('gaSavedView').style.display = 'none';
+  document.getElementById('gaEditView').style.display = 'flex';
+  const el = document.getElementById('gaId');
+  if(el) el.value = localStorage.getItem('grao_ga_id') || '';
+}
 function saveGA(){
   const id = (document.getElementById('gaId')||{}).value||'';
   if(!id) return toast('Informe o ID.');
   localStorage.setItem('grao_ga_id', id);
   toast('Google Analytics salvo!');
+  renderGA();
 }
 
 function saveMusic(){
@@ -2147,6 +2275,10 @@ function updatePartnerLang(){
 }
 
 function track(a){
+  // Admin activity (that's you, testing/managing) is excluded from engagement
+  // metrics on purpose — these numbers should reflect real partners, not you
+  // checking the app.
+  if(me && me.admin) return;
   const k='gm', m=JSON.parse(localStorage.getItem(k)||'{}');
   const d=new Date().toISOString().split('T')[0];
   m.t=(m.t||0)+1; m.d=m.d||{}; m.d[d]=(m.d[d]||0)+1; m.s=(m.s||0)+(a==='login'?1:0);
@@ -2328,19 +2460,36 @@ function loadTimelineFromFirebase(){
 
 function attrJson(v){ return JSON.stringify(v).replace(/"/g,'&quot;'); }
 
-function shareApp(title,text){
+function logShare(kind, refId, label){
+  if(!me) return;
+  getDb().collection('shares').add({
+    kind: kind||'app', newsId: refId||null, label: label||'',
+    email: me.email, nome: me.nome||'', at: new Date().toISOString()
+  }).catch(()=>{});
+  try{
+    const inc = firebase.firestore.FieldValue.increment;
+    getDb().collection('metrics').doc('global').set({ shares: inc(1) }, {merge:true}).catch(()=>{});
+  }catch(e){}
+}
+
+function shareApp(title,text,kind,refId){
   const shareData={title:title||'Projeto Grão',text:text||'Acompanhe a caminhada da família Baracho rumo ao campo missionário.',url:'https://projetograo.github.io/grao/'};
   if(navigator.share){
-    navigator.share(shareData).catch(()=>{});
+    // Only counts as a share once the native share sheet actually completes —
+    // if the person cancels it, the promise rejects and nothing is logged.
+    navigator.share(shareData).then(()=>logShare(kind,refId,title)).catch(()=>{});
   } else if(navigator.clipboard){
-    navigator.clipboard.writeText(shareData.url).then(()=>toast('Link copiado! Cole para compartilhar.')).catch(()=>toast(shareData.url));
+    navigator.clipboard.writeText(shareData.url).then(()=>{
+      toast('Link copiado! Cole para compartilhar.');
+      logShare(kind,refId,title);
+    }).catch(()=>toast(shareData.url));
   } else {
     toast(shareData.url);
   }
 }
 
 function shareNews(id,title,summary){
-  shareApp('Projeto Grão — '+title, summary);
+  shareApp('Projeto Grão — '+title, summary, 'news', id);
 }
 
 function loadMensais(filter){
