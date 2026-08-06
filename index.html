@@ -364,7 +364,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     </div>
     <p class="lhint">Quer fazer parte da equipe?</p>
     <button onclick="openRegister()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border-hi);border-radius:var(--r-md);padding:12px;font-size:0.78rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--text2)'">Quero ter acesso</button>
-    <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
+    <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
 
 <!-- REGISTER MODAL -->
 <div id="registerModal" style="display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center">
@@ -513,7 +513,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
             <div style="font-size:0.62rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;font-weight:600">Acompanhe a IPT</div>
             <p style="font-size:0.88rem;color:var(--text2);line-height:1.7;margin-bottom:14px">Acesse as mensagens da série em Marcos, localização e redes sociais da nossa igreja base.</p>
-            <a href="https://linktr.ee/iptabuleiro" target="_blank" style="display:flex;align-items:center;gap:12px;background:var(--card-lo);border:1px solid var(--border-md);border-radius:var(--r-md);padding:14px 16px;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
+            <a href="https://linktr.ee/iptabuleiro" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;gap:12px;background:var(--card-lo);border:1px solid var(--border-md);border-radius:var(--r-md);padding:14px 16px;text-decoration:none;transition:border-color 0.2s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border-md)'">
               <div style="width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--bg-deep)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
               </div>
@@ -557,7 +557,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div class="prcta">
           <h3>Grupo de oração</h3>
           <p>Entre no nosso grupo de WhatsApp para receber pedidos em tempo real.</p>
-          <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="bwa" onclick="track('wa-group')">Entrar no grupo</a>
+          <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" rel="noopener noreferrer" class="bwa" onclick="track('wa-group')">Entrar no grupo</a>
         </div>
       </div>
     </div>
@@ -583,7 +583,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           </div>
           <div class="ptbody">
             <ul class="ptlist" id="prayerPartner"></ul>
-            <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" class="bact bwa-s" onclick="track('wa-prayer')" data-tk="wa_group">Grupo de oração no WhatsApp</a>
+            <a href="https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp" target="_blank" rel="noopener noreferrer" class="bact bwa-s" onclick="track('wa-prayer')" data-tk="wa_group">Grupo de oração no WhatsApp</a>
           </div>
         </div>
 
@@ -867,7 +867,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           </div>
         </div>
         <div style="display:flex;gap:8px">
-          <a href="https://analytics.google.com/analytics/web/" target="_blank" class="adbtn" style="flex:2;text-decoration:none;text-align:center;display:block">📊 Abrir no Google Analytics</a>
+          <a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="adbtn" style="flex:2;text-decoration:none;text-align:center;display:block">📊 Abrir no Google Analytics</a>
           <button class="adbtn" style="flex:1;background:rgba(255,255,255,0.08);color:var(--text2)" onclick="editGA()">Editar</button>
         </div>
       </div>
@@ -1241,8 +1241,8 @@ function renderUserList(){
         const u=doc.data();
         return `<div class="adrow">
           <div class="adri">
-            <div class="adrt">${u.nome||u.email}</div>
-            <div class="adrm">${u.email}</div>
+            <div class="adrt">${esc(u.nome||u.email)}</div>
+            <div class="adrm">${esc(u.email)}</div>
           </div>
           <button class="addel" onclick='delUserById(${JSON.stringify(doc.id)},this)'>Remover</button>
         </div>`;
@@ -1314,10 +1314,10 @@ function renderShares(){
     el.innerHTML = snap.docs.map(doc=>{
       const s = doc.data();
       const when = new Date(s.at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-      const what = s.kind==='news' ? ('informativo "'+(s.label||'')+'"') : 'o Projeto Grão';
+      const what = s.kind==='news' ? ('informativo "'+esc(s.label||'')+'"') : 'o Projeto Grão';
       return `<div class="adrow">
         <div class="adri">
-          <div class="adrt">${s.nome||s.email}</div>
+          <div class="adrt">${esc(s.nome||s.email)}</div>
           <div class="adrm">compartilhou ${what} · ${when}</div>
         </div>
       </div>`;
@@ -2501,6 +2501,14 @@ function loadTimelineFromFirebase(){
 }
 
 function attrJson(v){ return JSON.stringify(v).replace(/"/g,'&quot;'); }
+// Escapes user-supplied text before it's inserted into innerHTML templates.
+// Anything a partner or a public registrant typed (name, email, "how", contribution
+// fields) MUST go through this before rendering — otherwise it's stored XSS that
+// runs with the admin's own session privileges the moment the admin views it.
+function esc(v){
+  if(v===undefined||v===null) return '';
+  return String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 function logShare(kind, refId, label){
   if(!me) return;
@@ -2557,17 +2565,17 @@ function loadMensais(filter){
       <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
           <div style="flex:1">
-            <div style="font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:2px">${d.nome||'—'}</div>
-            <div style="font-size:0.74rem;color:var(--text3)">${d.email||''} ${d.phone?'· '+d.phone:''}</div>
+            <div style="font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:2px">${esc(d.nome)||'—'}</div>
+            <div style="font-size:0.74rem;color:var(--text3)">${esc(d.email)} ${d.phone?'· '+esc(d.phone):''}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-            <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${d.valor||'—'}</span>
+            <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${esc(d.valor)||'—'}</span>
             <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'}">
               ${d.tipo==='cartao'?'💳 Cartão':'🔑 Pix'}
             </span>
           </div>
         </div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Cadastrado em ${d.data||'—'}</div>
+        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Cadastrado em ${esc(d.data)||'—'}</div>
         
         <!-- Contribution tracking -->
         <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
@@ -2575,16 +2583,16 @@ function loadMensais(filter){
           <div id="contLog_${d.id}" style="font-size:0.78rem;color:var(--text2);margin-bottom:8px">
             ${(d.contribuicoes||[]).length===0
               ? '<span style="color:var(--text3);font-style:italic">Nenhuma registrada ainda</span>'
-              : (d.contribuicoes||[]).map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${c.mes}</span><span style="color:var(--accent)">${c.valor}</span></div>`).join('')
+              : (d.contribuicoes||[]).map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${esc(c.mes)}</span><span style="color:var(--accent)">${esc(c.valor)}</span></div>`).join('')
             }
           </div>
           <div style="display:flex;gap:6px">
             <input id="contMes_${d.id}" type="text" placeholder="Ex: Maio/2026" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
             <input id="contVal_${d.id}" type="text" placeholder="R$ 50" style="width:80px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
-            <button onclick="addContribuicao('${d.id}')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:8px;padding:7px 12px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">+ Registrar</button>
+            <button onclick='addContribuicao(${JSON.stringify(d.id)})' style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:8px;padding:7px 12px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">+ Registrar</button>
           </div>
         </div>
-        <button onclick="deleteParceiro('${d.id}','${(d.nome||'').replace(/'/g,"\\'")}',this)" style="width:100%;background:transparent;border:1px solid rgba(224,120,96,0.3);color:var(--red);border-radius:8px;padding:7px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">Encerrar parceria</button>
+        <button onclick='deleteParceiro(${JSON.stringify(d.id)},${JSON.stringify(d.nome||"")},this)' style="width:100%;background:transparent;border:1px solid rgba(224,120,96,0.3);color:var(--red);border-radius:8px;padding:7px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">Encerrar parceria</button>
       </div>`).join('');
   })
   .catch(e=>{ el.innerHTML='<p style="font-size:0.82rem;color:var(--red)">Erro: '+e.message+'</p>'; });
@@ -2637,9 +2645,9 @@ function loadPending(){
         const d = doc.data();
         return `<div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:8px">
           <div style="margin-bottom:6px">
-            <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${d.nome}</div>
-            <div style="font-size:0.74rem;color:var(--text3)">${d.email}</div>
-            ${d.how ? `<div style="font-size:0.74rem;color:var(--text3)">Como conheceu: ${d.how}</div>` : ''}
+            <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${esc(d.nome)}</div>
+            <div style="font-size:0.74rem;color:var(--text3)">${esc(d.email)}</div>
+            ${d.how ? `<div style="font-size:0.74rem;color:var(--text3)">Como conheceu: ${esc(d.how)}</div>` : ''}
             <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
           </div>
           <div style="display:flex;gap:8px">
@@ -2695,8 +2703,8 @@ function loadAdmins(){
       .map(doc=>{
         const d=doc.data();
         return `<div class="adrow">
-          <div class="adri"><div class="adrt">${d.nome||'Admin'}</div><div class="adrm">${d.email}</div></div>
-          <button class="addel" onclick="delAdmin('${doc.id}','${d.email}')">Remover</button>
+          <div class="adri"><div class="adrt">${esc(d.nome)||'Admin'}</div><div class="adrm">${esc(d.email)}</div></div>
+          <button class="addel" onclick='delAdmin(${JSON.stringify(doc.id)},${JSON.stringify(d.email)})'>Remover</button>
         </div>`;
       });
     el.innerHTML = rows.length ? rows.join('') : '<p style="font-size:0.8rem;color:var(--text3);padding:8px 0">Nenhum admin adicional.</p>';
@@ -2883,7 +2891,7 @@ function contPay(){
     document.getElementById('contForm').style.display='none';
     document.getElementById('contSuccess').style.display='block';
     document.getElementById('contSuccessMsg').innerHTML=
-      'E-mail de confirmação enviado para <strong>'+email+'</strong>.<br><br>'+
+      'E-mail de confirmação enviado para <strong>'+esc(email)+'</strong>.<br><br>'+
       '<strong>Chave Pix:</strong> nossoprojetograo@gmail.com<br>'+
       'Banco Bradesco · Bruno Ramires Baracho<br>'+
       '<span style="font-size:0.82rem;color:var(--text3)">Valor sugerido: R$ '+contValue+'</span>';
