@@ -1187,7 +1187,7 @@ function renderUserList(){
             <div class="adrt">${u.nome||u.email}</div>
             <div class="adrm">${u.email}</div>
           </div>
-          <button class="addel" onclick="delUserById(${JSON.stringify(doc.id)},this)">Remover</button>
+          <button class="addel" onclick='delUserById(${JSON.stringify(doc.id)},this)'>Remover</button>
         </div>`;
       }).join('');
     }).catch(()=>{
@@ -1633,7 +1633,7 @@ function renderExistingPr(){
           ${iconOpts.map(([val,label])=>`<option value="${val}" ${((p.icon||prIco[i%prIco.length].slice(1))===val)?'selected':''}>${label}</option>`).join('')}
         </select>
       </div>
-      <button onclick="delPr(${JSON.stringify(p.id)})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer">✕</button>
+      <button onclick='delPr(${JSON.stringify(p.id)})' title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer">✕</button>
     </div>`).join('');
 }
 
@@ -2484,11 +2484,11 @@ function loadPending(){
             <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
           </div>
           <div style="display:flex;gap:8px">
-            <button onclick="approvePending(${JSON.stringify(doc.id)})"
+            <button onclick='approvePending(${JSON.stringify(doc.id)})'
               style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:9px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
               ✓ Aceitar
             </button>
-            <button onclick="rejectPending(${JSON.stringify(doc.id)})"
+            <button onclick='rejectPending(${JSON.stringify(doc.id)})'
               style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:9px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif">
               ✕ Recusar
             </button>
