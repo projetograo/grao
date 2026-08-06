@@ -20,6 +20,8 @@ gtag('config','G-KNC0KYVRG4');
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="GRÃO">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <title>GRÃO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -777,6 +779,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adcard"><div class="adform">
       <div><label class="adlbl">Título</label><input class="adinp" id="nPT"></div>
       <div><label class="adlbl">Descrição</label><textarea class="adta" id="nPB" style="min-height:60px"></textarea></div>
+      <div><label class="adlbl">Ícone</label>
+        <select class="adsel adinp" id="nPI">
+          <option value="ihrt">❤️ Coração</option>
+          <option value="ihands">🙏 Mãos unidas</option>
+          <option value="if">👨‍👩‍👧 Família</option>
+          <option value="igl">🌍 Mundo</option>
+          <option value="im">📖 Aliança</option>
+          <option value="isd">🌱 Broto</option>
+          <option value="ih">🏠 Casa</option>
+          <option value="ibk">📚 Livro</option>
+          <option value="ibb">👶 Bebê</option>
+          <option value="imny">💰 Provisão</option>
+        </select>
+      </div>
       <button class="adbtn" onclick="addPrayer()">Adicionar</button>
     </div></div>
     <div id="existingPr"></div>
@@ -998,11 +1014,11 @@ const D={
     }
   ],
   prayers:[
-    {id:1,title:'Discernimento com as agências',body:'Pedimos por discernimento e sabedoria nas decisões que precisamos tomar junto às agências missionárias.'},
-    {id:2,title:'Tom, irmão mais velho',body:'Agradecemos por mais um ano de vida do Tom e pedimos por essa nova fase, agora como irmão mais velho.'},
-    {id:3,title:'Crescimento do Cauê',body:'Agradecemos pela chegada do Cauê e pedimos por saúde em seu crescimento.'},
-    {id:4,title:'Trabalhos na igreja local',body:'Pedimos por sabedoria e ânimo para a continuidade de nossos trabalhos na igreja local.'},
-    {id:5,title:'Reforma da IPT',body:'Pela reforma da IPT, para que aconteça tudo da melhor maneira, e que Deus viabilize os recursos necessários.'}
+    {id:1,title:'Discernimento com as agências',body:'Pedimos por discernimento e sabedoria nas decisões que precisamos tomar junto às agências missionárias.',icon:'ihands'},
+    {id:2,title:'Tom, irmão mais velho',body:'Agradecemos por mais um ano de vida do Tom e pedimos por essa nova fase, agora como irmão mais velho.',icon:'if'},
+    {id:3,title:'Crescimento do Cauê',body:'Agradecemos pela chegada do Cauê e pedimos por saúde em seu crescimento.',icon:'ibb'},
+    {id:4,title:'Trabalhos na igreja local',body:'Pedimos por sabedoria e ânimo para a continuidade de nossos trabalhos na igreja local.',icon:'ihrt'},
+    {id:5,title:'Reforma da IPT',body:'Pela reforma da IPT, para que aconteça tudo da melhor maneira, e que Deus viabilize os recursos necessários.',icon:'ih'}
   ],
   timeline:[
     {id:1,date:'2020',title:'Perspectivas — Bruno',body:'Concluiu o Perspectivas (turma online, 60h) — tempo fundamental para ampliar a visão sobre os povos.',status:'done',dot:'dg'},
@@ -1592,11 +1608,12 @@ function renderAdminNewsList(){
 
 function addPrayer(){
   const title=g('nPT'), body=g('nPB');
+  const icon=(document.getElementById('nPI')||{}).value||'ihrt';
   if(!title) return toast('Preencha o título.');
   const id=Date.now();
-  D.prayers.push({id,title,body});
+  D.prayers.push({id,title,body,icon});
   savePrayers();
-  try{ getDb().collection('prayers').doc(String(id)).set({title,body,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
+  try{ getDb().collection('prayers').doc(String(id)).set({title,body,icon,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
   ['nPT','nPB'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   renderPrayer(); renderPrayerPartner(); renderAdmin(); renderExistingPr(); toast('Adicionado!');
 }
@@ -1611,14 +1628,28 @@ function delPr(id){
 function renderExistingPr(){
   const el=document.getElementById('existingPr'); if(!el)return;
   if(!D.prayers.length){el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum motivo de oração ainda.</p>';return;}
-  el.innerHTML=D.prayers.map(p=>`
+  const iconOpts=[['ihrt','❤️ Coração'],['ihands','🙏 Mãos unidas'],['if','👨‍👩‍👧 Família'],['igl','🌍 Mundo'],['im','📖 Aliança'],['isd','🌱 Broto'],['ih','🏠 Casa'],['ibk','📚 Livro'],['ibb','👶 Bebê'],['imny','💰 Provisão']];
+  el.innerHTML=D.prayers.map((p,i)=>`
     <div class="adcard" style="margin-bottom:8px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
       <div style="flex:1;min-width:0">
         <div style="font-size:0.86rem;font-weight:600">${p.title}</div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:2px">${p.body}</div>
+        <select class="adsel adinp" style="margin-top:8px" onchange="updatePrayerIcon(${JSON.stringify(p.id)}, this.value)">
+          ${iconOpts.map(([val,label])=>`<option value="${val}" ${((p.icon||prIco[i%prIco.length].slice(1))===val)?'selected':''}>${label}</option>`).join('')}
+        </select>
       </div>
       <button onclick="delPr(${JSON.stringify(p.id)})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer">✕</button>
     </div>`).join('');
+}
+
+function updatePrayerIcon(id, icon){
+  const idx=D.prayers.findIndex(p=>p.id===id);
+  if(idx===-1) return;
+  D.prayers[idx].icon=icon;
+  savePrayers();
+  try{ getDb().collection('prayers').doc(String(id)).update({icon}).catch(()=>{}); }catch(e){}
+  renderPrayer(); renderPrayerPartner();
+  toast('Ícone atualizado.');
 }
 
 function addTimeline(){
@@ -2247,7 +2278,7 @@ function renderPrayer(){
   const el=document.getElementById('prList'); if(!el)return;
   if(!D.prayers.length){el.innerHTML='<p style="color:var(--text3);font-size:0.88rem;padding:8px 0">Nenhum pedido de oração no momento.</p>';return;}
   el.innerHTML=D.prayers.map((p,i)=>`
-    <div class="pritem"><div class="prico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--accent)"><use href="${prIco[i%prIco.length]}"/></svg></div>
+    <div class="pritem"><div class="prico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;color:var(--accent)"><use href="${p.icon?'#'+p.icon:prIco[i%prIco.length]}"/></svg></div>
       <div class="prtxt"><div class="prtitle">${p.title}</div><div class="prbody">${p.body}</div></div>
     </div>`).join('');
 }
