@@ -326,6 +326,15 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <path d="M20.42 4.58a5.4 5.4 0 00-7.65 0l-.77.78-.77-.78a5.4 5.4 0 00-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z"/>
     <path d="M12 5.36L8.87 8.5a2.13 2.13 0 003 3L12 10.5l1.13 1a2.13 2.13 0 003-3L13 5.36"/>
   </symbol>
+  <symbol id="ichart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="13"/><line x1="12" y1="21" x2="12" y2="7"/><line x1="20" y1="21" x2="20" y2="10"/><line x1="2" y1="21" x2="22" y2="21"/></symbol>
+  <symbol id="icard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></symbol>
+  <symbol id="icamera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+  <symbol id="ilink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="icheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8,12.5 11,15.5 16,9"/></symbol>
+  <symbol id="iclose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></symbol>
+  <symbol id="iedit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H5a2 2 0 00-2 2v13a2 2 0 002 2h13a2 2 0 002-2v-6"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></symbol>
+  <symbol id="isave" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17,21 17,13 7,13 7,21"/><polyline points="7,3 7,8 15,8"/></symbol>
+  <symbol id="imail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,6 12,13 22,6"/></symbol>
 </svg>
 
 <!-- LOGIN -->
@@ -668,13 +677,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
   <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" id="adminBackBtn" onclick="adminBackClick()">← Voltar</button></div>
   <div class="adcont">
     <div class="qgrid" id="adminMenu" style="margin-bottom:10px">
-      <div class="qcard qa" onclick="showAdminTab('parceiros')"><div style="font-size:1.5rem;margin-bottom:8px">👥</div><div class="qlbl">Parceiros</div><div class="qsub">Pedidos, lista, contribuições</div></div>
-      <div class="qcard qg" onclick="showAdminTab('config')"><div style="font-size:1.5rem;margin-bottom:8px">🏠</div><div class="qlbl">Tela de início</div><div class="qsub">Versículo, música, foto</div></div>
-      <div class="qcard qw" onclick="showAdminTab('novo')"><div style="font-size:1.5rem;margin-bottom:8px">📰</div><div class="qlbl">Novo informativo</div><div class="qsub">Publicar</div></div>
-      <div class="qcard qp" onclick="showAdminTab('antigos')"><div style="font-size:1.5rem;margin-bottom:8px">📚</div><div class="qlbl">Informativos antigos</div><div class="qsub">Editar, avisar parceiros</div></div>
-      <div class="qcard qa" onclick="showAdminTab('oracao')"><div style="font-size:1.5rem;margin-bottom:8px">🙏</div><div class="qlbl">Oração</div><div class="qsub">Motivos gerais</div></div>
-      <div class="qcard qg" onclick="showAdminTab('caminhada')"><div style="font-size:1.5rem;margin-bottom:8px">🗺️</div><div class="qlbl">Linha do tempo</div><div class="qsub">Caminhada e marcos</div></div>
-      <div class="qcard qw" onclick="showAdminTab('metricas')"><div style="font-size:1.5rem;margin-bottom:8px">📊</div><div class="qlbl">Métricas</div><div class="qsub">Uso, compartilhamentos, GA</div></div>
+      <div class="qcard qa" onclick="showAdminTab('parceiros')"><div class="qico"><svg><use href="#if"/></svg></div><div class="qlbl">Parceiros</div><div class="qsub">Pedidos, lista, contribuições</div></div>
+      <div class="qcard qg" onclick="showAdminTab('config')"><div class="qico"><svg><use href="#ih"/></svg></div><div class="qlbl">Tela de início</div><div class="qsub">Versículo, música, foto</div></div>
+      <div class="qcard qw" onclick="showAdminTab('novo')"><div class="qico"><svg><use href="#in"/></svg></div><div class="qlbl">Novo informativo</div><div class="qsub">Publicar</div></div>
+      <div class="qcard qp" onclick="showAdminTab('antigos')"><div class="qico"><svg><use href="#ibk"/></svg></div><div class="qlbl">Informativos antigos</div><div class="qsub">Editar, avisar parceiros</div></div>
+      <div class="qcard qa" onclick="showAdminTab('oracao')"><div class="qico"><svg><use href="#ihands"/></svg></div><div class="qlbl">Oração</div><div class="qsub">Motivos gerais</div></div>
+      <div class="qcard qg" onclick="showAdminTab('caminhada')"><div class="qico"><svg><use href="#im"/></svg></div><div class="qlbl">Linha do tempo</div><div class="qsub">Caminhada e marcos</div></div>
+      <div class="qcard qw" onclick="showAdminTab('metricas')"><div class="qico"><svg><use href="#ichart"/></svg></div><div class="qlbl">Métricas</div><div class="qsub">Uso, compartilhamentos, GA</div></div>
     </div>
 
     <div class="adtabsec" data-tab="parceiros" style="display:none">
@@ -683,8 +692,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <button onclick="filterMensais('todos')" id="mfTodos" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:5px 14px;font-size:0.68rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Todos</button>
-        <button onclick="filterMensais('cartao')" id="mfCartao" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif">💳 Cartão</button>
-        <button onclick="filterMensais('pix')" id="mfPix" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif">🔑 Pix</button>
+        <button onclick="filterMensais('cartao')" id="mfCartao" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12"><use href="#icard"/></svg>Cartão</button>
+        <button onclick="filterMensais('pix')" id="mfPix" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12"><use href="#ipix"/></svg>Pix</button>
       </div>
       <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
@@ -709,8 +718,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adsl">Versículo da página inicial</div>
     <div class="adcard"><div class="adform">
       <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Aparece logo abaixo do título "Você faz parte dessa jornada", na tela de início do app.</p>
-      <div><label class="adlbl">Texto em português (com a referência)</label><textarea class="adta" id="homeVerseInput" style="min-height:70px" placeholder='"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24'></textarea></div>
-      <div><label class="adlbl">Texto em inglês (opcional — some se o app estiver em EN)</label><textarea class="adta" id="homeVerseInputEn" style="min-height:70px" placeholder='"Unless a grain of wheat falls into the earth and dies, it remains alone." — John 12.24'></textarea></div>
+      <div><label class="adlbl">Texto do versículo (com a referência)</label><textarea class="adta" id="homeVerseInput" style="min-height:70px" placeholder='"Se o grão de trigo, caindo na terra, não morrer, fica ele só." — João 12.24'></textarea></div>
       <button class="adbtn" onclick="saveHomeVerse()">Salvar versículo</button>
     </div></div>
 
@@ -726,7 +734,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
       <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Aparece no topo da aba Família. Escolha uma foto — o upload é automático.</p>
       <div style="display:flex;align-items:center;gap:14px">
         <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;border:2px solid var(--accent);flex-shrink:0"><img id="familyPhotoPreview" src="" style="width:100%;height:100%;object-fit:cover"></div>
-        <button class="adbtn" style="flex:1" onclick="document.getElementById('familyPhotoInput').click()">📷 Escolher nova foto</button>
+        <button class="adbtn" style="flex:1;display:inline-flex;align-items:center;justify-content:center;gap:6px" onclick="document.getElementById('familyPhotoInput').click()"><svg width="14" height="14"><use href="#icamera"/></svg>Escolher nova foto</button>
       </div>
       <input type="file" id="familyPhotoInput" accept="image/*" style="display:none" onchange="uploadFamilyPhoto(this.files[0])">
       <div id="familyPhotoStatus" style="font-size:0.72rem;color:var(--accent);min-height:16px"></div>
@@ -734,6 +742,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     </div><!-- /tab config -->
 
     <div class="adtabsec" data-tab="novo" style="display:none">
+    <div id="newsFormNovoSlot"></div>
+    <div id="newsFormBlock">
         <div class="adsl">Publicar informativo</div>
     <div class="adcard">
       <!-- Step indicator -->
@@ -743,7 +753,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div onclick="newsGoStep(3)" style="flex:1;text-align:center;padding:8px 4px;border-radius:8px;background:rgba(255,255,255,0.07);color:var(--text3);font-size:0.65rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer" id="nStep3">3. Oração</div>
       </div>
       <div id="newsEditingBadge" style="display:none;background:rgba(232,168,112,0.15);border:1px solid var(--accent);border-radius:var(--r-sm);padding:8px 12px;margin-bottom:14px;font-size:0.75rem;color:var(--accent);display:flex;justify-content:space-between;align-items:center">
-        <span>✎ Editando informativo publicado</span>
+        <span style="display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12"><use href="#iedit"/></svg>Editando informativo publicado</span>
         <span style="cursor:pointer;text-decoration:underline" onclick="cancelNewsEdit()">cancelar</span>
       </div>
 
@@ -768,9 +778,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
           <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('formatBlock','P')" title="Texto normal">Texto</button>
           <span class="etsep"></span>
           <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('insertUnorderedList')" title="Lista">• Lista</button>
-          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edLink()" title="Link">🔗 Link</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edLink()" title="Link"><svg width="13" height="13"><use href="#ilink"/></svg> Link</button>
           <span class="etsep"></span>
-          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="openImagePicker()" title="Inserir foto">📷 Foto</button>
+          <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="openImagePicker()" title="Inserir foto"><svg width="13" height="13"><use href="#icamera"/></svg> Foto</button>
           <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edVideo()" title="Inserir vídeo do YouTube">▶ Vídeo</button>
           <span class="etsep"></span>
           <button type="button" class="etbtn" onmousedown="event.preventDefault()" onclick="edCmd('insertHorizontalRule')" title="Separador de seção">— Separador</button>
@@ -789,21 +799,23 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
         <div><label class="adlbl">Pedidos de oração (um por linha)</label>
           <textarea class="adta" id="nIPr" style="min-height:80px" placeholder="Pela saúde de Malu e Cauê&#10;Pelo processo com a APMT&#10;..."></textarea>
         </div>
-        <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin-top:8px;background:var(--card-lo);border-radius:var(--r-md);padding:10px 12px">✉️ O e-mail aos parceiros não é enviado automaticamente. Depois de publicar, revise como o informativo ficou no app e, quando estiver tudo certo, use o botão "Avisar parceiros" na lista de informativos publicados.</p>
+        <p style="font-size:0.78rem;color:var(--text2);line-height:1.6;margin-top:8px;background:var(--card-lo);border-radius:var(--r-md);padding:10px 12px;display:flex;gap:8px"><svg width="14" height="14" style="flex-shrink:0;margin-top:3px"><use href="#imail"/></svg><span>O e-mail aos parceiros não é enviado automaticamente. Depois de publicar, revise como o informativo ficou no app e, quando estiver tudo certo, use o botão "Avisar parceiros" na lista de informativos publicados.</span></p>
         <div style="background:var(--card-lo);border-radius:var(--r-md);padding:14px;margin-top:4px">
           <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Resumo do informativo</div>
           <div id="newsSummaryFinal" style="font-size:0.82rem;color:var(--text2);line-height:1.65"></div>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(2)">← Voltar</button>
-          <button class="adbtn" style="flex:2;background:var(--green)" id="newsPublishBtn" onclick="addNews()">🌱 Publicar</button>
+          <button class="adbtn" style="flex:2;background:var(--green);display:inline-flex;align-items:center;justify-content:center;gap:6px" id="newsPublishBtn" onclick="addNews()"><svg width="14" height="14"><use href="#isd"/></svg>Publicar</button>
         </div>
       </div>
     </div>
+    </div><!-- /newsFormBlock -->
     </div><!-- /tab novo -->
 
     <div class="adtabsec" data-tab="antigos" style="display:none">
     <div class="adsl">Informativos publicados</div>
+    <div id="newsFormAntigosSlot"></div>
     <div id="existingNews" class="adcard"></div>
     </div><!-- /tab antigos -->
 
@@ -860,14 +872,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
     <div class="adcard">
       <div id="gaSavedView" style="display:none">
         <div style="display:flex;align-items:center;gap:10px;background:rgba(120,180,120,0.1);border:1px solid rgba(120,180,120,0.3);border-radius:var(--r-md);padding:12px 14px;margin-bottom:12px">
-          <span style="color:var(--green);font-size:1.1rem">✓</span>
+          <span style="color:var(--green)"><svg width="18" height="18"><use href="#icheck"/></svg></span>
           <div>
             <div style="font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3)">Conectado</div>
             <div id="gaSavedId" style="font-size:0.9rem;color:var(--text);font-family:monospace"></div>
           </div>
         </div>
         <div style="display:flex;gap:8px">
-          <a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="adbtn" style="flex:2;text-decoration:none;text-align:center;display:block">📊 Abrir no Google Analytics</a>
+          <a href="https://analytics.google.com/analytics/web/" target="_blank" rel="noopener noreferrer" class="adbtn" style="flex:2;text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="14" height="14"><use href="#ichart"/></svg>Abrir no Google Analytics</a>
           <button class="adbtn" style="flex:1;background:rgba(255,255,255,0.08);color:var(--text2)" onclick="editGA()">Editar</button>
         </div>
       </div>
@@ -1328,11 +1340,20 @@ function renderShares(){
 const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas'];
 let adminCurrentTab = null;
 
+function moveNewsFormTo(where){
+  const block = document.getElementById('newsFormBlock');
+  const slot = document.getElementById(where==='antigos' ? 'newsFormAntigosSlot' : 'newsFormNovoSlot');
+  if(block && slot) slot.appendChild(block);
+}
+
 function showAdminTab(tab){
   document.getElementById('adminMenu').style.display = 'none';
   ADMIN_TABS.forEach(t=>{
     document.querySelectorAll('.adtabsec[data-tab="'+t+'"]').forEach(el=>{ el.style.display = t===tab?'block':'none'; });
   });
+  // Navigating to "Novo informativo" from the menu always means starting fresh —
+  // pull the form back here and clear it, even if it was left mid-edit elsewhere.
+  if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
 }
@@ -1475,13 +1496,10 @@ function loadSavedSettings(){
   const muEl = document.getElementById('musicUrl');
   if(gaId && gaEl) gaEl.value = gaId;
   renderGA();
-  // Home verse — paint from cache immediately, fill admin fields, then confirm from Firebase
+  // Home verse — paint from cache immediately, fill admin field, then confirm from Firebase
   const savedVerse = localStorage.getItem('grao_home_verse');
-  const savedVerseEn = localStorage.getItem('grao_home_verse_en');
   const verseInput = document.getElementById('homeVerseInput');
-  const verseInputEn = document.getElementById('homeVerseInputEn');
   if(verseInput) verseInput.value = savedVerse || '';
-  if(verseInputEn) verseInputEn.value = savedVerseEn || '';
   displayHomeVerse();
   try{
     getDb().collection('settings').doc('home').get()
@@ -1489,7 +1507,6 @@ function loadSavedSettings(){
       if(doc.exists){
         const d = doc.data();
         if(d.verse){ localStorage.setItem('grao_home_verse', d.verse); if(verseInput) verseInput.value = d.verse; }
-        if(d.verseEn){ localStorage.setItem('grao_home_verse_en', d.verseEn); if(verseInputEn) verseInputEn.value = d.verseEn; }
         displayHomeVerse();
       }
     }).catch(()=>{});
@@ -1571,24 +1588,19 @@ function editGA(){
   if(el) el.value = localStorage.getItem('grao_ga_id') || '';
 }
 function displayHomeVerse(){
-  const pt = localStorage.getItem('grao_home_verse');
-  const en = localStorage.getItem('grao_home_verse_en');
+  const verse = localStorage.getItem('grao_home_verse');
   const hverse = document.querySelector('.hverse');
   if(!hverse) return;
-  if(currentLang==='en'){ hverse.textContent = en || pt || t('verse'); }
-  else { hverse.textContent = pt || t('verse'); }
+  hverse.textContent = verse || t('verse');
 }
 
 function saveHomeVerse(){
-  const pt = ((document.getElementById('homeVerseInput')||{}).value||'').trim();
-  const en = ((document.getElementById('homeVerseInputEn')||{}).value||'').trim();
-  if(!pt) return toast('Digite ao menos o versículo em português.');
-  localStorage.setItem('grao_home_verse', pt);
-  if(en) localStorage.setItem('grao_home_verse_en', en);
-  else localStorage.removeItem('grao_home_verse_en');
+  const verse = ((document.getElementById('homeVerseInput')||{}).value||'').trim();
+  if(!verse) return toast('Digite o versículo.');
+  localStorage.setItem('grao_home_verse', verse);
   displayHomeVerse();
   try{
-    getDb().collection('settings').doc('home').set({verse:pt, verseEn:en||null, updatedAt:new Date().toISOString()},{merge:true}).catch(()=>{});
+    getDb().collection('settings').doc('home').set({verse, updatedAt:new Date().toISOString()},{merge:true}).catch(()=>{});
   }catch(e){}
   toast('Versículo salvo para todos! ✓');
 }
@@ -1613,6 +1625,11 @@ function saveMusic(){
   if(vid && ytPlayer && ytPlayer.loadVideoById){ ytPlayer.loadVideoById({videoId:vid}); ytPlayer.playVideo(); mPlaying=true; document.getElementById('micon').setAttribute('href','#ipause'); }
 }
 
+function setPublishBtnLabel(icon, text){
+  const btn=document.getElementById('newsPublishBtn');
+  if(btn) btn.innerHTML = '<svg width="14" height="14"><use href="#'+icon+'"/></svg>'+text;
+}
+
 let newsEditId=null;
 
 function clearNewsForm(){
@@ -1620,10 +1637,10 @@ function clearNewsForm(){
   const ed=document.getElementById('nEditor'); if(ed) ed.innerHTML='';
   newsEditId=null;
   const badge=document.getElementById('newsEditingBadge'); if(badge) badge.style.display='none';
-  const btn=document.getElementById('newsPublishBtn'); if(btn) btn.textContent='🌱 Publicar';
+  const btn=document.getElementById('newsPublishBtn'); if(btn) setPublishBtnLabel('isd','Publicar');
 }
 
-function cancelNewsEdit(){ clearNewsForm(); newsGoStep(1); toast('Edição cancelada.'); }
+function cancelNewsEdit(){ clearNewsForm(); moveNewsFormTo('novo'); newsGoStep(1); toast('Edição cancelada.'); }
 
 async function markOldNewsAsRead(exceptId){
   // Clears the "Novo" badge from every other informativo when a new one is published.
@@ -1671,6 +1688,7 @@ async function addNews(){
     saveNews();
     try{ await getDb().collection('news').doc(String(newsEditId)).update({name,date,summary,contentHtml,prayers,sign}); }catch(e){}
     clearNewsForm();
+    moveNewsFormTo('novo');
     renderAll(); toast('Alterações salvas! ✓');
     if(btn){ btn.disabled=false; btn.textContent='🌱 Publicar'; }
     return;
@@ -1716,6 +1734,7 @@ function editNews(id){
   const n=D.news.find(x=>x.id===id);
   if(!n) return;
   newsEditId=id;
+  moveNewsFormTo('antigos');
   document.getElementById('nIT').value=n.name||'';
   document.getElementById('nID').value=n.date||'';
   document.getElementById('nIS').value=n.summary||'';
@@ -1724,7 +1743,7 @@ function editNews(id){
   const ed=document.getElementById('nEditor');
   if(ed) ed.innerHTML = n.contentHtml || legacyNewsToHtml(n);
   const badge=document.getElementById('newsEditingBadge'); if(badge) badge.style.display='flex';
-  const btn=document.getElementById('newsPublishBtn'); if(btn) btn.textContent='💾 Salvar alterações';
+  const btn=document.getElementById('newsPublishBtn'); if(btn) setPublishBtnLabel('iedit','Salvar alterações');
   newsGoStep(1);
   const admin=document.getElementById('adminScreen'); if(admin) admin.scrollTop=0;
   toast('Editando "'+n.name+'"');
@@ -1760,14 +1779,14 @@ function renderAdminNewsList(){
       <div style="flex:1;min-width:0">
         <div style="font-size:0.88rem;color:var(--text);font-weight:500">${n.name}${idx===0?' <span style="color:var(--accent);font-size:0.65rem;text-transform:uppercase">· novo</span>':''}</div>
         <div style="font-size:0.74rem;color:var(--text3);margin-top:2px">${n.date||''}</div>
-        <div style="font-size:0.72rem;margin-top:4px;color:${n.emailSent?'var(--green)':'var(--text3)'}">${n.emailSent?`✉️ Parceiros avisados em ${new Date(n.emailSentAt).toLocaleDateString('pt-BR')}`:'✉️ Parceiros ainda não avisados'}</div>
+        <div style="font-size:0.72rem;margin-top:4px;color:${n.emailSent?'var(--green)':'var(--text3)'};display:flex;align-items:center;gap:4px"><svg width="11" height="11"><use href="#imail"/></svg>${n.emailSent?`Parceiros avisados em ${new Date(n.emailSentAt).toLocaleDateString('pt-BR')}`:'Parceiros ainda não avisados'}</div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0">
-        <button onclick="editNews(${n.id})" title="Editar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer">✎</button>
+        <button onclick="editNews(${n.id})" title="Editar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="15" height="15"><use href="#iedit"/></svg></button>
         <button onclick="shareNews(${n.id},${attrJson(n.name)},${attrJson(n.summary)})" title="Compartilhar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer">↗</button>
-        <button onclick="delNews(${n.id})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;color:var(--red);cursor:pointer">✕</button>
+        <button onclick="delNews(${n.id})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="14" height="14"><use href="#iclose"/></svg></button>
       </div>
-      <button onclick="sendNewsEmail(${n.id})" style="width:100%;margin-top:8px;background:${n.emailSent?'rgba(255,255,255,0.08)':'var(--green)'};color:${n.emailSent?'var(--text2)':'#fff'};border:none;border-radius:8px;padding:9px;font-size:0.82rem;cursor:pointer">${n.emailSent?'✉️ Avisar parceiros de novo':'✉️ Avisar parceiros por e-mail'}</button>
+      <button onclick="sendNewsEmail(${n.id})" style="width:100%;margin-top:8px;background:${n.emailSent?'rgba(255,255,255,0.08)':'var(--green)'};color:${n.emailSent?'var(--text2)':'#fff'};border:none;border-radius:8px;padding:9px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="13" height="13"><use href="#imail"/></svg>${n.emailSent?'Avisar parceiros de novo':'Avisar parceiros por e-mail'}</button>
     </div>`).join('');
 }
 
@@ -1803,7 +1822,7 @@ function renderExistingPr(){
           ${iconOpts.map(([val,label])=>`<option value="${val}" ${((p.icon||prIco[i%prIco.length].slice(1))===val)?'selected':''}>${label}</option>`).join('')}
         </select>
       </div>
-      <button onclick='delPr(${JSON.stringify(p.id)})' title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer">✕</button>
+      <button onclick='delPr(${JSON.stringify(p.id)})' title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="14" height="14"><use href="#iclose"/></svg></button>
     </div>`).join('');
 }
 
@@ -1853,7 +1872,7 @@ function renderAdminTimeline(){
           <option value="active" ${t.status==='active'?'selected':''}>Em andamento</option>
           <option value="next" ${t.status==='next'?'selected':''}>Próximo passo</option>
         </select>
-        <button class="adbtn" style="background:rgba(255,90,90,0.15);color:#ff8080;flex:0 0 auto;padding:8px 12px" onclick="delTimeline(${t.id})">🗑</button>
+        <button class="adbtn" style="background:rgba(255,90,90,0.15);color:#ff8080;flex:0 0 auto;padding:8px 12px;display:flex;align-items:center" onclick="delTimeline(${t.id})"><svg width="14" height="14"><use href="#iclose"/></svg></button>
       </div>
     </div>`).join('');
 }
@@ -2570,8 +2589,8 @@ function loadMensais(filter){
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
             <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${esc(d.valor)||'—'}</span>
-            <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'}">
-              ${d.tipo==='cartao'?'💳 Cartão':'🔑 Pix'}
+            <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'};display:inline-flex;align-items:center;gap:4px">
+              <svg width="9" height="9"><use href="#${d.tipo==='cartao'?'icard':'ipix'}"/></svg>${d.tipo==='cartao'?'Cartão':'Pix'}
             </span>
           </div>
         </div>
@@ -2652,12 +2671,12 @@ function loadPending(){
           </div>
           <div style="display:flex;gap:8px">
             <button onclick='approvePending(${JSON.stringify(doc.id)})'
-              style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:9px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">
-              ✓ Aceitar
+              style="flex:1;background:var(--accent);color:var(--bg-deep);border:none;border-radius:10px;padding:9px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px">
+              <svg width="13" height="13"><use href="#icheck"/></svg>Aceitar
             </button>
             <button onclick='rejectPending(${JSON.stringify(doc.id)})'
-              style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:9px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif">
-              ✕ Recusar
+              style="flex:1;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:10px;padding:9px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px">
+              <svg width="13" height="13"><use href="#iclose"/></svg>Recusar
             </button>
           </div>
         </div>`;
