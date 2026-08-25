@@ -24,33 +24,39 @@ Não confundir com o **Grão Devocional**, que é outro app da família — esse
   Dá pra reverter pro arquivo anterior a qualquer momento pela aba de
   commits/deployments do repositório.
 
-## Estrutura do arquivo
+## Estrutura dos arquivos
 
-Tudo vive num único `index.html` (HTML + CSS + JavaScript juntos, sem build).
-Ele é grande (quase 3000 linhas) — aqui está o mapa de onde fica cada coisa:
+Desde ago/2026, o app está dividido em 3 arquivos (antes era tudo num
+`index.html` só de quase 3000 linhas):
 
-| Linhas (aprox.) | O que tem lá |
+| Arquivo | O que tem |
 |---|---|
-| 1-330 | `<head>`, CSS de todo o app, sprite de ícones SVG (`<symbol id="i...">`) |
-| 340-430 | Tela de login |
-| 378-430 | Modal de cadastro ("Quero ter acesso") |
-| 434-670 | Telas do app (Início, Família, Notícias, Caminhada, Parceria) |
-| 675-900 | Painel admin inteiro (menu + 7 abas) |
-| 900-1010 | Modais de contribuição financeira |
-| 1010+ | Todo o JavaScript |
+| `index.html` | Só a estrutura HTML das telas — login, cadastro, app, painel admin, modais. Carrega os outros dois arquivos via `<link>`/`<script src>`. |
+| `style.css` | Todo o CSS do app. |
+| `app.js` | Todo o JavaScript — funções, dados padrão, config do Firebase, inicialização. |
 
-Dentro do JavaScript, as funções não seguem uma ordem rígida, mas os blocos
-grandes são: autenticação/login (~1097-1240), painel admin
-(~1278-2030), textos/tradução (~2233-2360, hoje só português),
-renderização das telas públicas (~2360-2520), compartilhamento e
-métricas (~2522-2565), contribuições financeiras (~2564-2650),
-aprovação de parceiros (~2649-2745), e cadastro/pagamento (~2758-2940).
+**Ordem de carregamento importa:** no `index.html`, os `<script>` do
+EmailJS e do Firebase (CDN) vêm ANTES do `<script src="app.js">`, porque
+`app.js` chama `firebase.initializeApp(...)` logo depois de definir todas
+as funções — se a ordem for trocada, o app quebra inteiro. Ao editar o
+`index.html`, nunca mover o `app.js` pra antes desses CDNs.
 
-**Ícones:** o app usa um sprite SVG próprio (não emoji) definido no topo do
-arquivo, com símbolos tipo `#ih` (casa), `#in` (notícia), `#imny`
-(parceria), etc. Ao adicionar um botão novo, prefira reusar um símbolo
-existente ou criar um novo no mesmo estilo (`stroke-width="1.5"`,
-`viewBox="0 0 24 24"`) em vez de emoji.
+**Como editar:** style visual → `style.css`. Qualquer lógica, função,
+fluxo de dado → `app.js`. Nova tela, novo botão, estrutura de uma aba nova
+→ `index.html`. Os três arquivos precisam ser subidos juntos no GitHub
+sempre que algum dos três mudar (mesmo que só um tenha sido editado, não
+custa subir os três pra evitar esquecer).
+
+Dentro do `app.js`, os blocos grandes continuam na mesma ordem lógica de
+antes: autenticação/login, painel admin, textos, renderização das telas
+públicas, compartilhamento e métricas, contribuições financeiras,
+aprovação de parceiros, e cadastro/pagamento.
+
+**Ícones:** o app usa um sprite SVG próprio (não emoji), definido no topo
+do `index.html` (dentro do `<body>`, antes das telas), com símbolos tipo
+`#ih` (casa), `#in` (notícia), `#imny` (parceria), etc. Ao adicionar um
+botão novo, prefira reusar um símbolo existente ou criar um novo no mesmo
+estilo (`stroke-width="1.5"`, `viewBox="0 0 24 24"`) em vez de emoji.
 
 ## Autenticação e permissões
 
@@ -119,8 +125,8 @@ data-tab="...">`, escondida/mostrada via `showAdminTab()`:
 Registrado aqui pra não esquecer, não é uma crítica a ninguém — é só o
 estado real do projeto em ago/2026:
 
-1. **Arquivo único, sem separação de HTML/CSS/JS.** Funciona, mas cresce o
-   risco de um bug num canto afetar outro sem ninguém perceber na hora.
+1. ~~**Arquivo único, sem separação de HTML/CSS/JS.**~~ Resolvido — dividido
+   em `index.html`/`style.css`/`app.js`.
 2. **Sem testes automatizados.** Toda mudança precisa ser testada na mão,
    tela por tela.
 3. **Sem ambiente de teste/staging.** O que é publicado no GitHub Pages já
@@ -129,7 +135,7 @@ estado real do projeto em ago/2026:
    ID do Google Analytics, foto da família, listas de notícias/orações)
    — sincronizado manualmente por código espalhado em vários pontos. Já
    funcionou mal uma vez (ID do GA salvo só localmente, não em todo device).
-5. **Sem documentação de arquitetura** até este arquivo existir.
+5. ~~**Sem documentação de arquitetura**~~ Resolvido — este arquivo.
 
 ## Assuntos em aberto (ago/2026)
 
