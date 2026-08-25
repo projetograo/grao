@@ -540,6 +540,9 @@ function loadSavedSettings(){
   const savedPhoto = localStorage.getItem('grao_family_photo');
   if(savedPhoto){ if(famImg) famImg.src=savedPhoto; if(famPreview) famPreview.src=savedPhoto; }
   else if(famPreview && famImg) famPreview.src = famImg.src;
+  const savedPosX = localStorage.getItem('grao_family_photo_x');
+  const savedPosY = localStorage.getItem('grao_family_photo_y');
+  applyFamilyPhotoPosition(savedPosX!==null?savedPosX:50, savedPosY!==null?savedPosY:0);
   // Load from Firebase
   try{
     getDb().collection('settings').doc('music').get()
@@ -559,9 +562,48 @@ function loadSavedSettings(){
           if(famPreview) famPreview.src=d.familyPhotoUrl;
           localStorage.setItem('grao_family_photo',d.familyPhotoUrl);
         }
+        if(d.familyPhotoX!==undefined && d.familyPhotoY!==undefined){
+          localStorage.setItem('grao_family_photo_x', d.familyPhotoX);
+          localStorage.setItem('grao_family_photo_y', d.familyPhotoY);
+          applyFamilyPhotoPosition(d.familyPhotoX, d.familyPhotoY);
+        }
       }
     }).catch(()=>{});
   }catch(e){}
+}
+
+// Applies the crop position to both the public photo and the admin preview,
+// and keeps the two sliders in sync with it (without re-triggering a save).
+function applyFamilyPhotoPosition(x, y){
+  const pos = x+'% '+y+'%';
+  const famImg = document.getElementById('familyPhotoImg');
+  const famPreview = document.getElementById('familyPhotoPreview');
+  if(famImg) famImg.style.objectPosition = pos;
+  if(famPreview) famPreview.style.objectPosition = pos;
+  const xEl = document.getElementById('familyPhotoPosX');
+  const yEl = document.getElementById('familyPhotoPosY');
+  if(xEl) xEl.value = x;
+  if(yEl) yEl.value = y;
+}
+
+let familyPhotoSaveTimer = null;
+function updateFamilyPhotoPosition(){
+  const x = (document.getElementById('familyPhotoPosX')||{}).value ?? 50;
+  const y = (document.getElementById('familyPhotoPosY')||{}).value ?? 0;
+  applyFamilyPhotoPosition(x, y);
+  localStorage.setItem('grao_family_photo_x', x);
+  localStorage.setItem('grao_family_photo_y', y);
+  // Debounced — only writes to Firestore once the person stops dragging for
+  // a moment, instead of on every pixel of movement.
+  clearTimeout(familyPhotoSaveTimer);
+  familyPhotoSaveTimer = setTimeout(()=>{
+    try{
+      getDb().collection('settings').doc('appearance').set(
+        {familyPhotoX:Number(x), familyPhotoY:Number(y), updatedAt:new Date().toISOString()},
+        {merge:true}
+      ).then(()=>toast('Posição da foto salva! ✓')).catch(()=>toast('Salvo só neste navegador.'));
+    }catch(e){}
+  }, 500);
 }
 
 async function uploadFamilyPhoto(file){
@@ -573,12 +615,16 @@ async function uploadFamilyPhoto(file){
     const ref=getStorage().ref().child(path);
     await ref.put(file);
     const url=await ref.getDownloadURL();
-    await getDb().collection('settings').doc('appearance').set({familyPhotoUrl:url,updatedAt:new Date().toISOString()},{merge:true});
+    // Keep whatever crop position is already set (from the sliders) rather
+    // than resetting it — most photos benefit from a similar framing.
+    const x = Number((document.getElementById('familyPhotoPosX')||{}).value ?? 50);
+    const y = Number((document.getElementById('familyPhotoPosY')||{}).value ?? 0);
+    await getDb().collection('settings').doc('appearance').set({familyPhotoUrl:url,familyPhotoX:x,familyPhotoY:y,updatedAt:new Date().toISOString()},{merge:true});
     localStorage.setItem('grao_family_photo',url);
     const img=document.getElementById('familyPhotoImg'); if(img) img.src=url;
     const preview=document.getElementById('familyPhotoPreview'); if(preview) preview.src=url;
-    if(status) status.textContent='Foto atualizada para todos! ✓';
-    setTimeout(()=>{ if(status) status.textContent=''; },2500);
+    if(status) status.textContent='Foto atualizada para todos! ✓ Ajuste a posição abaixo se precisar.';
+    setTimeout(()=>{ if(status) status.textContent=''; },3500);
   }catch(e){
     if(status) status.textContent='Erro ao enviar: '+(e.message||'tente novamente');
   }
@@ -816,6 +862,8 @@ function addPrayer(){
   savePrayers();
   try{ getDb().collection('prayers').doc(String(id)).set({title,body,icon,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
   ['nPT','nPB'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const sel=document.getElementById('nPI'); if(sel) sel.value='ihrt';
+  const prev=document.getElementById('nPIPreview'); if(prev) prev.setAttribute('href','#ihrt');
   renderPrayer(); renderPrayerPartner(); renderAdmin(); renderExistingPr(); toast('Adicionado!');
 }
 
@@ -829,18 +877,22 @@ function delPr(id){
 function renderExistingPr(){
   const el=document.getElementById('existingPr'); if(!el)return;
   if(!D.prayers.length){el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum motivo de oração ainda.</p>';return;}
-  const iconOpts=[['ihrt','❤️ Coração'],['ihands','🙏 Mãos unidas'],['if','👨‍👩‍👧 Família'],['igl','🌍 Mundo'],['im','📖 Aliança'],['isd','🌱 Broto'],['ih','🏠 Casa'],['ibk','📚 Livro'],['ibb','👶 Bebê'],['imny','💰 Provisão']];
-  el.innerHTML=D.prayers.map((p,i)=>`
+  const iconOpts=[['ihrt','Coração'],['ihands','Mãos unidas'],['if','Família'],['igl','Mundo'],['im','Aliança'],['isd','Broto'],['ih','Casa'],['ibk','Livro'],['ibb','Bebê'],['imny','Provisão']];
+  el.innerHTML=D.prayers.map((p,i)=>{
+    const currentIcon = p.icon||prIco[i%prIco.length].slice(1);
+    return `
     <div class="adcard" style="margin-bottom:8px;padding:12px;display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--card-lo);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--accent)"><svg width="17" height="17"><use href="#${currentIcon}" id="prIcoPreview_${p.id}"/></svg></div>
       <div style="flex:1;min-width:0">
         <div style="font-size:0.86rem;font-weight:600">${p.title}</div>
         <div style="font-size:0.78rem;color:var(--text2);margin-top:2px">${p.body}</div>
-        <select class="adsel adinp" style="margin-top:8px" onchange="updatePrayerIcon(${JSON.stringify(p.id)}, this.value)">
-          ${iconOpts.map(([val,label])=>`<option value="${val}" ${((p.icon||prIco[i%prIco.length].slice(1))===val)?'selected':''}>${label}</option>`).join('')}
+        <select class="adsel adinp" style="margin-top:8px" onchange="document.getElementById('prIcoPreview_${p.id}').setAttribute('href','#'+this.value); updatePrayerIcon(${JSON.stringify(p.id)}, this.value)">
+          ${iconOpts.map(([val,label])=>`<option value="${val}" ${(currentIcon)===val?'selected':''}>${label}</option>`).join('')}
         </select>
       </div>
       <button onclick='delPr(${JSON.stringify(p.id)})' title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;flex:0 0 auto;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="14" height="14"><use href="#iclose"/></svg></button>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function updatePrayerIcon(id, icon){
