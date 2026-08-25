@@ -6,14 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#4A2E20">
 <link rel="manifest" href="manifest.json">
-<!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-KNC0KYVRG4"></script>
-<script>
-window.dataLayer=window.dataLayer||[];
-function gtag(){dataLayer.push(arguments);}
-gtag('js',new Date());
-gtag('config','G-KNC0KYVRG4');
-</script>
+<!-- Google Analytics is now loaded dynamically from app.js, using whatever
+     ID is configured in the admin panel (falls back to a default if none
+     is set yet) — see loadGoogleAnalytics() in app.js. -->
 <!-- Firebase -->
 
 <meta name="apple-mobile-web-app-capable" content="yes">

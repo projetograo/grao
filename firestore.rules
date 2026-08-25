@@ -1,0 +1,108 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin = signed in AND their own approved profile has admin:true.
+    // This is what stops a regular partner from just editing their own
+    // profile doc in the console to grant themselves admin.
+    function isAdmin() {
+      return isSignedIn() &&
+        exists(/databases/$(database)/documents/profiles/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.admin == true &&
+        get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.status == 'approved';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // profiles/{uid} — one doc per Auth user, doc ID == uid
+    match /profiles/{uid} {
+      // Anyone can create their OWN profile at signup (submitRegister),
+      // but can't hand themselves admin or pre-approve themselves. Nothing
+      // in the app creates a profile for someone else's uid anymore (the
+      // admin panel only sends an invite e-mail — the person still signs
+      // themselves up), so there's no admin-create case to allow here.
+      allow create: if isOwner(uid)
+        && request.resource.data.admin == false
+        && request.resource.data.status == 'pending';
+
+      // A user can always read their own profile (needed at login to check
+      // status/admin); admins can read anyone's for the admin panel.
+      allow get: if isOwner(uid) || isAdmin();
+
+      // Listing/querying the collection (approve panel, admin search, the
+      // approved-partners list) is admin-only.
+      allow list: if isAdmin();
+
+      // Admins can update anything (approve/reject, grant/revoke admin).
+      // A user can update their OWN doc (e.g. future profile edits) but
+      // may never touch their own admin or status fields — that would be
+      // silent self-promotion / self-approval.
+      allow update: if isAdmin()
+        || (isOwner(uid)
+            && request.resource.data.admin == resource.data.admin
+            && request.resource.data.status == resource.data.status);
+
+      allow delete: if isAdmin();
+    }
+
+    // Published content: safe to read without login (it's what powers the
+    // pre-login/initial page load in index.html), but only admins publish.
+    match /news/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /prayers/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /timeline/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Aggregate usage counters — any signed-in partner increments them via
+    // track(); only admins need to read them (shown in the admin panel).
+    // Admin activity is filtered out client-side before it ever reaches here.
+    match /metrics/{docId} {
+      allow read: if isAdmin();
+      allow write: if isSignedIn();
+    }
+
+    // Individual share events (who shared what, and when) — a signed-in
+    // partner can log their own share, but can't read the log of everyone
+    // else's; only admins see who shared what.
+    match /shares/{docId} {
+      allow create: if isSignedIn() && request.resource.data.email == request.auth.token.email;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    // App-wide settings (music pick, family photo, etc.) — readable by any
+    // signed-in partner, editable only by admins. The 'analytics' doc is the
+    // one exception: it holds only the public Google Analytics measurement
+    // ID, which is never confidential (it's visible in any page's HTML
+    // source anyway) and needs to load for anonymous visitors too, before
+    // they've logged in.
+    match /settings/{docId} {
+      allow read: if docId == 'analytics' || isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Monthly-partner contribution submissions — a signed-in partner can
+    // create their own; only admins list/manage/close them out.
+    match /parceiros_mensais/{docId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Everything else (including the now-retired 'partners' and 'admins'
+    // collections) is denied by default — no rule below means no access.
+  }
+}

@@ -83,7 +83,7 @@ estilo (`stroke-width="1.5"`, `viewBox="0 0 24 24"`) em vez de emoji.
 | `news` | só admin | público | informativos publicados |
 | `prayers` | só admin | público | motivos de oração gerais |
 | `timeline` | só admin | público | marcos da Caminhada |
-| `settings` | só admin | qualquer logado | versículo, música, foto da família (docs `home`, `music`, `appearance`) |
+| `settings` | só admin | qualquer logado (doc `analytics` é público, de propósito — ver nota abaixo) | versículo, música, foto da família (`home`, `music`, `appearance`), ID do Google Analytics (`analytics`) |
 | `metrics` | qualquer logado (exceto admin, filtrado no código) | só admin | contadores de uso |
 | `shares` | qualquer logado | só admin | quem compartilhou o quê |
 | `parceiros_mensais` | qualquer logado (criação) / admin (edição) | só admin | contribuições financeiras cadastradas |
@@ -131,11 +131,22 @@ estado real do projeto em ago/2026:
    tela por tela.
 3. **Sem ambiente de teste/staging.** O que é publicado no GitHub Pages já
    é visto por qualquer parceiro imediatamente.
-4. **Dado duplicado entre `localStorage` e Firestore** (música, versículo,
-   ID do Google Analytics, foto da família, listas de notícias/orações)
-   — sincronizado manualmente por código espalhado em vários pontos. Já
-   funcionou mal uma vez (ID do GA salvo só localmente, não em todo device).
-5. ~~**Sem documentação de arquitetura**~~ Resolvido — este arquivo.
+4. ~~**Google Analytics não sincronizava e nem controlava o rastreamento
+   real.**~~ Resolvido — agora carrega dinamicamente (`loadGoogleAnalytics()`
+   em `app.js`) com o ID salvo em `settings/analytics` no Firestore, com
+   `DEFAULT_GA_ID` como fallback. Trocar o ID salvo só tem efeito completo
+   depois de recarregar a página (o gtag não troca de ID limpo em tempo
+   real).
+5. **`localStorage` ainda é usado como cache de leitura rápida** pra
+   música, versículo e foto da família (Firestore continua sendo a fonte
+   de verdade, e sempre sobrescreve o cache ao carregar) — isso é
+   intencional, não um bug, mas vale saber que existe esse padrão ao mexer
+   nessas telas.
+6. **Sem testes automatizados.** Toda mudança precisa ser testada na mão,
+   tela por tela.
+7. **Sem ambiente de teste/staging.** O que é publicado no GitHub Pages já
+   é visto por qualquer parceiro imediatamente.
+8. ~~**Sem documentação de arquitetura**~~ Resolvido — este arquivo.
 
 ## Assuntos em aberto (ago/2026)
 

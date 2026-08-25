@@ -1,15 +1,28 @@
 const MID='c0VO-WfnW0k';
 const STRIPE_LINKS = { geral: 'https://buy.stripe.com/8x2fZadaKbH1eln8Roak000' };
 const STRIPE_PK='pk_live_51TTU4m3O6qoVuJnRZrtaodgORjpb8Lil6G2bzYd1QJ4I85y8ozbIDDS1bkpsFBxwiJygSyjr8IfyksQTzfohWb5J00FZMbhnQI';
+const DEFAULT_GA_ID='G-KNC0KYVRG4'; // used until an admin saves a different one
 function getDb(){ return window.db||db; }
 let mPlaying=false,me=null;
 
-// ── PERSISTENCE ──
-function saveUsers(){ localStorage.setItem('grao_users', JSON.stringify(D.users)); }
-function loadUsers(){
-  const saved = localStorage.getItem('grao_users');
-  if(saved){ try{ D.users = JSON.parse(saved); }catch(e){} }
+// Loads Google Analytics dynamically with whatever ID is actually configured,
+// instead of a fixed ID baked into the HTML — so the admin panel's "save"
+// button does something real. Safe to call more than once; only the first
+// call actually injects the script.
+function loadGoogleAnalytics(id){
+  if(window._gaLoaded) return;
+  window._gaLoaded = true;
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function(){ dataLayer.push(arguments); };
+  gtag('js', new Date());
+  gtag('config', id);
+  const s = document.createElement('script');
+  s.async = true;
+  s.src = 'https://www.googletagmanager.com/gtag/js?id=' + id;
+  document.head.appendChild(s);
 }
+
+// ── PERSISTENCE ──
 function saveNews(){ localStorage.setItem('grao_news', JSON.stringify(D.news)); }
 function loadNews(){
   const saved = localStorage.getItem('grao_news');
@@ -87,8 +100,22 @@ const D={
 // Load all persisted data after Firebase is ready
 function initData(){
   loadNews(); loadPrayers(); loadTimeline();
-  const gaId=localStorage.getItem('grao_ga_id');
-  if(gaId) window._gaId=gaId;
+  // Paint Analytics instantly from whatever was cached last time (or the
+  // default), then confirm from Firestore — same cache-then-confirm pattern
+  // used for music/verse/photo elsewhere in this file.
+  loadGoogleAnalytics(localStorage.getItem('grao_ga_id') || DEFAULT_GA_ID);
+  try{
+    getDb().collection('settings').doc('analytics').get()
+    .then(doc=>{
+      const id = doc.exists && doc.data().gaId;
+      if(id && id !== localStorage.getItem('grao_ga_id')){
+        localStorage.setItem('grao_ga_id', id);
+        // A different ID than what was already loaded requires a fresh
+        // page load to take effect cleanly (gtag doesn't support swapping
+        // the measurement ID after the script has already initialized).
+      }
+    }).catch(()=>{});
+  }catch(e){}
   loadPartnersFromFirebase();
   loadNewsFromFirebase();
   loadPrayersFromFirebase();
@@ -479,7 +506,7 @@ function toggleEye(inputId, btn){
 }
 
 function loadSavedSettings(){
-  const gaId = localStorage.getItem('grao_ga_id');
+  const gaId = localStorage.getItem('grao_ga_id') || DEFAULT_GA_ID;
   const mName = localStorage.getItem('grao_music_name');
   const mId = localStorage.getItem('grao_music_id');
   const gaEl = document.getElementById('gaId');
@@ -559,24 +586,19 @@ async function uploadFamilyPhoto(file){
 }
 
 function renderGA(){
-  const id = localStorage.getItem('grao_ga_id');
+  const id = localStorage.getItem('grao_ga_id') || DEFAULT_GA_ID;
   const saved = document.getElementById('gaSavedView');
   const edit = document.getElementById('gaEditView');
   if(!saved || !edit) return;
-  if(id){
-    document.getElementById('gaSavedId').textContent = id;
-    saved.style.display = 'block';
-    edit.style.display = 'none';
-  } else {
-    saved.style.display = 'none';
-    edit.style.display = 'flex';
-  }
+  document.getElementById('gaSavedId').textContent = id;
+  saved.style.display = 'block';
+  edit.style.display = 'none';
 }
 function editGA(){
   document.getElementById('gaSavedView').style.display = 'none';
   document.getElementById('gaEditView').style.display = 'flex';
   const el = document.getElementById('gaId');
-  if(el) el.value = localStorage.getItem('grao_ga_id') || '';
+  if(el) el.value = localStorage.getItem('grao_ga_id') || DEFAULT_GA_ID;
 }
 function displayHomeVerse(){
   const verse = localStorage.getItem('grao_home_verse');
@@ -600,7 +622,11 @@ function saveGA(){
   const id = (document.getElementById('gaId')||{}).value||'';
   if(!id) return toast('Informe o ID.');
   localStorage.setItem('grao_ga_id', id);
-  toast('Google Analytics salvo!');
+  try{
+    getDb().collection('settings').doc('analytics').set({gaId:id, updatedAt:new Date().toISOString()},{merge:true})
+      .then(()=>toast('Google Analytics salvo para todos! Recarregue a página pra ativar nesta sessão.'))
+      .catch(()=>toast('Salvo só neste navegador — não foi possível sincronizar.'));
+  }catch(e){ toast('Salvo só neste navegador.'); }
   renderGA();
 }
 
