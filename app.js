@@ -271,10 +271,10 @@ function renderUserList(){
         return;
       }
       el.innerHTML = partners.map(doc=>{
-        const u=doc.data();
+        const u=doc.data(); window._perfis=window._perfis||{}; _perfis[doc.id]={id:doc.id,...u};
         return `<div class="adrow">
-          <div class="adri">
-            <div class="adrt">${esc(u.nome||u.email)}</div>
+          <div class="adri" style="cursor:pointer" onclick='showPerfil(${JSON.stringify(doc.id)})'>
+            <div class="adrt">${esc(u.nome||u.email)} <span style="color:var(--accent);font-size:.8rem;font-weight:400">ver</span></div>
             <div class="adrm">${esc(u.email)}</div>
           </div>
           <button class="addel" onclick='delUserById(${JSON.stringify(doc.id)},this)'>Remover</button>
@@ -377,7 +377,7 @@ function showAdminTab(tab){
   // pull the form back here and clear it, even if it was left mid-edit elsewhere.
   if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
   if(tab==='historico'){ try{ loadAudit(); }catch(e){} }
-  if(tab==='pendentes'){ try{ loadPending(); renderUserList(); }catch(e){} }
+  if(tab==='pendentes'){ try{ loadPending(); renderUserList(); loadAdmins(); }catch(e){} }
   if(tab==='metricas'){ try{ loadAdoption(); }catch(e){} }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
@@ -1793,8 +1793,9 @@ function loadAdmins(){
       .filter(doc=>doc.data().email!=='admin@grao.com')
       .map(doc=>{
         const d=doc.data();
+        window._perfis=window._perfis||{}; _perfis[doc.id]={id:doc.id,...d};
         return `<div class="adrow">
-          <div class="adri"><div class="adrt">${esc(d.nome)||'Admin'}</div><div class="adrm">${esc(d.email)}</div></div>
+          <div class="adri" style="cursor:pointer" onclick='showPerfil(${JSON.stringify(doc.id)})'><div class="adrt">${esc(d.nome)||'Admin'} <span style="color:var(--accent);font-size:.8rem;font-weight:400">ver</span></div><div class="adrm">${esc(d.email)}</div></div>
           <button class="addel" onclick='delAdmin(${JSON.stringify(doc.id)},${JSON.stringify(d.email)})'>Remover</button>
         </div>`;
       });
@@ -2526,7 +2527,7 @@ function discardDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} cl
 })();
 // botão voltar do celular fecha o modal aberto em vez de sair do app
 (function(){
-  const MODS=['fichaModal','privModal','installModal','contribuicaoModal','regModal'];
+  const MODS=['fichaModal','privModal','installModal','contribuicaoModal','perfilModal','waModal','contatoModal'];
   const aberto=()=>MODS.map(i=>document.getElementById(i)).find(m=>m&&m.style.display&&m.style.display!=='none');
   new MutationObserver(()=>{ if(aberto() && !history.state?.modal) history.pushState({modal:1},''); }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
   window.addEventListener('popstate',()=>{ const m=aberto(); if(m) m.style.display='none'; });
@@ -2745,5 +2746,57 @@ async function destacarInscrito(uid){
     if(!fs.empty){ await fs.docs[0].ref.update({destaque:true,proximoContato:isoMaisDias(new Date(),3)}); }
     else{ await getDb().collection('parceiros_mensais').add({ nome:p.nome||'', email:String(p.email||'').toLowerCase(), phone:p.whatsapp||'', cidade:p.cidade||'', nascimento:p.nascimento||'', categoria:'inscrito', destaque:true, profileUid:uid, tipo:'manual', data:new Date().toLocaleDateString('pt-BR'), timestamp:new Date().toISOString(), contribuicoes:[], proximoContato:isoMaisDias(new Date(),3) }); }
     toast((p.nome||'').split(' ')[0]+' agora tem atenção especial'); logAcao('Deu atenção especial a '+(p.nome||''));
+  }catch(e){ toast('Erro: '+e.message); }
+}
+
+// ══ Perfil de um parceiro: informações e ações (tornar admin, ficha) ══
+function perfilLinha(rot,val){ return val?`<div style="padding:11px 0;border-bottom:1px solid var(--border)"><div style="font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:3px">${rot}</div><div style="font-size:1rem;color:var(--text);line-height:1.5">${val}</div></div>`:''; }
+function fmtData(iso){ if(!iso) return ''; const d=new Date(iso); return isNaN(d)?'':d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function showPerfil(uid){
+  const p=(window._perfis||{})[uid]; if(!p) return;
+  document.getElementById('pfNome').textContent=p.nome||p.email;
+  const nasc=p.nascimento?new Date(p.nascimento+'T12:00:00').toLocaleDateString('pt-BR'):'';
+  document.getElementById('pfInfo').innerHTML =
+    perfilLinha('Função',p.admin?'Administrador':'Parceiro')+
+    perfilLinha('E-mail',esc(p.email))+
+    perfilLinha('WhatsApp',p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366">${esc(p.whatsapp)}</a>`:'')+
+    perfilLinha('Cidade',esc(p.cidade||''))+
+    perfilLinha('Nascimento',nasc)+
+    perfilLinha('Pediu acesso em',fmtData(p.requestedAt))+
+    perfilLinha('Aprovado em',fmtData(p.approvedAt))+
+    perfilLinha('Último acesso',fmtData(p.lastSeenAt)+(p.acessos?' ('+p.acessos+' acessos)':''))+
+    perfilLinha('App na tela inicial',(p.installedAt||p.standalone)?'Sim':'Ainda não')+
+    perfilLinha('Notificações',p.pushOn?'Ativadas':'Ainda não');
+  document.getElementById('pfAcoes').innerHTML =
+    `<button class="adbtn" onclick='perfilFicha(${JSON.stringify(uid)})'>Abrir ficha de acompanhamento</button>`+
+    (p.whatsapp?`<button class="adbtn" style="background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(uid)},_perfis[${JSON.stringify(uid)}]);closePerfil()'>Mandar mensagem no WhatsApp</button>`:'')+
+    (p.admin?`<button class="adbtn" style="background:transparent;border:1px solid var(--red);color:var(--red)" onclick='setAdmin(${JSON.stringify(uid)},false)'>Remover como admin</button>`
+            :`<button class="adbtn" style="background:var(--green);color:#fff" onclick='setAdmin(${JSON.stringify(uid)},true)'>Tornar admin</button>`);
+  const m=document.getElementById('perfilModal'); document.body.appendChild(m); m.style.display='flex';
+}
+function closePerfil(){ document.getElementById('perfilModal').style.display='none'; }
+async function setAdmin(uid,flag){
+  const p=(window._perfis||{})[uid]; if(!p) return;
+  if(flag && p.status!=='approved') return toast('Aprove o cadastro antes de tornar admin.');
+  try{ if(!flag && getAuth().currentUser && getAuth().currentUser.uid===uid) return toast('Você não pode remover o seu próprio acesso.'); }catch(e){}
+  if(!confirm(flag?`Dar acesso de administrador a ${p.nome||p.email}? Poderá ver e editar tudo neste painel.`:`Remover o acesso de administrador de ${p.nome||p.email}?`)) return;
+  try{
+    await getDb().collection('profiles').doc(uid).update({admin:flag});
+    p.admin=flag; logAcao((flag?'Deu acesso de admin a ':'Removeu o admin ')+(p.nome||p.email));
+    toast(flag?'Agora é administrador.':'Admin removido.'); closePerfil(); loadAdmins(); renderUserList();
+  }catch(e){ toast('Erro: '+e.message); }
+}
+async function perfilFicha(uid){
+  const p=(window._perfis||{})[uid]; if(!p) return;
+  try{
+    const email=String(p.email||'').toLowerCase();
+    const fs=await getDb().collection('parceiros_mensais').where('email','==',email).get();
+    let id;
+    if(!fs.empty){ id=fs.docs[0].id; _mensaisById[id]={id,...fs.docs[0].data()}; }
+    else{
+      const ref=await getDb().collection('parceiros_mensais').add({ nome:p.nome||'', email, phone:p.whatsapp||'', cidade:p.cidade||'', nascimento:p.nascimento||'', categoria:'inscrito', profileUid:uid, tipo:'manual', data:new Date().toLocaleDateString('pt-BR'), timestamp:new Date().toISOString(), contribuicoes:[], proximoContato:isoMaisDias(new Date(),30) });
+      id=ref.id; _mensaisById[id]={id,nome:p.nome||'',email,phone:p.whatsapp||'',cidade:p.cidade||'',nascimento:p.nascimento||'',categoria:'inscrito'};
+    }
+    closePerfil(); openFicha(id);
   }catch(e){ toast('Erro: '+e.message); }
 }
