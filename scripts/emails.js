@@ -154,4 +154,22 @@ function familyBirthdays({ itens }) {
   return { subject: subj, html, text };
 }
 
-module.exports = { welcome, news, birthday, prayers, familyBirthdays, firstName, esc, APP_URL };
+// Resumo semanal para a família: quem cuidar, aniversários, boas-vindas e inscrições esperando.
+function weeklyCare({ cuidar, aniversarios, boasVindas, pendentes }) {
+  const sec = (titulo, linhas) => linhas.length ? `<div style="margin:0 0 18px"><div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#B7763A;margin-bottom:8px">${esc(titulo)}</div>${linhas.map((l) => `<div style="background:#F8F1E9;border-left:3px solid #E8A870;border-radius:6px;padding:10px 14px;margin:0 0 8px;font-size:14px;line-height:1.6;color:#3B2619">${l}</div>`).join('')}</div>` : '';
+  const html = layout({
+    preheader: 'Quem cuidar nesta semana',
+    title: 'Semana de cuidado 🌱',
+    bodyHtml: `<p style="margin:0 0 16px">Sem pressa: uma conversa de cada vez, do jeito de vocês.</p>`
+      + sec('Para conversar', cuidar.map((c) => `<b>${esc(c.nome)}</b> · ${esc(c.quando)}${c.phone ? ' · ' + esc(c.phone) : ''}${c.nota ? `<br><span style="color:#8C7260">Última conversa: ${esc(c.nota)}</span>` : ''}`))
+      + sec('Aniversários dos próximos dias', aniversarios.map((a) => `<b>${esc(a.quem)}</b> · ${esc(a.quando)}${a.rel ? ' · ' + esc(a.rel) : ''}`))
+      + sec('Boas-vindas no WhatsApp esperando', boasVindas.map((b) => `<b>${esc(b.nome)}</b>${b.phone ? ' · ' + esc(b.phone) : ''}`))
+      + sec('Inscrições para aceitar', pendentes.map((p) => `<b>${esc(p.nome)}</b>${p.cidade ? ' · ' + esc(p.cidade) : ''}`)),
+    buttonLabel: 'Abrir o painel',
+    interno: true,
+  });
+  const total = cuidar.length + aniversarios.length + boasVindas.length + pendentes.length;
+  return { subject: `🌱 Semana de cuidado: ${total} ${total === 1 ? 'coisa' : 'coisas'}`, html, text: `Para conversar: ${cuidar.map((c) => c.nome).join(', ') || '—'}` };
+}
+
+module.exports = { welcome, news, birthday, prayers, familyBirthdays, weeklyCare, firstName, esc, APP_URL };

@@ -358,7 +358,7 @@ function renderShares(){
   }).catch(e=>{ console.log('renderShares error:',e); el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Não foi possível carregar.</p>'; });
 }
 
-const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas'];
+const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas','historico'];
 let adminCurrentTab = null;
 
 function moveNewsFormTo(where){
@@ -375,6 +375,7 @@ function showAdminTab(tab){
   // Navigating to "Novo informativo" from the menu always means starting fresh —
   // pull the form back here and clear it, even if it was left mid-edit elsewhere.
   if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
+  if(tab==='historico'){ try{ loadAudit(); }catch(e){} }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
 }
@@ -1627,7 +1628,7 @@ function loadMensais(filter){
     }
     let docs = snap.docs.map(doc=>({id:doc.id,...doc.data()}));
     _mensaisById = {}; docs.forEach(x=>{ _mensaisById[x.id]=x; });
-    try{ renderNextBdays(docs); }catch(e){}
+    try{ renderNextBdays(docs); renderCuidar(docs); }catch(e){}
     if(filter && filter!=='todos') docs=docs.filter(d=>d.tipo===filter);
     
     if(docs.length===0){
@@ -1654,6 +1655,7 @@ function loadMensais(filter){
         <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
             <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">Ficha</div>
+            <button onclick='openContato(${JSON.stringify(d.id)})' style="background:rgba(232,168,112,.15);color:var(--accent);border:1px solid var(--accent);border-radius:50px;padding:4px 12px;font-size:.68rem;cursor:pointer;font-family:'Inter',sans-serif;margin-right:6px">💬 Registrei contato</button>
             <button onclick='openFicha(${JSON.stringify(d.id)})' style="background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:4px 12px;font-size:.68rem;cursor:pointer;font-family:'Inter',sans-serif">✎ Editar</button>
           </div>
           ${fichaResumoHtml(d)}
@@ -1724,7 +1726,7 @@ function loadPending(){
         return;
       }
       el.innerHTML = snap.docs.map(doc=>{
-        const d = doc.data();
+        const d = doc.data(); window._pendNames=window._pendNames||{}; _pendNames[doc.id]=d.nome;
         return `<div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:8px">
           <div style="margin-bottom:6px">
             <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${esc(d.nome)}</div>
@@ -2368,6 +2370,7 @@ function fichaResumoHtml(d){
   if(d.outrosFamiliares) L.push(`🏠 ${esc(d.outrosFamiliares)}`);
   if(d.oracao) L.push(`🙏 ${esc(d.oracao)}`);
   if(d.notas) L.push(`📝 ${esc(d.notas)}`);
+  const crm=crmLinha(d); if(crm) L.push(crm);
   // o que ainda não sabemos — convite gentil para ir conhecendo aos poucos
   const falta=[];
   if(!d.nascimento) falta.push('aniversário');
@@ -2571,4 +2574,103 @@ function loadWaPending(){
       <button class="adbtn" style="width:auto;padding:8px 14px;background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(p.id)},window._waById[${JSON.stringify(p.id)}])'>Boas-vindas</button></div>`).join('')
       : '<p style="font-size:.82rem;color:var(--text3)">Ninguém esperando boas-vindas. Quando você aceitar alguém, o botão aparece aqui.</p>';
   }).catch(()=>{ el.innerHTML='<p style="font-size:.82rem;color:var(--red)">Não foi possível carregar.</p>'; });
+}
+
+// ══ Histórico de modificações (auditoria) ══
+function logAcao(acao){
+  try{
+    const u=getAuth().currentUser; if(!u||!me||!me.admin) return;
+    getDb().collection('auditoria').add({ uid:u.uid, quem:(me.nome||'').split(' ')[0]||me.email||'admin', email:me.email||u.email||'', acao:String(acao).slice(0,200), quando:new Date().toISOString() }).catch(()=>{});
+  }catch(e){}
+}
+(function(){
+  const nomeNews=id=>((D.news.find(n=>String(n.id)===String(id))||{}).name)||'';
+  const nomePr=id=>((D.prayers.find(p=>String(p.id)===String(id))||{}).title)||'';
+  const nomeTl=id=>((D.timeline.find(t=>String(t.id)===String(id))||{}).title)||'';
+  const M={
+    addNews:()=> (newsEditId?'Editou':'Publicou')+' o informativo "'+(g('nIT')||'')+'"',
+    delNews:id=>'Removeu o informativo "'+nomeNews(id)+'"',
+    sendNewsEmail:id=>'Avisou os parceiros sobre "'+nomeNews(id)+'"',
+    addPrayer:()=>'Adicionou motivo de oração "'+g('nPT')+'"',
+    delPr:id=>'Removeu motivo de oração "'+nomePr(id)+'"',
+    addTimeline:()=>'Adicionou à linha do tempo "'+g('nTT')+'"',
+    delTimeline:id=>'Removeu da linha do tempo "'+nomeTl(id)+'"',
+    approvePending:id=>'Aceitou a inscrição de '+((window._pendNames||{})[id]||'alguém'),
+    rejectPending:id=>'Recusou a inscrição de '+((window._pendNames||{})[id]||'alguém'),
+    addAdmin:()=>'Deu acesso de admin a '+g('nAE'),
+    delAdmin:(id,email)=>'Removeu o admin '+email,
+    saveFicha:()=> (_fichaEditId?'Atualizou a ficha de ':'Cadastrou o parceiro ')+g('fhNome'),
+    saveContato:()=>'Registrou contato com '+((_mensaisById[_ctId]||{}).nome||'parceiro'),
+    deleteParceiro:(id,nome)=>'Removeu o parceiro '+nome,
+    announceUpdate:()=>'Avisou todos sobre novidade do app: "'+g('annTitle')+'"',
+    sendWa:n=>n===1&&_waDoc?'Mandou boas-vindas por WhatsApp a '+(_waDoc.d.nome||''):null
+  };
+  Object.keys(M).forEach(fn=>{
+    const f=window[fn]; if(typeof f!=='function') return;
+    window[fn]=function(){
+      let txt=null; try{ txt=M[fn].apply(null,arguments); }catch(e){}
+      const r=f.apply(this,arguments);
+      if(txt) Promise.resolve(r).then(()=>logAcao(txt)).catch(()=>{});
+      return r;
+    };
+  });
+})();
+function loadAudit(){
+  const el=document.getElementById('auditList'); if(!el) return;
+  getDb().collection('auditoria').orderBy('quando','desc').limit(100).get().then(snap=>{
+    if(snap.empty){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Nada registrado ainda. As próximas modificações aparecem aqui.</p>'; return; }
+    el.innerHTML=snap.docs.map(d=>{ const x=d.data(); const dt=new Date(x.quando);
+      return `<div class="adrow"><div class="adri"><div class="adrt">${esc(x.acao)}</div><div class="adrm">${esc(x.quem)} · ${dt.toLocaleDateString('pt-BR')} às ${dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div></div></div>`; }).join('');
+  }).catch(e=>{ el.innerHTML='<p style="font-size:.82rem;color:var(--red)">Não foi possível carregar o histórico ('+esc(e.message)+'). Publique as regras novas do Firebase.</p>'; });
+}
+
+// ══ Acompanhamento dos parceiros (CRM leve) ══
+const CRM_FREQ={ financeiro:45, adotou:30 };
+function crmFreq(d){ return CRM_FREQ[d.categoria]||45; }
+function isoMaisDias(base,dias){ const t=new Date(base); t.setDate(t.getDate()+dias); const p=n=>String(n).padStart(2,'0'); return t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate()); }
+function crmProximo(d){
+  if(d.proximoContato) return d.proximoContato;
+  const t=d.timestamp||d.fichaAt; if(!t) return null;
+  return isoMaisDias(t,2); // novo parceiro: primeiro contato em 2 dias
+}
+function crmDiasAte(iso){ if(!iso) return null; const h=new Date(); h.setHours(0,0,0,0); return Math.round((new Date(iso+'T00:00:00')-h)/86400000); }
+function crmLinha(d){
+  const u=d.ultimoContato?new Date(d.ultimoContato).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):null;
+  const p=crmProximo(d), dias=crmDiasAte(p);
+  const ult=(d.contatos||[]).slice(-1)[0];
+  let s='💬 '+(u?'Último contato '+u+(ult&&ult.canal?' ('+esc(ult.canal)+')':''):'Ainda sem contato registrado');
+  if(p) s+=' · próximo '+(dias<0?'<b style="color:var(--red)">atrasado '+(-dias)+' d</b>':dias===0?'<b style="color:var(--accent)">hoje</b>':'em '+dias+' d');
+  if(ult&&ult.nota) s+='\n“'+esc(ult.nota)+'”';
+  return s;
+}
+function waLink(fone,txt){ let n=String(fone||'').replace(/\D/g,''); if(!n) return ''; if(n.length<=11) n='55'+n; return 'https://wa.me/'+n+(txt?'?text='+encodeURIComponent(txt):''); }
+function renderCuidar(docs){
+  const el=document.getElementById('cuidarSemana'); if(!el) return;
+  const lista=docs.map(d=>({d,dias:crmDiasAte(crmProximo(d))})).filter(x=>x.dias!==null&&x.dias<=7).sort((a,b)=>a.dias-b.dias);
+  if(!lista.length){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Tudo em dia. Ninguém precisa de contato nos próximos 7 dias.</p>'; return; }
+  el.innerHTML=lista.slice(0,12).map(({d,dias})=>`<div class="adrow"><div class="adri">
+      <div class="adrt">${esc(d.nome||'—')}</div>
+      <div class="adrm">${dias<0?'<b style="color:var(--red)">atrasado '+(-dias)+' dias</b>':dias===0?'<b style="color:var(--accent)">hoje</b>':'em '+dias+' dias'}${d.ultimoContato?' · último '+new Date(d.ultimoContato).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' · primeiro contato'}</div></div>
+      ${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:1.2rem;padding:6px" aria-label="WhatsApp">💬</a>`:''}
+      <button class="adbtn" style="width:auto;padding:8px 12px" onclick='openContato(${JSON.stringify(d.id)})'>Registrei</button></div>`).join('')
+    + (lista.length>12?`<p style="font-size:.74rem;color:var(--text3)">e mais ${lista.length-12}...</p>`:'');
+}
+let _ctId=null;
+function openContato(id){
+  _ctId=id; const d=_mensaisById[id]||{};
+  document.getElementById('ctTitle').textContent='Contato com '+(String(d.nome||'').split(' ')[0]||'parceiro');
+  document.getElementById('ctNota').value=''; document.getElementById('ctDias').value=String(crmFreq(d));
+  const m=document.getElementById('contatoModal'); document.body.appendChild(m); m.style.display='flex';
+}
+function closeContato(){ document.getElementById('contatoModal').style.display='none'; }
+async function saveContato(){
+  if(!_ctId) return;
+  const canal=document.getElementById('ctCanal').value, nota=document.getElementById('ctNota').value.trim(), dias=+document.getElementById('ctDias').value||45;
+  const agora=new Date().toISOString();
+  try{
+    await getDb().collection('parceiros_mensais').doc(_ctId).update({
+      ultimoContato:agora, proximoContato:isoMaisDias(agora,dias),
+      contatos:firebase.firestore.FieldValue.arrayUnion({data:agora,canal,nota,por:(me&&me.nome||'').split(' ')[0]||''}) });
+    closeContato(); toast('Contato registrado ✓'); loadMensais();
+  }catch(e){ toast('Não foi possível salvar: '+e.message); }
 }
