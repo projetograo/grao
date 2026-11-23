@@ -1,5 +1,5 @@
 // GRÃO — Service Worker v3
-const CACHE = 'grao-v6';
+const CACHE = 'grao-v7';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
@@ -46,9 +46,16 @@ self.addEventListener('push', e => {
   const title = d.title || n.title || 'Projeto Grão';
   const body = d.body || n.body || '';
   const url = d.url || '/grao/';
-  e.waitUntil(self.registration.showNotification(title, {
-    body, icon: '/grao/icon-192.png', badge: '/grao/icon-192.png', data: { url }
-  }));
+  e.waitUntil((async () => {
+    await self.registration.showNotification(title, {
+      body, icon: '/grao/icon-192.png', badge: '/grao/icon-192.png', data: { url }
+    });
+    // bolinha no ícone do app: quantas notificações ainda não foram vistas
+    try {
+      const n = (await self.registration.getNotifications()).length;
+      if (self.navigator && self.navigator.setAppBadge) await self.navigator.setAppBadge(n);
+    } catch (_) {}
+  })());
 });
 
 self.addEventListener('notificationclick', e => {

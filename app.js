@@ -403,7 +403,7 @@ function closeAdmin(){
   document.getElementById('adminScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
 }
-function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;try{trackTab(t);}catch(e){}}
+function navTo(t){try{markSeenTab(t);}catch(e){}document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;try{trackTab(t);}catch(e){}}
 
 let ytPlayer=null;
 
@@ -700,7 +700,9 @@ let newsEditId=null;
 function clearNewsForm(){
   ['nIT','nID','nIS','nISg','nIPr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const ed=document.getElementById('nEditor'); if(ed) ed.innerHTML='';
-  newsEditId=null;
+  newsEditId=null; try{ localStorage.removeItem('grao_news_draft'); }catch(e){}
+  const nn=document.getElementById('nNotify'); if(nn) nn.checked=false;
+  const sg=document.getElementById('nISg'); if(sg && !sg.value){ try{ sg.value=localStorage.getItem('grao_last_sign')||''; }catch(e){} }
   const badge=document.getElementById('newsEditingBadge'); if(badge) badge.style.display='none';
   const btn=document.getElementById('newsPublishBtn'); if(btn) setPublishBtnLabel('isd','Publicar');
 }
@@ -742,13 +744,15 @@ async function addNews(){
   }
 
   const id=Date.now();
+  const notifyNow=!!(document.getElementById('nNotify')||{}).checked;
+  try{ localStorage.setItem('grao_last_sign',sign); }catch(e){}
   const n={id,name,date,summary,contentHtml,prayers,sign,isNew:true,emailSent:false,emailSentAt:null};
   D.news.unshift(n);
   saveNews();
   await markOldNewsAsRead(id);
-  try{ await getDb().collection('news').doc(String(id)).set({id,name,date,summary,contentHtml,prayers,sign,isNew:true,emailSent:false,emailSentAt:null,createdAt:new Date().toISOString()}); }catch(e){}
+  try{ await getDb().collection('news').doc(String(id)).set({id,name,date,summary,contentHtml,prayers,sign,isNew:true,emailSent:false,emailSentAt:null,createdAt:new Date().toISOString(),notifyPending:!!(document.getElementById('nNotify')||{}).checked}); }catch(e){}
   clearNewsForm();
-  renderAll(); toast('Publicado! 🌱 Quando revisar e estiver tudo certo, avise os parceiros na lista abaixo.');
+  renderAll(); toast(notifyNow?'Publicado! Os avisos saem em até 15 minutos. 🌱':'Publicado! 🌱 Quando revisar, avise os parceiros na lista de publicados.');
   if(btn){ btn.disabled=false; btn.textContent='🌱 Publicar'; }
 }
 
@@ -973,6 +977,12 @@ function newsGoStep(n){
   });
   if(n===3) updateNewsSummary();
 }
+// Editor em uma página só: mostra tudo de uma vez e rola até a parte pedida.
+newsGoStep=function(n){
+  currentNewsStep=n;
+  [1,2,3].forEach(i=>{ const s=document.getElementById('newsStep'+i); if(s) s.style.display='flex'; });
+  updateNewsSummary();
+};
 
 function updateNewsSummary(){
   const el=document.getElementById('newsSummaryFinal');
@@ -2418,3 +2428,89 @@ async function saveFicha(){
     closeFicha(); toast('Ficha salva ✓'); loadMensais();
   }catch(e){ toast('Não foi possível salvar: '+e.message); }
 }
+
+// ══ Bolinhas de novidade (abas + ícone do app) ══
+// "Visto" = a pessoa abriu a aba daquele assunto. Conteúdo que já existia na 1ª abertura não conta como novo.
+const SEEN_KEY='grao_seen_v1';
+const SEEN_MAP={news:'news', journey:'timeline', partner:'prayers'}; // aba → coleção
+function seenGet(){
+  try{ const s=JSON.parse(localStorage.getItem(SEEN_KEY)||'null'); if(s) return s; }catch(e){}
+  const n=Date.now(), s={news:n,timeline:n,prayers:n};
+  try{ localStorage.setItem(SEEN_KEY,JSON.stringify(s)); }catch(e){}
+  return s;
+}
+function markSeenKey(k){ const s=seenGet(); const col={news:D.news,timeline:D.timeline,prayers:D.prayers}[k]||[]; s[k]=Math.max(Date.now(),...col.map(x=>Number(x.id)||0))+1; try{ localStorage.setItem(SEEN_KEY,JSON.stringify(s)); }catch(e){} refreshBadges(); }
+function markSeenTab(t){ if(SEEN_MAP[t]) markSeenKey(SEEN_MAP[t]); }
+function newCounts(){
+  const s=seenGet(), after=(arr,k)=>(arr||[]).filter(x=>(Number(x.id)||0)>s[k]).length;
+  return { news:after(D.news,'news'), timeline:after(D.timeline,'timeline'), prayers:after(D.prayers,'prayers') };
+}
+function refreshBadges(){
+  let c; try{ c=newCounts(); }catch(e){ return; }
+  const set=(id,n)=>{ const el=document.getElementById(id); if(!el) return; el.classList.toggle('on',n>0); };
+  set('tdot-news',c.news); set('tdot-journey',c.timeline); set('tdot-partner',c.prayers);
+  const total=c.news+c.timeline+c.prayers;
+  try{
+    if(total>0 && navigator.setAppBadge) navigator.setAppBadge(total);
+    else if(navigator.clearAppBadge) navigator.clearAppBadge();
+  }catch(e){}
+  if(total===0 && 'serviceWorker' in navigator){ try{ navigator.serviceWorker.ready.then(r=>r.getNotifications().then(l=>l.forEach(n=>n.close()))); }catch(e){} }
+}
+['renderAll','renderTimeline','renderPrayerPartner'].forEach(fn=>{
+  const f=window[fn]; if(typeof f!=='function') return;
+  window[fn]=function(){ const r=f.apply(this,arguments); try{ refreshBadges(); }catch(e){} return r; };
+});
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ try{ refreshBadges(); }catch(e){} } });
+// quem publica não precisa ver bolinha do que acabou de publicar
+['addNews','addPrayer','addTimeline'].forEach(fn=>{
+  const f=window[fn]; if(typeof f!=='function') return;
+  const key={addNews:'news',addPrayer:'prayers',addTimeline:'timeline'}[fn];
+  window[fn]=function(){ const r=f.apply(this,arguments); Promise.resolve(r).then(()=>markSeenKey(key)); return r; };
+});
+setTimeout(()=>{ try{ refreshBadges(); }catch(e){} },1500);
+
+function openPrivacidade(){ const m=document.getElementById('privModal'); document.body.appendChild(m); m.style.display='flex'; }
+function closePrivacidade(){ document.getElementById('privModal').style.display='none'; }
+
+// ══ Rascunho automático do informativo + formulários mais ágeis ══
+const DRAFT_KEY='grao_news_draft';
+const DRAFT_IDS=['nIT','nID','nIS','nISg','nIPr'];
+function saveDraft(){
+  if(newsEditId) return;
+  const ed=document.getElementById('nEditor'); const d={html:ed?ed.innerHTML:''};
+  DRAFT_IDS.forEach(i=>{ d[i]=g(i); });
+  const vazio=!d.html.trim() && DRAFT_IDS.every(i=>!d[i]);
+  try{ vazio?localStorage.removeItem(DRAFT_KEY):localStorage.setItem(DRAFT_KEY,JSON.stringify(d)); }catch(e){}
+}
+function restoreDraft(){
+  let d; try{ d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null'); }catch(e){}
+  if(!d || newsEditId) return;
+  DRAFT_IDS.forEach(i=>{ const el=document.getElementById(i); if(el && d[i]) el.value=d[i]; });
+  const ed=document.getElementById('nEditor'); if(ed && d.html) ed.innerHTML=d.html;
+  const note=document.getElementById('draftNote'); if(note) note.style.display='flex';
+}
+function discardDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} clearNewsForm(); const n=document.getElementById('draftNote'); if(n) n.style.display='none'; }
+(function(){
+  const blk=document.getElementById('newsFormBlock'); if(!blk) return;
+  let t; ['input','change'].forEach(ev=>blk.addEventListener(ev,()=>{ clearTimeout(t); t=setTimeout(saveDraft,600); }));
+  restoreDraft();
+  const sg=document.getElementById('nISg'); if(sg && !sg.value){ try{ sg.value=localStorage.getItem('grao_last_sign')||'Com carinho, Malu Kassar 🌱'; }catch(e){} }
+})();
+// teclado e preenchimento certos em cada campo (menos toques)
+(function(){
+  const A={ regEmail:['email','email','username'], contEmail:['email','email','email'], contEmail2:['email','email','email'], contPhone:['tel','tel','tel'], contName:['text','','name'],
+    fhEmail:['email','email','off'], fhPhone:['tel','tel','off'], pfEmail:['email','email','off'] };
+  Object.keys(A).forEach(id=>{ const el=document.getElementById(id); if(!el) return; const [type,mode,ac]=A[id];
+    if(mode) el.setAttribute('inputmode',mode); if(ac) el.setAttribute('autocomplete',ac); el.setAttribute('autocapitalize', type==='email'?'none':'words'); });
+  document.querySelectorAll('input[type=password]').forEach(el=>{ if(!el.getAttribute('autocomplete')) el.setAttribute('autocomplete', /reg|new|nova/i.test(el.id)?'new-password':'current-password'); });
+  document.querySelectorAll('.adinp,.adta,input[type=text],input[type=email],input[type=tel]').forEach(el=>{ el.setAttribute('enterkeyhint', el.tagName==='TEXTAREA'?'enter':'next'); });
+  // Enter no último campo de login envia
+  document.querySelectorAll('#loginScreen input, #loginModal input').forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const b=el.closest('div[id]')?.querySelector('button[onclick*="doLogin"]'); if(b) b.click(); } }));
+})();
+// botão voltar do celular fecha o modal aberto em vez de sair do app
+(function(){
+  const MODS=['fichaModal','privModal','installModal','contribuicaoModal','regModal'];
+  const aberto=()=>MODS.map(i=>document.getElementById(i)).find(m=>m&&m.style.display&&m.style.display!=='none');
+  new MutationObserver(()=>{ if(aberto() && !history.state?.modal) history.pushState({modal:1},''); }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
+  window.addEventListener('popstate',()=>{ const m=aberto(); if(m) m.style.display='none'; });
+})();

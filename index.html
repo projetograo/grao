@@ -96,6 +96,21 @@
     <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
     <div style="text-align:center;margin-top:6px"><button class="inst-link" id="installLoginLink" onclick="openInstall()" style="display:none">📲 Instalar o app no celular</button></div>
 
+<!-- PRIVACIDADE -->
+<div id="privModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closePrivacidade()">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:88vh;overflow-y:auto;padding:24px 24px 36px;color:var(--text2);font-size:.85rem;line-height:1.7">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)">Como cuidamos dos seus dados</div>
+      <button onclick="closePrivacidade()" style="background:none;border:none;color:var(--text3);font-size:1.5rem;cursor:pointer;line-height:1" aria-label="Fechar">×</button>
+    </div>
+    <p><b style="color:var(--text)">O que guardamos.</b> Nome, e-mail e telefone. Se você quiser e nos contar com o tempo, também data de aniversário, endereço e informações da sua família (como cônjuge e filhos), para conhecer você melhor.</p>
+    <p><b style="color:var(--text)">Para quê.</b> Para enviar os avisos do projeto, agradecer, lembrar do seu aniversário, orar por você e pela sua família e, se for o caso, enviar um carinho. Nada além disso.</p>
+    <p><b style="color:var(--text)">Quem vê.</b> Somente a nossa família (Bruno, Malu e quem cuida do projeto). Nunca vendemos nem repassamos seus dados. Usamos serviços de apoio (Google/Firebase para guardar e Brevo para enviar e-mails) apenas para o app funcionar.</p>
+    <p><b style="color:var(--text)">Seus direitos (LGPD).</b> Você pode pedir a qualquer momento para ver, corrigir ou apagar seus dados, ou para parar de receber e-mails (basta responder SAIR). Escreva para <a href="mailto:nossoprojetograo@gmail.com" style="color:var(--accent)">nossoprojetograo@gmail.com</a>.</p>
+    <p style="font-size:.75rem;color:var(--text3)">Guardamos seus dados enquanto você caminhar com o projeto ou até você pedir para apagar.</p>
+  </div>
+</div>
+
 <!-- FICHA DO PARCEIRO (admin) -->
 <div id="fichaModal" style="display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeFicha()">
   <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
@@ -196,6 +211,7 @@
       <div id="regErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
       <button id="regSubmitBtn" onclick="submitRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px">Quero ter acesso</button>
       <p style="font-size:0.75rem;color:var(--text3);text-align:center;line-height:1.6">Após o envio, nossa equipe vai revisar e ativar sua participação em breve.</p>
+      <p style="font-size:0.7rem;color:var(--text3);text-align:center;line-height:1.6">Ao se cadastrar, você concorda que a família guarde seus dados só para cuidar do projeto e de você. <a href="#" onclick="openPrivacidade();return false" style="color:var(--accent)">Como cuidamos dos seus dados</a></p>
     </div>
     <div id="regSuccess" style="display:none;text-align:center;padding:32px 0">
       <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
@@ -461,9 +477,9 @@
   <div class="tab-bar">
     <button class="tab active" onclick="navTo('home')" data-tab="home"><div class="tico"><svg><use href="#ih"/></svg></div><span class="tlbl">Início</span></button>
     <button class="tab" onclick="navTo('about')" data-tab="about"><div class="tico"><svg><use href="#if"/></svg></div><span class="tlbl">Família</span></button>
-    <button class="tab" onclick="navTo('news')" data-tab="news"><div class="tico"><svg><use href="#in"/></svg></div><span class="tlbl">Notícias</span></button>
-    <button class="tab" onclick="navTo('journey')" data-tab="journey"><div class="tico"><svg><use href="#im"/></svg></div><span class="tlbl">Caminhada</span></button>
-    <button class="tab" onclick="navTo('partner')" data-tab="partner"><div class="tico"><svg><use href="#imny"/></svg></div><span class="tlbl">Parceria</span></button>
+    <button class="tab" onclick="navTo('news')" data-tab="news"><div class="tico"><i class="tdot" id="tdot-news" aria-label="novidade"></i><svg><use href="#in"/></svg></div><span class="tlbl">Notícias</span></button>
+    <button class="tab" onclick="navTo('journey')" data-tab="journey"><div class="tico"><i class="tdot" id="tdot-journey" aria-label="novidade"></i><svg><use href="#im"/></svg></div><span class="tlbl">Caminhada</span></button>
+    <button class="tab" onclick="navTo('partner')" data-tab="partner"><div class="tico"><i class="tdot" id="tdot-partner" aria-label="novidade"></i><svg><use href="#imny"/></svg></div><span class="tlbl">Parceria</span></button>
   </div>
  </div>
 </div>
@@ -560,7 +576,8 @@
 
     <div class="adtabsec" data-tab="novo" style="display:none">
     <div id="newsFormNovoSlot"></div>
-    <div id="newsFormBlock">
+    <div id="newsFormBlock" class="onepage">
+      <div id="draftNote" style="display:none;background:rgba(232,168,112,.12);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.78rem;color:var(--accent);justify-content:space-between"><span>Rascunho recuperado ✓</span><span style="text-decoration:underline;cursor:pointer" onclick="discardDraft()">descartar</span></div>
         <div class="adsl">Publicar informativo</div>
     <div class="adcard">
       <!-- Step indicator -->
@@ -621,6 +638,7 @@
           <div style="font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Resumo do informativo</div>
           <div id="newsSummaryFinal" style="font-size:0.82rem;color:var(--text2);line-height:1.65"></div>
         </div>
+        <label style="display:flex;gap:10px;align-items:flex-start;margin-top:10px;font-size:.82rem;color:var(--text2);line-height:1.5;cursor:pointer"><input type="checkbox" id="nNotify" style="width:20px;height:20px;margin-top:1px;accent-color:var(--accent);flex:none"><span>Avisar os parceiros agora (e-mail + notificação). Deixe desmarcado para revisar antes e avisar depois.</span></label>
         <div style="display:flex;gap:8px;margin-top:8px">
           <button class="adbtn" style="background:rgba(255,255,255,0.08);color:var(--text2);flex:1" onclick="newsGoStep(2)">← Voltar</button>
           <button class="adbtn" style="flex:2;background:var(--green);display:inline-flex;align-items:center;justify-content:center;gap:6px" id="newsPublishBtn" onclick="addNews()"><svg width="14" height="14"><use href="#isd"/></svg>Publicar</button>
@@ -759,6 +777,7 @@
         </div>
       </div>
       <div id="contErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
+      <p style="font-size:0.7rem;color:var(--text3);line-height:1.6;text-align:center;margin:0">Seus dados ficam só com a nossa família, para agradecer, cuidar e orar por você. <a href="#" onclick="openPrivacidade();return false" style="color:var(--accent)">Saiba mais</a></p>
       <button id="contPayBtn" onclick="contPay()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">
         Confirmar e continuar
       </button>
