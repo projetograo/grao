@@ -47,10 +47,9 @@ function welcome({ nome, genero }) {
     title: `${saud} ao Grão, ${n}!`,
     bodyHtml: `
       <p style="margin:0 0 14px">Sua conta foi aprovada e já está liberada. Que alegria ter você caminhando com a nossa família nesta jornada.</p>
-      <p style="margin:0 0 8px"><b>Três passos para aproveitar melhor o app:</b></p>
+      <p style="margin:0 0 8px"><b>Dois passos para aproveitar melhor o app:</b></p>
       <p style="margin:0 0 8px"><b>1. Coloque o Grão na tela inicial.</b> No iPhone: toque em Compartilhar e depois em “Adicionar à Tela de Início”. No Android: menu ⋮ e “Instalar app”.</p>
-      <p style="margin:0 0 8px"><b>2. Ative os avisos.</b> Dentro do app, toque em “Ativar” no cartão de notificações para saber assim que sair um informativo.</p>
-      <p style="margin:0 0 14px"><b>3. Conte seu aniversário</b> (se quiser), para a gente poder te dar parabéns.</p>`,
+      <p style="margin:0 0 14px"><b>2. Ative os avisos.</b> Dentro do app, toque em “Ativar” no cartão de notificações para saber assim que sair um informativo.</p>`,
     buttonLabel: 'Abrir o Grão',
   });
   return {
