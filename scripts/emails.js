@@ -29,7 +29,7 @@ function layout({ preheader, title, bodyHtml, buttonLabel, buttonUrl, interno })
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#5A4333">${bodyHtml}</div>
     </td></tr>
     ${btn}
-    ${interno ? '' : `<tr><td style="padding:0 32px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#3B2619">Com carinho,<br>Bruno, Malu, Tom e Cauê 🌱</td></tr>`}
+    ${interno ? '' : `<tr><td style="padding:0 32px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#3B2619">Com carinho,<br>Bruno, Malu, Tom e Cauê </td></tr>`}
     <tr><td style="background:#F8F1E9;padding:16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;line-height:1.6;color:#8C7260;text-align:center">
       ${interno ? 'Aviso interno do painel do Grão. Só a família recebe.' : 'Você recebe este e-mail porque faz parte do Projeto Grão.<br>Não quer mais receber? É só responder com a palavra <b>SAIR</b>.'}
     </td></tr>
@@ -52,7 +52,7 @@ function welcome({ nome, genero }) {
     buttonLabel: 'Abrir o Grão',
   });
   return {
-    subject: `${saud} ao Grão 🌱`,
+    subject: `${saud} ao Grão `,
     html,
     text: `${saud} ao Grão, ${firstName(nome)}! Sua conta foi aprovada. Entre em ${APP_URL}\n\nCom carinho, Bruno, Malu, Tom e Cauê`,
   };
@@ -82,14 +82,14 @@ function birthday({ nome }) {
   const n = esc(firstName(nome));
   const html = layout({
     preheader: 'Um abraço da família Baracho no seu dia.',
-    title: `Parabéns, ${n}! 🎂`,
+    title: `Parabéns, ${n}! `,
     bodyHtml: `
       <p style="margin:0 0 14px">Hoje o dia é seu, e a gente não podia deixar passar. Agradecemos a Deus pela sua vida e por você caminhar com a nossa família.</p>
       <p style="margin:0 0 14px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#3B2619">“O Senhor te abençoe e te guarde; o Senhor faça resplandecer o seu rosto sobre ti, e tenha misericórdia de ti; o Senhor sobre ti levante o seu rosto, e te dê a paz.” <span style="font-style:normal;font-size:13px;color:#8C7260">Números 6.24-26</span></p>
       <p style="margin:0">Que este novo ano de vida seja cheio da graça dele.</p>`,
   });
   return {
-    subject: `Parabéns, ${firstName(nome)}! 🎂`,
+    subject: `Parabéns, ${firstName(nome)}! `,
     html,
     text: `Parabéns, ${firstName(nome)}! Hoje o dia é seu. Agradecemos a Deus pela sua vida.\n\nCom carinho, Bruno, Malu, Tom e Cauê`,
   };
@@ -125,12 +125,12 @@ function familyBirthdays({ itens }) {
   const bloco = (it) => {
     const p = it.parceiro || {};
     const linhas = [];
-    if (p.phone) linhas.push(`📞 ${esc(p.phone)}`);
-    if (p.email) linhas.push(`✉️ ${esc(p.email)}`);
-    if (p.endereco || p.cidade) linhas.push(`📍 ${esc([p.endereco, p.cidade].filter(Boolean).join(' · '))}`);
-    if (p.valor) linhas.push(`💛 Contribui: ${esc(p.valor)}`);
-    if (p.oracao) linhas.push(`🙏 ${esc(p.oracao)}`);
-    if (p.notas) linhas.push(`📝 ${esc(p.notas)}`);
+    if (p.phone) linhas.push(`Telefone: ${esc(p.phone)}`);
+    if (p.email) linhas.push(`E-mail: ${esc(p.email)}`);
+    if (p.endereco || p.cidade) linhas.push(`Endereço: ${esc([p.endereco, p.cidade].filter(Boolean).join(' · '))}`);
+    if (p.valor) linhas.push(`Contribui: ${esc(p.valor)}`);
+    if (p.oracao) linhas.push(`Orar por: ${esc(p.oracao)}`);
+    if (p.notas) linhas.push(`Notas: ${esc(p.notas)}`);
     return `<div style="background:#F8F1E9;border-left:3px solid #E8A870;border-radius:6px;padding:14px 16px;margin:0 0 12px">
       <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#B7763A;margin-bottom:4px">${esc(it.quando)}</div>
       <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#3B2619">${esc(it.quem)}${it.idade ? ` faz ${esc(it.idade)} ${it.idade === 1 ? 'ano' : 'anos'}` : ''}</div>
@@ -142,14 +142,14 @@ function familyBirthdays({ itens }) {
   const nomes = itens.map((i) => i.quem).join(', ');
   const html = layout({
     preheader: nomes,
-    title: hoje.length ? 'Aniversário hoje 🎂' : 'Aniversário chegando 🎂',
+    title: hoje.length ? 'Aniversário hoje ' : 'Aniversário chegando ',
     bodyHtml: `<p style="margin:0 0 14px">${hoje.length ? 'Uma boa hora para ligar, mandar uma mensagem ou um presente.' : 'Dá tempo de preparar um carinho.'}</p>${itens.map(bloco).join('')}`,
     buttonLabel: 'Abrir o painel',
     interno: true,
   });
   const subj = hoje.length
-    ? `🎂 Hoje: ${hoje.map((i) => i.quem).join(', ')}`
-    : `🎂 Em 7 dias: ${itens.map((i) => i.quem).join(', ')}`;
+    ? ` Hoje: ${hoje.map((i) => i.quem).join(', ')}`
+    : ` Em 7 dias: ${itens.map((i) => i.quem).join(', ')}`;
   const text = itens.map((i) => `${i.quando}: ${i.quem}${i.rel ? ' (' + i.rel + ')' : ''}${i.parceiro && i.parceiro.phone ? ' - ' + i.parceiro.phone : ''}`).join('\n');
   return { subject: subj, html, text };
 }
@@ -159,7 +159,7 @@ function weeklyCare({ cuidar, aniversarios, boasVindas, pendentes }) {
   const sec = (titulo, linhas) => linhas.length ? `<div style="margin:0 0 18px"><div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#B7763A;margin-bottom:8px">${esc(titulo)}</div>${linhas.map((l) => `<div style="background:#F8F1E9;border-left:3px solid #E8A870;border-radius:6px;padding:10px 14px;margin:0 0 8px;font-size:14px;line-height:1.6;color:#3B2619">${l}</div>`).join('')}</div>` : '';
   const html = layout({
     preheader: 'Quem cuidar nesta semana',
-    title: 'Semana de cuidado 🌱',
+    title: 'Semana de cuidado ',
     bodyHtml: `<p style="margin:0 0 16px">Sem pressa: uma conversa de cada vez, do jeito de vocês.</p>`
       + sec('Para conversar', cuidar.map((c) => `<b>${esc(c.nome)}</b> · ${esc(c.quando)}${c.phone ? ' · ' + esc(c.phone) : ''}${c.nota ? `<br><span style="color:#8C7260">Última conversa: ${esc(c.nota)}</span>` : ''}`))
       + sec('Aniversários dos próximos dias', aniversarios.map((a) => `<b>${esc(a.quem)}</b> · ${esc(a.quando)}${a.rel ? ' · ' + esc(a.rel) : ''}`))
@@ -169,7 +169,7 @@ function weeklyCare({ cuidar, aniversarios, boasVindas, pendentes }) {
     interno: true,
   });
   const total = cuidar.length + aniversarios.length + boasVindas.length + pendentes.length;
-  return { subject: `🌱 Semana de cuidado: ${total} ${total === 1 ? 'coisa' : 'coisas'}`, html, text: `Para conversar: ${cuidar.map((c) => c.nome).join(', ') || '—'}` };
+  return { subject: ` Semana de cuidado: ${total} ${total === 1 ? 'coisa' : 'coisas'}`, html, text: `Para conversar: ${cuidar.map((c) => c.nome).join(', ') || '—'}` };
 }
 
 module.exports = { welcome, news, birthday, prayers, familyBirthdays, weeklyCare, firstName, esc, APP_URL };

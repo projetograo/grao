@@ -138,7 +138,7 @@ async function pollInformativos(ctx) {
     for (const p of lista) {
       (await mandar(ctx, p, emails.news({ nome: p.nome, titulo: n.name, resumo: n.summary }))) ? ok++ : fail++;
     }
-    await pushTodos(ctx, { title: 'Novo informativo 🌱', body: n.name, url: APP_URL });
+    await pushTodos(ctx, { title: 'Novo informativo ', body: n.name, url: APP_URL });
     await d.ref.update({
       notifyPending: false, emailSent: true, emailSentAt: ctx.now().toISOString(),
       emailOk: ok, emailFail: fail,
@@ -151,7 +151,7 @@ async function pollNovidades(ctx) {
   if (!pr.empty) {
     const titulos = pr.docs.map((d) => d.data().title).filter(Boolean);
     await pushTodos(ctx, {
-      title: pr.size === 1 ? 'Novo pedido de oração 🙏' : `${pr.size} novos pedidos de oração 🙏`,
+      title: pr.size === 1 ? 'Novo pedido de oração ' : `${pr.size} novos pedidos de oração `,
       body: titulos.slice(0, 2).join(' · '),
     });
     for (const d of pr.docs) await d.ref.update({ pushPending: false });
@@ -197,7 +197,7 @@ async function pollInscricoes(ctx) {
     const nome = novos.length === 1 ? (novos[0].nome || 'Alguém') : `${novos.length} pessoas`;
     const onde = novos.length === 1 && novos[0].cidade ? ` (${novos[0].cidade})` : '';
     log(`nova inscrição: ${novos.map((p) => p.nome).join(', ')}`);
-    await pushAdmins(ctx, { title: 'Nova inscrição no Grão 🌱', body: `${nome}${onde} quer participar. Toque para aceitar.`, url: '/grao/?aprovar=1' });
+    await pushAdmins(ctx, { title: 'Nova inscrição no Grão ', body: `${nome}${onde} quer participar. Toque para aceitar.`, url: '/grao/?aprovar=1' });
   }
   for (const d of snap.docs) await d.ref.update({ regPending: false });
 }
@@ -293,7 +293,7 @@ async function alertaFamilia(ctx) {
     const hojeNomes = itens.filter((i) => i.quando === 'hoje').map((i) => i.quem);
     const em7Nomes = itens.filter((i) => i.quando !== 'hoje').map((i) => i.quem);
     const corpo = [hojeNomes.length ? 'Hoje: ' + hojeNomes.join(', ') : '', em7Nomes.length ? 'Em 7 dias: ' + em7Nomes.join(', ') : ''].filter(Boolean).join(' · ');
-    await pushAdmins(ctx, { title: 'Aniversário de parceiro 🎂', body: corpo });
+    await pushAdmins(ctx, { title: 'Aniversário de parceiro ', body: corpo });
   }
   await ref.set({ lastFamilyAlert: hoje }, { merge: true });
 }
@@ -344,7 +344,7 @@ async function resumoSemanal(ctx) {
     if (p && p <= lim) {
       const dias = Math.round((Date.parse(p) - Date.parse(hoje)) / 86400000);
       const ult = (f.contatos || []).slice(-1)[0];
-      cuidar.push({ destaque: f.destaque === true, nome: (f.destaque ? '⭐ ' : '') + (f.nome || 'Parceiro'), phone: f.phone, dias, quando: dias < 0 ? `atrasado ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`, nota: ult && ult.nota });
+      cuidar.push({ destaque: f.destaque === true, nome: (f.destaque ? ' ' : '') + (f.nome || 'Parceiro'), phone: f.phone, dias, quando: dias < 0 ? `atrasado ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`, nota: ult && ult.nota });
     }
     for (const a of vale(f) ? datasDaFicha(f) : []) {
       for (let i = 0; i <= 7; i++) {
@@ -368,7 +368,7 @@ async function resumoSemanal(ctx) {
     log(`resumo semanal: ${total} itens`);
     try { await ctx.sendMail({ to: SENDER.email, name: SENDER.name, subject: tpl.subject, html: tpl.html, text: tpl.text }); }
     catch (e) { log('  falhou o resumo semanal: ' + e.message); return; }
-    await pushAdmins(ctx, { title: 'Semana de cuidado 🌱', body: [cuidar.length ? `${cuidar.length} para conversar` : '', pendentes.length ? `${pendentes.length} inscrição(ões)` : '', boasVindas.length ? `${boasVindas.length} boas-vindas` : ''].filter(Boolean).join(' · ') || 'Veja o resumo no e-mail.' });
+    await pushAdmins(ctx, { title: 'Semana de cuidado ', body: [cuidar.length ? `${cuidar.length} para conversar` : '', pendentes.length ? `${pendentes.length} inscrição(ões)` : '', boasVindas.length ? `${boasVindas.length} boas-vindas` : ''].filter(Boolean).join(' · ') || 'Veja o resumo no e-mail.' });
   }
   await ref.set({ lastWeeklyDigest: hoje }, { merge: true });
 }
@@ -395,7 +395,7 @@ async function teste(ctx, tipo) {
       { title: 'Nossa família', body: 'Pela saúde e pelo cuidado de cada um de nós.' } ] }),
   };
   if (tipo === 'push') {
-    await pushAdmins(ctx, { title: 'Teste do Grão 🔔', body: 'Se você está vendo isto, as notificações funcionam.' });
+    await pushAdmins(ctx, { title: 'Teste do Grão ', body: 'Se você está vendo isto, as notificações funcionam.' });
     return;
   }
   if (!exemplos[tipo]) throw new Error('Tipo de teste desconhecido: ' + tipo);
