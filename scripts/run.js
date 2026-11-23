@@ -44,6 +44,7 @@ function makeContext() {
   return {
     db: admin.firestore(),
     messaging: admin.messaging(),
+    auth: admin.auth(),
     now: () => new Date(),
     sendMail: brevoSend,
     pause: () => sleep(200),
@@ -173,6 +174,21 @@ async function pollNovidades(ctx) {
 }
 
 // Nova inscrição → avisa a família (push nos aparelhos dos admins) para aceitar pelo app
+// Remoção completa de um parceiro (pedida no app): conta de login, aparelhos de aviso, perfil e ficha.
+async function pollRemocoes(ctx) {
+  const snap = await ctx.db.collection('profiles').where('removePending', '==', true).get();
+  for (const d of snap.docs) {
+    const uid = d.id;
+    log(`removendo parceiro ${d.data().email || uid}`);
+    if (ctx.auth) { try { await ctx.auth.deleteUser(uid); } catch (e) { if (e.code !== 'auth/user-not-found') { log('  não removeu o login: ' + e.message); continue; } } }
+    const toks = await ctx.db.collection('pushTokens').where('uid', '==', uid).get();
+    for (const t of toks.docs) await t.ref.delete();
+    const fichas = await ctx.db.collection('parceiros_mensais').where('profileUid', '==', uid).get();
+    for (const f of fichas.docs) await f.ref.delete();
+    await d.ref.delete();
+  }
+}
+
 async function pollInscricoes(ctx) {
   const snap = await ctx.db.collection('profiles').where('regPending', '==', true).get();
   if (snap.empty) return;
@@ -187,6 +203,7 @@ async function pollInscricoes(ctx) {
 }
 
 async function poll(ctx) {
+  await pollRemocoes(ctx);
   await pollInscricoes(ctx);
   await pollBoasVindas(ctx);
   await pollInformativos(ctx);
@@ -397,7 +414,7 @@ async function main() {
   else throw new Error('Uso: node run.js poll | daily | teste <tipo>');
 }
 
-module.exports = { resumoSemanal, pollInscricoes, poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
+module.exports = { pollRemocoes, resumoSemanal, pollInscricoes, poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
 
 if (require.main === module) {
   main().then(() => process.exit(0)).catch((e) => { console.error('ERRO:', e.message); process.exit(1); });

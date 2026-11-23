@@ -289,10 +289,10 @@ function renderUserList(){
 }
 
 function delUserById(docId, btn){
-  if(!confirm('Remover o acesso desse parceiro? Ele não vai conseguir mais entrar no app.')) return;
+  if(!confirm('Remover esse parceiro? Ele perde o acesso e os dados dele (conta, avisos e ficha) são apagados em até 15 minutos.')) return;
   btn.textContent='...';
-  getDb().collection('profiles').doc(docId).delete()
-  .then(()=>{ D.users=D.users.filter(u=>u.id!==docId); renderUserList(); toast('Acesso removido.'); })
+  getDb().collection('profiles').doc(docId).update({status:'removed',removePending:true})
+  .then(()=>{ D.users=D.users.filter(u=>u.id!==docId); renderUserList(); toast('Removido. A limpeza completa sai em até 15 minutos.'); logAcao('Removeu um parceiro'); })
   .catch(e=>toast('Erro: '+e.message));
 }
 
@@ -377,7 +377,7 @@ function showAdminTab(tab){
   // pull the form back here and clear it, even if it was left mid-edit elsewhere.
   if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
   if(tab==='historico'){ try{ loadAudit(); }catch(e){} }
-  if(tab==='pendentes'){ try{ loadPending(); }catch(e){} }
+  if(tab==='pendentes'){ try{ loadPending(); renderUserList(); }catch(e){} }
   if(tab==='metricas'){ try{ loadAdoption(); }catch(e){} }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
