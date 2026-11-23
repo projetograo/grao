@@ -91,10 +91,12 @@
       <button class="lbtn" onclick="doLogin()" data-t="enter">Entrar</button>
       <button type="button" onclick="forgotPassword()" style="width:100%;background:transparent;border:none;padding:10px;margin-top:2px;font-size:0.72rem;color:var(--text3);text-decoration:underline;cursor:pointer;font-family:'Inter',sans-serif">Esqueci minha senha</button>
     </div>
-    <p class="lhint">Quer fazer parte da equipe?</p>
-    <button onclick="openRegister()" style="width:100%;margin-top:8px;background:transparent;border:1px solid var(--border-hi);border-radius:var(--r-md);padding:12px;font-size:0.78rem;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border-hi)';this.style.color='var(--text2)'">Quero ter acesso</button>
+    <div class="lnew">
+      <div class="lnew-t">Primeira vez por aqui?</div>
+      <button class="lnew-b" onclick="openRegister()">Quero fazer parte do Grão</button>
+      <div class="lnew-s">O cadastro leva 1 minuto. A gente aprova e te dá as boas-vindas.</div>
+    </div>
     <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
-    <div style="text-align:center;margin-top:6px"><button class="inst-link" id="installLoginLink" onclick="openInstall()" style="display:none">📲 Instalar o app no celular</button></div>
 
 <!-- PRIVACIDADE -->
 <div id="privModal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closePrivacidade()">
@@ -163,7 +165,8 @@
     <div class="adform">
       <div><label class="adlbl">Nome *</label><input class="adinp" id="fhNome" type="text"></div>
       <div><label class="adlbl">Tipo</label>
-        <select class="adinp" id="fhCateg"><option value="financeiro">Parceiro financeiro</option><option value="adotou">Adotou o projeto (acompanha de perto)</option></select></div>
+        <select class="adinp" id="fhCateg"><option value="financeiro">Parceiro financeiro</option><option value="adotou">Adotou o projeto (acompanha de perto)</option><option value="inscrito">Inscrito no app</option></select></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:.84rem;color:var(--text2);line-height:1.5;cursor:pointer"><input type="checkbox" id="fhDestaque" style="width:20px;height:20px;accent-color:var(--accent);flex:none;margin-top:1px"><span>⭐ Atenção especial: caminha de perto com a gente (contato a cada 3 semanas)</span></label>
       <div><label class="adlbl">E-mail</label><input class="adinp" id="fhEmail" type="email"></div>
       <div><label class="adlbl">Telefone / WhatsApp</label><input class="adinp" id="fhPhone" type="tel"></div>
       <div><label class="adlbl">Data de nascimento</label><input class="adinp" id="fhNasc" type="date"></div>
@@ -538,7 +541,8 @@
     <div class="adsl">Parceiros & Contribuições</div>
     <div class="adcard">
       <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
-      <button class="adbtn" style="margin-bottom:14px" onclick="openFicha()">+ Cadastrar parceiro</button>
+      <button class="adbtn" style="margin-bottom:8px" onclick="openFicha()">+ Cadastrar parceiro</button>
+      <button class="adbtn" style="margin-bottom:14px;background:rgba(255,255,255,.08);color:var(--text2);font-weight:400" onclick="trazerInscritos()">Trazer os inscritos do app para o acompanhamento</button>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <button onclick="filterMensais('todos')" id="mfTodos" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:5px 14px;font-size:0.68rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Todos</button>
         <button onclick="filterMensais('cartao')" id="mfCartao" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12"><use href="#icard"/></svg>Cartão</button>
@@ -738,6 +742,9 @@
     <div class="adcard"><div class="mgrid" id="metricsGrid"></div><button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,0.08);color:var(--text2);font-weight:400" onclick="clearMetrics()">Zerar métricas</button></div>
 
     <div class="adsl">Cliques por aba</div>
+    <div class="adsl">Instalação e notificações</div>
+    <div class="adcard"><div id="metricsAdopt"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
+
     <div class="adcard"><div id="metricsTabs"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
 
     <div class="adsl">De onde acessam</div>

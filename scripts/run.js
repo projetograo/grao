@@ -248,6 +248,7 @@ function datasDaFicha(f) {
   (f.filhos || []).forEach((x) => { if (x && x.nascimento) out.push({ quem: x.nome || 'Filho(a)', rel: `filho(a) de ${nome}`, nasc: x.nascimento }); });
   return out;
 }
+const vale = (f) => f.categoria !== 'inscrito' || f.destaque === true;
 async function alertaFamilia(ctx) {
   const hoje = hojeMaceio(ctx.now());
   const ref = ctx.db.collection('system').doc('state');
@@ -259,6 +260,7 @@ async function alertaFamilia(ctx) {
   const fichas = await ctx.db.collection('parceiros_mensais').get();
   for (const d of fichas.docs) {
     const f = d.data();
+    if (!vale(f)) continue;
     for (const a of datasDaFicha(f)) {
       const nasc = Number(a.nasc.slice(0, 4));
       if (ehAniversarioHoje(a.nasc, hoje)) itens.push({ quando: 'hoje', quem: a.quem, rel: a.rel, idade: Number(hoje.slice(0, 4)) - nasc, parceiro: f });
@@ -325,16 +327,16 @@ async function resumoSemanal(ctx) {
     if (p && p <= lim) {
       const dias = Math.round((Date.parse(p) - Date.parse(hoje)) / 86400000);
       const ult = (f.contatos || []).slice(-1)[0];
-      cuidar.push({ nome: f.nome || 'Parceiro', phone: f.phone, dias, quando: dias < 0 ? `atrasado ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`, nota: ult && ult.nota });
+      cuidar.push({ destaque: f.destaque === true, nome: (f.destaque ? '⭐ ' : '') + (f.nome || 'Parceiro'), phone: f.phone, dias, quando: dias < 0 ? `atrasado ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`, nota: ult && ult.nota });
     }
-    for (const a of datasDaFicha(f)) {
+    for (const a of vale(f) ? datasDaFicha(f) : []) {
       for (let i = 0; i <= 7; i++) {
         const dia = somarDias(hoje, i);
         if (ehAniversarioHoje(a.nasc, dia)) aniversarios.push({ quem: a.quem, rel: a.rel, quando: i === 0 ? 'hoje' : i === 1 ? 'amanhã' : `em ${i} dias` });
       }
     }
   }
-  cuidar.sort((a, b) => a.dias - b.dias);
+  cuidar.sort((a, b) => (a.dias - b.dias) || (Number(b.destaque) - Number(a.destaque)));
   const perfis = await ctx.db.collection('profiles').get();
   const quinze = somarDias(hoje, -14);
   const boasVindas = [], pendentes = [];
