@@ -1,5 +1,5 @@
 // GRÃO — Service Worker v3
-const CACHE = 'grao-v7';
+const CACHE = 'grao-v8';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
@@ -63,7 +63,7 @@ self.addEventListener('notificationclick', e => {
   const url = (e.notification.data && e.notification.data.url) || '/grao/';
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      for (const c of list) { if (c.url.includes('/grao/') && 'focus' in c) return c.focus(); }
+      for (const c of list) { if (c.url.includes('/grao/') && 'focus' in c) { if (/aprovar=1/.test(url)) c.postMessage({ go: 'aprovar' }); return c.focus(); } }
       return clients.openWindow(url);
     })
   );
