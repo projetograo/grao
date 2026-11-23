@@ -1628,6 +1628,7 @@ function loadMensais(filter){
   .then(snap=>{
     if(snap.empty){
       el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum parceiro ainda. Que o Senhor levante!</p>';
+      try{ renderNextBdays([]); renderCuidar([]); }catch(e){}
       return;
     }
     let docs = snap.docs.map(doc=>({id:doc.id,...doc.data()}));
