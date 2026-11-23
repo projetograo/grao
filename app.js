@@ -189,7 +189,7 @@ function successLogin(user){
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   const greetEl=document.querySelector('.hgreet');
-  if(greetEl) greetEl.textContent = user.genero==='F' ? 'Bem-vinda, parceira' : 'Bem-vindo, parceiro';
+  if(greetEl) greetEl.textContent = user.genero==='F' ? 'Bem-vinda, parceira' : (user.genero==='M' ? 'Bem-vindo, parceiro' : 'Que bom ter você aqui');
   if(user.admin){
     document.getElementById('adminBtn').style.display='flex';
     if(window.__abrirPendentes) setTimeout(abrirPendentes,400);
@@ -1324,7 +1324,7 @@ function applyTranslations(){
   if(htitle) htitle.innerHTML = t('home_title')+'<br><em>'+t('home_italic')+'</em>';
   displayHomeVerse();
   if(hgreet){
-    if(lang==='pt') hgreet.textContent = (me && me.genero==='F') ? 'Bem-vinda, parceira' : t('welcome');
+    if(lang==='pt') hgreet.textContent = (me && me.genero==='F') ? 'Bem-vinda, parceira' : ((me && !me.genero) ? 'Que bom ter você aqui' : t('welcome'));
     else hgreet.textContent = t('welcome');
   }
   const pills = document.querySelectorAll('.pill');

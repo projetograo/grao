@@ -190,12 +190,9 @@
         <input id="regFone" class="rg-i" type="tel" placeholder="(82) 99999-9999" autocomplete="tel" inputmode="tel" enterkeyhint="next"></div>
       <div><label class="rg-l" for="regCidade">Cidade e estado</label>
         <input id="regCidade" class="rg-i" type="text" placeholder="Ex: Maceió, AL" autocomplete="address-level2" autocapitalize="words" enterkeyhint="next"></div>
-      <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px">
-        <div><label class="rg-l" for="regNasc">Nascimento</label>
-          <input id="regNasc" class="rg-i" type="date" autocomplete="bday"></div>
-        <div><label class="rg-l" for="regGenero">Tratamento</label>
-          <select id="regGenero" class="rg-i"><option value="">—</option><option value="F">Ela</option><option value="M">Ele</option></select></div>
-      </div>
+      <div><label class="rg-l" for="regNasc">Data de nascimento</label>
+        <input id="regNasc" class="rg-i" type="date" autocomplete="bday"></div>
+      <input type="hidden" id="regGenero" value="">
       <div id="regErr" style="display:none;background:rgba(220,80,60,0.12);border:1px solid rgba(220,80,60,0.3);border-radius:12px;padding:10px 14px;font-size:0.82rem;color:#E07860"></div>
       <button id="regSubmitBtn" onclick="submitRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:4px">Quero ter acesso</button>
       <p style="font-size:0.75rem;color:var(--text3);text-align:center;line-height:1.6">Após o envio, nossa equipe vai revisar e ativar sua participação em breve.</p>
