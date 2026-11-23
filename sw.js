@@ -1,5 +1,5 @@
 // GRÃO — Service Worker v3
-const CACHE = 'grao-v22';
+const CACHE = 'grao-v23';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
@@ -18,7 +18,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE && k !== 'grao-meta').map(k => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -47,6 +47,7 @@ self.addEventListener('push', e => {
   const body = d.body || n.body || '';
   const url = d.url || '/grao/';
   e.waitUntil((async () => {
+    try { const c = await caches.open('grao-meta'); await c.put('/grao/__lastpush', new Response(JSON.stringify({ t: Date.now(), title }))); } catch (_) {}
     await self.registration.showNotification(title, {
       body, icon: '/grao/icon-192.png', badge: '/grao/icon-192.png', data: { url }
     });

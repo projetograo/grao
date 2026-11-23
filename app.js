@@ -403,6 +403,7 @@ function openAdmin(){
   renderAdmin();
   showAdminMenu();
   try{ loadPending(); }catch(e){}
+  try{ renderDeviceCard(); }catch(e){}
 }
 
 function closeAdmin(){
@@ -2626,11 +2627,11 @@ function renderCuidar(docs){
   const el=document.getElementById('cuidarSemana'); if(!el) return;
   const lista=docs.map(d=>({d,dias:crmDiasAte(crmProximo(d))})).filter(x=>x.dias!==null&&x.dias<=7).sort((a,b)=>(a.dias-b.dias)||((b.d.destaque?1:0)-(a.d.destaque?1:0)));
   if(!lista.length){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Tudo em dia. Ninguém precisa de contato nos próximos 7 dias.</p>'; return; }
-  el.innerHTML=lista.slice(0,12).map(({d,dias})=>`<div class="adrow"><div class="adri">
+  el.innerHTML=lista.slice(0,12).map(({d,dias})=>`<div class="adrow" style="flex-direction:column;align-items:stretch;gap:12px"><div class="adri">
       <div class="adrt">${esc(d.nome||'—')}${d.destaque?' <span style="font-size:.7rem;background:rgba(232,168,112,.2);color:var(--accent);border-radius:50px;padding:2px 8px;margin-left:4px">atenção especial</span>':''}</div>
       <div class="adrm">${dias<0?'<b style="color:var(--red)">atrasado '+(-dias)+' dias</b>':dias===0?'<b style="color:var(--accent)">hoje</b>':'em '+dias+' dias'}${d.ultimoContato?' · último '+new Date(d.ultimoContato).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' · primeiro contato'}</div></div>
-      ${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:.8rem;font-weight:600;padding:8px 10px;display:inline-flex;align-items:center" aria-label="WhatsApp"><i class="wa-ic"></i>WhatsApp</a>`:''}
-      <button class="adbtn" style="width:auto;padding:8px 12px" onclick='openContato(${JSON.stringify(d.id)})'>Registrei</button></div>`).join('')
+      <div style="display:flex;gap:10px">${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="flex:1;color:#25D366;border:1px solid #25D366;border-radius:var(--r-md);text-decoration:none;font-size:.82rem;font-weight:600;min-height:44px;display:inline-flex;align-items:center;justify-content:center" aria-label="WhatsApp"><i class="wa-ic"></i>WhatsApp</a>`:''}
+      <button class="adbtn" style="flex:1;min-height:44px;padding:8px 12px" onclick='openContato(${JSON.stringify(d.id)})'>Registrei contato</button></div></div>`).join('')
     + (lista.length>12?`<p style="font-size:.74rem;color:var(--text3)">e mais ${lista.length-12}...</p>`:'');
 }
 let _ctId=null;
@@ -2809,4 +2810,28 @@ async function addContribModal(id){
     await getDb().collection('parceiros_mensais').doc(id).update({ contribuicoes:firebase.firestore.FieldValue.arrayUnion({mes:mes.trim(),valor:val.trim(),data:new Date().toLocaleDateString('pt-BR')}) });
     toast('Contribuição registrada'); loadMensais();
   }catch(e){ toast('Erro: '+e.message); }
+}
+
+// ══ Este aparelho: as notificações estão chegando? ══
+async function ultimaNotificacao(){
+  try{ const c=await caches.open('grao-meta'); const r=await c.match('/grao/__lastpush'); if(!r) return null; return await r.json(); }catch(e){ return null; }
+}
+async function renderDeviceCard(){
+  const el=document.getElementById('deviceInfo'); if(!el) return;
+  const st=pushState(), inst=souStandalone();
+  const ultimo=await ultimaNotificacao();
+  const linha=(r,v,ok)=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);font-size:.95rem"><span style="color:var(--text2)">${r}</span><b style="color:${ok===true?'var(--green)':ok===false?'var(--red)':'var(--text)'};text-align:right">${v}</b></div>`;
+  const avisos = st==='granted' ? 'Ativados' : st==='denied' ? 'Bloqueados no aparelho' : st==='needs-install' ? 'Instale o app primeiro' : st==='unsupported' ? 'Sem suporte' : 'Ainda não ativados';
+  el.innerHTML =
+    linha('App na tela inicial', inst?'Sim':'Não', inst)+
+    linha('Avisos neste aparelho', avisos, st==='granted')+
+    linha('Última notificação recebida', ultimo?fmtData(new Date(ultimo.t).toISOString()):'Nenhuma ainda', ultimo?true:null)+
+    (st==='default'?`<button class="adbtn" style="margin-top:14px" onclick="enablePush().then(renderDeviceCard)">Ativar avisos agora</button>`:'')+
+    (st==='denied'?`<p style="font-size:.85rem;color:var(--text2);line-height:1.6;margin-top:12px">No iPhone: Ajustes, Notificações, Grão, e permita as notificações.</p>`:'')+
+    (st==='granted'?`<button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,.1);color:var(--text)" onclick="testeLocal()">Mostrar uma notificação de teste</button>
+      <p style="font-size:.78rem;color:var(--text3);line-height:1.6;margin-top:10px">O teste acima só confirma que o aparelho mostra avisos. Quando um aviso vier do servidor (nova inscrição, informativo), a linha "Última notificação recebida" mostra a hora dele.</p>`:'');
+}
+async function testeLocal(){
+  try{ const r=await navigator.serviceWorker.ready; await r.showNotification('Teste do Grão',{body:'Este aparelho mostra notificações.',icon:'/grao/icon-192.png',badge:'/grao/icon-192.png',data:{url:'/grao/'}}); }
+  catch(e){ toast('Não foi possível mostrar: '+e.message); }
 }
