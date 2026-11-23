@@ -192,6 +192,7 @@ function successLogin(user){
   if(greetEl) greetEl.textContent = user.genero==='F' ? 'Bem-vinda, parceira' : 'Bem-vindo, parceiro';
   if(user.admin){
     document.getElementById('adminBtn').style.display='flex';
+    if(window.__abrirPendentes) setTimeout(abrirPendentes,400);
     try{
       getDb().collection('profiles').where('status','==','pending').get()
       .then(snap=>{
@@ -1727,6 +1728,8 @@ function loadPending(){
           <div style="margin-bottom:6px">
             <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${esc(d.nome)}</div>
             <div style="font-size:0.74rem;color:var(--text3)">${esc(d.email)}</div>
+            ${d.whatsapp ? `<div style="font-size:0.78rem;color:var(--text2);margin-top:2px">📱 <a href="https://wa.me/${String(d.whatsapp).replace(/\D/g,'').replace(/^(?!55)/,'55')}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(d.whatsapp)}</a></div>` : ''}
+            ${d.cidade ? `<div style="font-size:0.78rem;color:var(--text2)">📍 ${esc(d.cidade)}</div>` : ''}
             ${d.how ? `<div style="font-size:0.74rem;color:var(--text3)">Como conheceu: ${esc(d.how)}</div>` : ''}
             <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
           </div>
@@ -1834,10 +1837,12 @@ async function submitRegister(){
   const email = document.getElementById('regEmail').value.trim().toLowerCase();
   const pass  = document.getElementById('regPass').value.trim();
   const genero= document.getElementById('regGenero').value;
-  const how   = document.getElementById('regHow').value.trim();
+  const fone  = (document.getElementById('regFone')||{}).value.trim();
+  const cidade= (document.getElementById('regCidade')||{}).value.trim();
   const err   = document.getElementById('regErr');
   const btn   = document.getElementById('regSubmitBtn');
-  if(!name||!email||!pass){ err.textContent='Preencha nome, e-mail e senha.'; err.style.display='block'; return; }
+  if(!name||!email||!pass||!fone){ err.textContent='Preencha nome, e-mail, senha e WhatsApp.'; err.style.display='block'; return; }
+  if(fone.replace(/\D/g,'').length<10){ err.textContent='Confira o WhatsApp: inclua o DDD.'; err.style.display='block'; return; }
   if(pass.length < 6){ err.textContent='Senha muito curta — mínimo 6 caracteres.'; err.style.display='block'; return; }
   err.style.display='none';
   if(btn){ btn.disabled=true; btn.textContent='Enviando...'; }
@@ -1846,15 +1851,15 @@ async function submitRegister(){
     const cred = await getAuth().createUserWithEmailAndPassword(email, pass);
     const uid = cred.user.uid;
     await getDb().collection('profiles').doc(uid).set({
-      nome: name, email, genero, how, nascimento: (document.getElementById('regNasc')||{}).value||'',
-      admin:false, status:'pending',
+      nome: name, email, genero, whatsapp: fone, cidade, nascimento: (document.getElementById('regNasc')||{}).value||'',
+      admin:false, status:'pending', regPending:true,
       requestedAt: new Date().toISOString()
     });
     // Notifica a família por e-mail
     emailjs.send('service_grao','template_grao_1',{
       nome: `Nova solicitação: ${name}`,
       email_parceiro: 'nossoprojetograo@gmail.com',
-      senha: `E-mail: ${email} | Como conheceu: ${how||'Não informado'} | Aprovar no painel admin.`
+      senha: `E-mail: ${email} | WhatsApp: ${fone} | Cidade: ${cidade||'—'} | Aprovar no painel admin.`
     }).catch(()=>{});
     await getAuth().signOut(); // criar conta já loga automaticamente — precisamos deslogar até aprovar
     document.getElementById('regForm').style.display='none';
@@ -2514,3 +2519,11 @@ function discardDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} cl
   new MutationObserver(()=>{ if(aberto() && !history.state?.modal) history.pushState({modal:1},''); }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
   window.addEventListener('popstate',()=>{ const m=aberto(); if(m) m.style.display='none'; });
 })();
+
+// Toque na notificação de nova inscrição → abre direto a lista para aceitar
+function abrirPendentes(){
+  if(!me || !me.admin){ window.__abrirPendentes=true; return; }
+  window.__abrirPendentes=false; openAdmin(); showAdminTab('config'); loadPending();
+}
+if(/[?&]aprovar=1/.test(location.search)){ window.__abrirPendentes=true; try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+if('serviceWorker' in navigator){ navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.go==='aprovar') abrirPendentes(); }); }

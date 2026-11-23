@@ -172,7 +172,22 @@ async function pollNovidades(ctx) {
   }
 }
 
+// Nova inscrição → avisa a família (push nos aparelhos dos admins) para aceitar pelo app
+async function pollInscricoes(ctx) {
+  const snap = await ctx.db.collection('profiles').where('regPending', '==', true).get();
+  if (snap.empty) return;
+  const novos = snap.docs.map((d) => d.data()).filter((p) => p.status === 'pending');
+  if (novos.length) {
+    const nome = novos.length === 1 ? (novos[0].nome || 'Alguém') : `${novos.length} pessoas`;
+    const onde = novos.length === 1 && novos[0].cidade ? ` (${novos[0].cidade})` : '';
+    log(`nova inscrição: ${novos.map((p) => p.nome).join(', ')}`);
+    await pushAdmins(ctx, { title: 'Nova inscrição no Grão 🌱', body: `${nome}${onde} quer participar. Toque para aceitar.`, url: '/grao/?aprovar=1' });
+  }
+  for (const d of snap.docs) await d.ref.update({ regPending: false });
+}
+
 async function poll(ctx) {
+  await pollInscricoes(ctx);
   await pollBoasVindas(ctx);
   await pollInformativos(ctx);
   await pollNovidades(ctx);
@@ -328,7 +343,7 @@ async function main() {
   else throw new Error('Uso: node run.js poll | daily | teste <tipo>');
 }
 
-module.exports = { poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
+module.exports = { pollInscricoes, poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
 
 if (require.main === module) {
   main().then(() => process.exit(0)).catch((e) => { console.error('ERRO:', e.message); process.exit(1); });
