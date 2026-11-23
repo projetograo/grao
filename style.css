@@ -270,5 +270,20 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 .pass-eye{position:absolute;right:14px;background:transparent;border:none;cursor:pointer;color:var(--text3);padding:4px;display:flex;align-items:center;justify-content:center;transition:color 0.2s}
 .pass-eye:hover{color:var(--accent)}
 .pass-eye svg{width:18px;height:18px}
+/* ── INSTALAR NA TELA INICIAL ── */
+.inst-card{margin:0 20px 18px;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(232,168,112,.18),rgba(232,168,112,.06));border:1px solid var(--border-hi);border-radius:18px;padding:14px 14px 14px 16px;position:relative}
+.inst-ico{flex:none;width:44px;height:44px;border-radius:12px;background:var(--accent);color:var(--bg-deep);display:flex;align-items:center;justify-content:center;font-size:1.3rem}
+.inst-txt{flex:1;min-width:0}
+.inst-t{font-family:'Playfair Display',serif;font-size:1.02rem;color:var(--text);line-height:1.25}
+.inst-s{font-size:.76rem;color:var(--text2);margin-top:2px;line-height:1.4}
+.inst-btn{flex:none;background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:9px 16px;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif}
+.inst-x{position:absolute;top:4px;right:8px;background:none;border:none;color:var(--text3);font-size:1.1rem;cursor:pointer;padding:4px 6px;line-height:1}
+.inst-link{display:inline-block;margin-top:10px;background:none;border:none;color:var(--accent);font-size:.8rem;font-family:'Inter',sans-serif;text-decoration:underline;cursor:pointer}
+.inst-step{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px}
+.inst-n{flex:none;width:28px;height:28px;border-radius:50%;background:rgba(232,168,112,.18);border:1px solid var(--accent);color:var(--accent);font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center}
+.inst-step p{font-size:.9rem;color:var(--text2);line-height:1.5;margin:3px 0 0}
+.inst-step b{color:var(--text);font-weight:500}
+.inst-share{display:inline-block;vertical-align:-4px;width:20px;height:20px;border:1.5px solid var(--accent);border-radius:5px;position:relative;margin:0 2px}
+.inst-share:after{content:'↑';position:absolute;inset:0;text-align:center;font-size:.8rem;line-height:19px;color:var(--accent)}
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--accent);color:var(--bg-deep);padding:10px 24px;border-radius:50px;font-size:0.78rem;font-weight:600;opacity:0;transition:all 0.3s;z-index:500;white-space:nowrap;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}

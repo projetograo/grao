@@ -2051,3 +2051,76 @@ document.addEventListener('DOMContentLoaded', function(){
   }
   waitForFirebase(20);
 });
+
+// ── INSTALAR NA TELA INICIAL ──
+(function(){
+  var deferred=null, KEY='grao_install_dismissed';
+  function en(){ try{ return typeof currentLang!=='undefined' && currentLang==='en'; }catch(e){ return false; } }
+  function standalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true; }
+  function isIOS(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+  function isAndroid(){ return /android/i.test(navigator.userAgent); }
+  function dismissed(){ try{ var t=+localStorage.getItem(KEY)||0; return t && (Date.now()-t) < 14*86400000; }catch(e){ return false; } }
+  function refresh(){
+    var card=document.getElementById('installCard'), link=document.getElementById('installLoginLink');
+    var show=!standalone();
+    if(card) card.style.display = (show && !dismissed()) ? 'flex' : 'none';
+    if(link) link.style.display = show ? 'inline-block' : 'none';
+    if(!show) return;
+    var e=en();
+    var set=function(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; };
+    set('instCardT', e?'Put Grão on your home screen':'Coloque o Grão na sua tela inicial');
+    set('instCardS', e?'Opens in one tap, full screen, like any app.':'Abre com um toque, em tela cheia, como qualquer app.');
+    set('instCardB', (deferred ? (e?'Install':'Instalar') : (e?'How to':'Como fazer')));
+    set('installLoginLink', e?'📲 Install the app on your phone':'📲 Instalar o app no celular');
+  }
+  window.addEventListener('beforeinstallprompt', function(ev){ ev.preventDefault(); deferred=ev; refresh(); });
+  window.addEventListener('appinstalled', function(){ deferred=null; refresh(); try{ toast('App instalado! 🌱'); }catch(e){} });
+  window.dismissInstall=function(){ try{ localStorage.setItem(KEY, String(Date.now())); }catch(e){} refresh(); };
+  window.closeInstall=function(){ document.getElementById('installModal').style.display='none'; };
+  window.openInstall=function(){
+    if(deferred){ deferred.prompt(); deferred.userChoice.then(function(){ deferred=null; refresh(); }).catch(function(){}); return; }
+    var e=en(), steps;
+    if(isIOS()){
+      steps = e ? [
+        'Tap the <b>Share</b> button <span class="inst-share"></span> in the browser bar (bottom on iPhone, top on iPad).',
+        'Scroll and tap <b>Add to Home Screen</b>.',
+        'Tap <b>Add</b>. Grão now appears with your apps.',
+        'Tip: if you opened this link inside Instagram or WhatsApp, tap <b>⋯ → Open in browser</b> first.'
+      ] : [
+        'Toque em <b>Compartilhar</b> <span class="inst-share"></span> na barra do navegador (embaixo no iPhone, em cima no iPad).',
+        'Role a lista e toque em <b>Adicionar à Tela de Início</b>.',
+        'Toque em <b>Adicionar</b>. Pronto: o Grão aparece junto com seus aplicativos.',
+        'Dica: se você abriu este link dentro do Instagram ou do WhatsApp, toque em <b>⋯ → Abrir no navegador</b> antes.'
+      ];
+    } else if(isAndroid()){
+      steps = e ? [
+        'Tap the <b>⋮</b> menu at the top right of Chrome.',
+        'Tap <b>Install app</b> (or <b>Add to Home screen</b>).',
+        'Confirm. Grão appears with your apps.'
+      ] : [
+        'Toque no menu <b>⋮</b> no canto superior direito do Chrome.',
+        'Toque em <b>Instalar app</b> (ou <b>Adicionar à tela inicial</b>).',
+        'Confirme. O Grão aparece junto com seus aplicativos.'
+      ];
+    } else {
+      steps = e ? [
+        'In Chrome or Edge, click the <b>install icon</b> at the right end of the address bar.',
+        'Click <b>Install</b>. Grão opens in its own window.'
+      ] : [
+        'No Chrome ou Edge, clique no <b>ícone de instalar</b> no fim da barra de endereço.',
+        'Clique em <b>Instalar</b>. O Grão abre em janela própria.'
+      ];
+    }
+    document.getElementById('instSteps').innerHTML = steps.map(function(s,i){
+      var tip = /^(Dica|Tip):/.test(s.replace(/<[^>]+>/g,''));
+      return tip ? '<p style="font-size:.78rem;color:var(--text3);line-height:1.5;margin:4px 0 18px">'+s+'</p>'
+                 : '<div class="inst-step"><div class="inst-n">'+(i+1)+'</div><p>'+s+'</p></div>';
+    }).join('');
+    document.getElementById('instMT').innerHTML = e ? 'Install <em style="color:var(--accent);font-style:italic">Grão</em>' : 'Instalar o <em style="color:var(--accent);font-style:italic">Grão</em>';
+    document.getElementById('instMS').textContent = e ? 'Takes under a minute' : 'Leva menos de 1 minuto';
+    document.getElementById('instMOk').textContent = e ? 'Got it' : 'Entendi';
+    var m=document.getElementById('installModal'); document.body.appendChild(m); m.style.display='flex';
+  };
+  document.addEventListener('DOMContentLoaded', function(){ refresh(); setTimeout(refresh, 1500); });
+})();
+
