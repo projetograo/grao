@@ -185,7 +185,6 @@ function loginErr(msg){
 
 function successLogin(user){
   me=user;
-  try{ renderBirthdayCard(); }catch(e){}
   try{ renderPushCard(); }catch(e){}
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
@@ -2196,21 +2195,6 @@ async function deleteNiComment(id,cid){
   refreshNiSocial(id);
 }
 
-// ── Aniversário (para quem já tem conta e ainda não informou) ──
-function renderBirthdayCard(){
-  const c=document.getElementById('bdayCard'); if(!c) return;
-  let skip=false; try{ skip = !!localStorage.getItem('grao_bday_skip'); }catch(e){}
-  c.style.display = (me && !me.nascimento && !skip) ? 'flex' : 'none';
-}
-async function saveBirthday(){
-  const v=(document.getElementById('bdayIn')||{}).value;
-  if(!v || !me) return toast('Escolha a data.');
-  try{
-    await getDb().collection('profiles').doc(me.id).update({nascimento:v});
-    me.nascimento=v; renderBirthdayCard(); toast('Anotado! Vamos te dar parabéns 🎂');
-  }catch(e){ toast('Não foi possível salvar agora.'); }
-}
-function skipBirthday(){ try{ localStorage.setItem('grao_bday_skip','1'); }catch(e){} renderBirthdayCard(); }
 
 // ══ ETAPA 2 — notificações push (Firebase Cloud Messaging) ══
 const VAPID_KEY = 'BMZ1IA77FLpmurAJvuMWGxkEbZ1yHfIOzlIgsiYpALwMNI9K4w4FElN_mCIGGa1qSq5hVeRo2SSCxHWQekkKEDI';
