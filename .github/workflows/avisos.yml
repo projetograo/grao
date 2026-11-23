@@ -18,6 +18,7 @@ on:
           - teste-boas-vindas
           - teste-informativo
           - teste-aniversario
+          - teste-aniversario-parceiro
           - teste-oracoes
           - teste-push
 

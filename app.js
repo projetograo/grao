@@ -1615,6 +1615,8 @@ function loadMensais(filter){
       return;
     }
     let docs = snap.docs.map(doc=>({id:doc.id,...doc.data()}));
+    _mensaisById = {}; docs.forEach(x=>{ _mensaisById[x.id]=x; });
+    try{ renderNextBdays(docs); }catch(e){}
     if(filter && filter!=='todos') docs=docs.filter(d=>d.tipo===filter);
     
     if(docs.length===0){
@@ -1632,12 +1634,19 @@ function loadMensais(filter){
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
             <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${esc(d.valor)||'—'}</span>
             <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'};display:inline-flex;align-items:center;gap:4px">
-              <svg width="9" height="9"><use href="#${d.tipo==='cartao'?'icard':'ipix'}"/></svg>${d.tipo==='cartao'?'Cartão':'Pix'}
+              <svg width="9" height="9"><use href="#${d.tipo==='cartao'?'icard':'ipix'}"/></svg>${d.tipo==='cartao'?'Cartão':(d.tipo==='pix'?'Pix':'Manual')}
             </span>
           </div>
         </div>
         <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Cadastrado em ${esc(d.data)||'—'}</div>
         
+        <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">Ficha</div>
+            <button onclick='openFicha(${JSON.stringify(d.id)})' style="background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:4px 12px;font-size:.68rem;cursor:pointer;font-family:'Inter',sans-serif">✎ Editar</button>
+          </div>
+          ${fichaResumoHtml(d)}
+        </div>
         <!-- Contribution tracking -->
         <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
           <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Registro de contribuições</div>
@@ -2273,4 +2282,139 @@ async function announceUpdate(){
     document.getElementById('annBody').value='';
     toast('Aviso na fila! Sai em até 15 minutos.');
   }catch(e){ toast('Não foi possível enviar o aviso.'); }
+}
+
+// ══ Ficha dos parceiros de perto (financeiros e quem adotou o projeto) ══
+// Só o admin preenche e vê. Nada disso é pedido no cadastro do parceiro.
+let _mensaisById = {};
+let _fichaEditId = null;
+
+function fichaIdade(nasc){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(nasc||'')) return null;
+  const h=new Date(), y=+nasc.slice(0,4), m=+nasc.slice(5,7)-1, d=+nasc.slice(8,10);
+  let i=h.getFullYear()-y; if(h.getMonth()<m || (h.getMonth()===m && h.getDate()<d)) i--;
+  return i;
+}
+
+function fichaNextBirthday(nasc){
+  // devolve {dias, quando, idade} para a próxima ocorrência do aniversário (hoje = 0)
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(nasc||'')) return null;
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const mm=+nasc.slice(5,7)-1, dd=+nasc.slice(8,10);
+  const alvo=(ano)=>{ let d=new Date(ano,mm,dd); if(mm===1 && dd===29 && d.getMonth()!==1) d=new Date(ano,1,28); return d; };
+  let d=alvo(hoje.getFullYear());
+  if(d<hoje) d=alvo(hoje.getFullYear()+1);
+  return { dias: Math.round((d-hoje)/86400000), quando: d, idade: d.getFullYear()-(+nasc.slice(0,4)) };
+}
+
+// todas as datas de uma ficha: do parceiro, do cônjuge e dos filhos
+function fichaAniversarios(d){
+  const nomeP = d.nome||'Parceiro';
+  const out=[];
+  if(d.nascimento) out.push({quem:nomeP, rel:'', nasc:d.nascimento});
+  if(d.conjuge && d.conjuge.nascimento) out.push({quem:d.conjuge.nome||'Cônjuge', rel:'cônjuge de '+nomeP, nasc:d.conjuge.nascimento});
+  (d.filhos||[]).forEach(f=>{ if(f && f.nascimento) out.push({quem:f.nome||'Filho(a)', rel:'filho(a) de '+nomeP, nasc:f.nascimento}); });
+  return out;
+}
+
+function renderNextBdays(docs){
+  const el=document.getElementById('nextBdays'); if(!el) return;
+  const lista=[];
+  docs.forEach(d=>fichaAniversarios(d).forEach(a=>{ const nb=fichaNextBirthday(a.nasc); if(nb && nb.dias<=30) lista.push({d,a,nb}); }));
+  lista.sort((x,y)=>x.nb.dias-y.nb.dias);
+  if(!lista.length){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Nenhum aniversário nos próximos 30 dias entre os parceiros e suas famílias.</p>'; return; }
+  el.innerHTML = lista.map(({d,a,nb})=>`
+    <div class="adrow"><div class="adri">
+      <div class="adrt">${esc(a.quem)} <span style="color:var(--text3);font-weight:400">· faz ${nb.idade} ${nb.idade===1?'ano':'anos'}</span></div>
+      <div class="adrm">${nb.dias===0?'<b style="color:var(--accent)">Hoje!</b>':nb.dias===1?'Amanhã':'Em '+nb.dias+' dias'} · ${nb.quando.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}${a.rel?' · '+esc(a.rel):''}${d.phone?' · '+esc(d.phone):''}</div>
+    </div></div>`).join('');
+}
+
+const ESTADO_CIVIL = {solteiro:'Solteiro(a)', casado:'Casado(a)', viuvo:'Viúvo(a)', divorciado:'Divorciado(a)'};
+
+function fichaResumoHtml(d){
+  const cat = d.categoria==='adotou' ? 'Adotou o projeto' : (d.categoria==='financeiro' ? 'Parceiro financeiro' : '');
+  const L=[];  // linhas de texto
+  const nb=fichaNextBirthday(d.nascimento);
+  if(nb) L.push(`🎂 ${new Date(d.nascimento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}${nb.dias<=30?' · '+(nb.dias===0?'hoje!':'em '+nb.dias+' dias'):''}`);
+  if(d.endereco||d.cidade) L.push(`📍 ${esc([d.endereco,d.cidade].filter(Boolean).join(' · '))}`);
+  // família
+  const fam=[];
+  if(d.estadoCivil) fam.push(ESTADO_CIVIL[d.estadoCivil]||'');
+  if(d.conjuge && d.conjuge.nome) fam.push('cônjuge: '+esc(d.conjuge.nome)+(d.conjuge.nascimento?' ('+fichaIdade(d.conjuge.nascimento)+')':''));
+  if(d.filhosStatus==='nao') fam.push('sem filhos');
+  if(d.filhosStatus==='sim'){
+    const fs=(d.filhos||[]).map(f=>esc(f.nome||'filho(a)')+(f.nascimento?' ('+fichaIdade(f.nascimento)+')':''));
+    fam.push('filhos: '+(fs.length?fs.join(', '):'quantos e quem, ainda a anotar'));
+  }
+  if(fam.filter(Boolean).length) L.push('👨‍👩‍👧 '+fam.filter(Boolean).join(' · '));
+  if(d.outrosFamiliares) L.push(`🏠 ${esc(d.outrosFamiliares)}`);
+  if(d.oracao) L.push(`🙏 ${esc(d.oracao)}`);
+  if(d.notas) L.push(`📝 ${esc(d.notas)}`);
+  // o que ainda não sabemos — convite gentil para ir conhecendo aos poucos
+  const falta=[];
+  if(!d.nascimento) falta.push('aniversário');
+  if(!d.estadoCivil) falta.push('estado civil');
+  if(!d.filhosStatus) falta.push('se tem filhos');
+  if(!d.endereco && !d.cidade) falta.push('onde mora');
+  let html='';
+  if(cat) html+=`<div style="margin-bottom:6px"><span style="font-size:.6rem;padding:2px 8px;border-radius:50px;background:rgba(232,168,112,.15);color:var(--accent)">${cat}</span></div>`;
+  html+=L.map(l=>`<div style="font-size:.78rem;color:var(--text2);line-height:1.5;margin-bottom:4px;white-space:pre-wrap">${l}</div>`).join('');
+  if(falta.length) html+=`<div style="font-size:.72rem;color:var(--text3);font-style:italic;margin-top:6px">Ainda não sabemos: ${falta.join(', ')}.</div>`;
+  return html;
+}
+
+function fichaFilhoRow(f){
+  const row=document.createElement('div');
+  row.className='fh-filho'; row.style.cssText='display:flex;gap:8px;margin-bottom:8px;align-items:center';
+  row.innerHTML='<input class="adinp fh-fn" type="text" placeholder="Nome" style="flex:1;min-width:0"><input class="adinp fh-fd" type="date" style="width:150px;flex:none"><button type="button" aria-label="Remover" style="background:none;border:none;color:var(--text3);font-size:1.3rem;cursor:pointer;flex:none">×</button>';
+  row.querySelector('.fh-fn').value=(f&&f.nome)||'';
+  row.querySelector('.fh-fd').value=(f&&f.nascimento)||'';
+  row.querySelector('button').onclick=()=>row.remove();
+  return row;
+}
+function fichaAddFilho(f){ document.getElementById('fhFilhos').appendChild(fichaFilhoRow(f)); }
+function fichaToggleFamilia(){
+  document.getElementById('fhConjBox').style.display = document.getElementById('fhEstCivil').value==='casado' ? 'block':'none';
+  document.getElementById('fhFilhosBox').style.display = document.getElementById('fhFilhosSt').value==='sim' ? 'block':'none';
+}
+
+function openFicha(id){
+  _fichaEditId = id || null;
+  const d = id ? (_mensaisById[id]||{}) : {};
+  const set=(k,v)=>{ const el=document.getElementById(k); if(el) el.value=v||''; };
+  set('fhNome',d.nome); set('fhEmail',d.email); set('fhPhone',d.phone); set('fhNasc',d.nascimento);
+  set('fhCateg',d.categoria||'financeiro'); set('fhValor',d.valor); set('fhEnd',d.endereco); set('fhCidade',d.cidade); set('fhNotas',d.notas);
+  set('fhEstCivil',d.estadoCivil); set('fhConjNome',d.conjuge&&d.conjuge.nome); set('fhConjNasc',d.conjuge&&d.conjuge.nascimento);
+  set('fhFilhosSt',d.filhosStatus); set('fhOutros',d.outrosFamiliares); set('fhOracao',d.oracao);
+  const box=document.getElementById('fhFilhos'); box.innerHTML='';
+  (d.filhos||[]).forEach(f=>fichaAddFilho(f));
+  if(d.filhosStatus==='sim' && !(d.filhos||[]).length) fichaAddFilho();
+  fichaToggleFamilia();
+  document.getElementById('fhTitle').textContent = id ? 'Ficha do parceiro' : 'Cadastrar parceiro';
+  const m=document.getElementById('fichaModal'); document.body.appendChild(m); m.style.display='flex';
+}
+function closeFicha(){ document.getElementById('fichaModal').style.display='none'; }
+
+async function saveFicha(){
+  const v=(k)=>((document.getElementById(k)||{}).value||'').trim();
+  const nome=v('fhNome'); if(!nome) return toast('Preencha o nome.');
+  const casado = v('fhEstCivil')==='casado';
+  const filhosSim = v('fhFilhosSt')==='sim';
+  const filhos = filhosSim ? [...document.querySelectorAll('#fhFilhos .fh-filho')].map(r=>({
+      nome:r.querySelector('.fh-fn').value.trim(), nascimento:r.querySelector('.fh-fd').value
+    })).filter(f=>f.nome||f.nascimento) : [];
+  const dados={ nome, email:v('fhEmail').toLowerCase(), phone:v('fhPhone'), nascimento:v('fhNasc'), categoria:v('fhCateg')||'financeiro',
+    valor:v('fhValor'), endereco:v('fhEnd'), cidade:v('fhCidade'), notas:v('fhNotas'),
+    estadoCivil:v('fhEstCivil'), conjuge: casado ? { nome:v('fhConjNome'), nascimento:v('fhConjNasc') } : null,
+    filhosStatus:v('fhFilhosSt'), filhos, outrosFamiliares:v('fhOutros'), oracao:v('fhOracao'),
+    fichaAt:new Date().toISOString() };
+  try{
+    if(_fichaEditId){
+      await getDb().collection('parceiros_mensais').doc(_fichaEditId).update(dados);
+    } else {
+      await getDb().collection('parceiros_mensais').add({ ...dados, tipo:'manual', data:new Date().toLocaleDateString('pt-BR'), timestamp:new Date().toISOString(), contribuicoes:[] });
+    }
+    closeFicha(); toast('Ficha salva ✓'); loadMensais();
+  }catch(e){ toast('Não foi possível salvar: '+e.message); }
 }

@@ -9,7 +9,7 @@ const esc = (s) => String(s == null ? '' : s)
 
 const firstName = (n) => String(n || '').trim().split(/\s+/)[0] || 'amigo';
 
-function layout({ preheader, title, bodyHtml, buttonLabel, buttonUrl }) {
+function layout({ preheader, title, bodyHtml, buttonLabel, buttonUrl, interno }) {
   const btn = buttonLabel
     ? `<tr><td align="center" style="padding:8px 32px 28px">
          <a href="${esc(buttonUrl || APP_URL)}" style="display:inline-block;background:#E8A870;color:#4A2E20;text-decoration:none;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:bold;letter-spacing:1px;text-transform:uppercase;padding:14px 30px;border-radius:50px">${esc(buttonLabel)}</a>
@@ -29,10 +29,9 @@ function layout({ preheader, title, bodyHtml, buttonLabel, buttonUrl }) {
       <div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.7;color:#5A4333">${bodyHtml}</div>
     </td></tr>
     ${btn}
-    <tr><td style="padding:0 32px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#3B2619">Com carinho,<br>Bruno, Malu, Tom e Cauê 🌱</td></tr>
+    ${interno ? '' : `<tr><td style="padding:0 32px 26px;font-family:Georgia,'Times New Roman',serif;font-size:15px;color:#3B2619">Com carinho,<br>Bruno, Malu, Tom e Cauê 🌱</td></tr>`}
     <tr><td style="background:#F8F1E9;padding:16px 32px;font-family:Arial,Helvetica,sans-serif;font-size:11.5px;line-height:1.6;color:#8C7260;text-align:center">
-      Você recebe este e-mail porque faz parte do Projeto Grão.<br>
-      Não quer mais receber? É só responder com a palavra <b>SAIR</b>.
+      ${interno ? 'Aviso interno do painel do Grão. Só a família recebe.' : 'Você recebe este e-mail porque faz parte do Projeto Grão.<br>Não quer mais receber? É só responder com a palavra <b>SAIR</b>.'}
     </td></tr>
   </table>
 </td></tr></table>
@@ -120,4 +119,39 @@ function prayers({ nome, mes, itens }) {
   };
 }
 
-module.exports = { welcome, news, birthday, prayers, firstName, esc, APP_URL };
+// Aviso interno: aniversários de parceiros de perto (e da família deles) para a família ligar ou mandar um presente.
+// itens: [{ quando: 'hoje'|'em 7 dias', quem, rel, idade, parceiro: {...ficha} }]
+function familyBirthdays({ itens }) {
+  const bloco = (it) => {
+    const p = it.parceiro || {};
+    const linhas = [];
+    if (p.phone) linhas.push(`📞 ${esc(p.phone)}`);
+    if (p.email) linhas.push(`✉️ ${esc(p.email)}`);
+    if (p.endereco || p.cidade) linhas.push(`📍 ${esc([p.endereco, p.cidade].filter(Boolean).join(' · '))}`);
+    if (p.valor) linhas.push(`💛 Contribui: ${esc(p.valor)}`);
+    if (p.oracao) linhas.push(`🙏 ${esc(p.oracao)}`);
+    if (p.notas) linhas.push(`📝 ${esc(p.notas)}`);
+    return `<div style="background:#F8F1E9;border-left:3px solid #E8A870;border-radius:6px;padding:14px 16px;margin:0 0 12px">
+      <div style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#B7763A;margin-bottom:4px">${esc(it.quando)}</div>
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:18px;color:#3B2619">${esc(it.quem)}${it.idade ? ` faz ${esc(it.idade)} ${it.idade === 1 ? 'ano' : 'anos'}` : ''}</div>
+      ${it.rel ? `<div style="font-size:13px;color:#8C7260;margin:2px 0 8px">${esc(it.rel)}</div>` : '<div style="height:8px"></div>'}
+      <div style="font-size:14px;line-height:1.7;color:#5A4333;white-space:pre-wrap">${linhas.join('<br>')}</div>
+    </div>`;
+  };
+  const hoje = itens.filter((i) => i.quando === 'hoje');
+  const nomes = itens.map((i) => i.quem).join(', ');
+  const html = layout({
+    preheader: nomes,
+    title: hoje.length ? 'Aniversário hoje 🎂' : 'Aniversário chegando 🎂',
+    bodyHtml: `<p style="margin:0 0 14px">${hoje.length ? 'Uma boa hora para ligar, mandar uma mensagem ou um presente.' : 'Dá tempo de preparar um carinho.'}</p>${itens.map(bloco).join('')}`,
+    buttonLabel: 'Abrir o painel',
+    interno: true,
+  });
+  const subj = hoje.length
+    ? `🎂 Hoje: ${hoje.map((i) => i.quem).join(', ')}`
+    : `🎂 Em 7 dias: ${itens.map((i) => i.quem).join(', ')}`;
+  const text = itens.map((i) => `${i.quando}: ${i.quem}${i.rel ? ' (' + i.rel + ')' : ''}${i.parceiro && i.parceiro.phone ? ' - ' + i.parceiro.phone : ''}`).join('\n');
+  return { subject: subj, html, text };
+}
+
+module.exports = { welcome, news, birthday, prayers, familyBirthdays, firstName, esc, APP_URL };

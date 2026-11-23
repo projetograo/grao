@@ -96,6 +96,45 @@
     <p class="lhint" style="margin-top:12px">Dúvidas? <a href="https://wa.me/5582996210019?text=E%20a%C3%AD%20parceiro%2C%20como%20fa%C3%A7o%20pra%20ter%20acesso%3F" target="_blank" rel="noopener noreferrer" style="color:var(--accent);text-decoration:none;font-weight:500">Fale pelo WhatsApp</a></p>
     <div style="text-align:center;margin-top:6px"><button class="inst-link" id="installLoginLink" onclick="openInstall()" style="display:none">📲 Instalar o app no celular</button></div>
 
+<!-- FICHA DO PARCEIRO (admin) -->
+<div id="fichaModal" style="display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeFicha()">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)" id="fhTitle">Ficha do parceiro</div>
+        <div style="font-size:.75rem;color:var(--text3);margin-top:2px">Só você e a Malu veem isto</div>
+      </div>
+      <button onclick="closeFicha()" style="background:none;border:none;color:var(--text3);font-size:1.5rem;cursor:pointer;line-height:1" aria-label="Fechar">×</button>
+    </div>
+    <div class="adform">
+      <div><label class="adlbl">Nome *</label><input class="adinp" id="fhNome" type="text"></div>
+      <div><label class="adlbl">Tipo</label>
+        <select class="adinp" id="fhCateg"><option value="financeiro">Parceiro financeiro</option><option value="adotou">Adotou o projeto (acompanha de perto)</option></select></div>
+      <div><label class="adlbl">E-mail</label><input class="adinp" id="fhEmail" type="email"></div>
+      <div><label class="adlbl">Telefone / WhatsApp</label><input class="adinp" id="fhPhone" type="tel"></div>
+      <div><label class="adlbl">Data de nascimento</label><input class="adinp" id="fhNasc" type="date"></div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)">Família — preencha aos poucos</div>
+      <div><label class="adlbl">Estado civil</label>
+        <select class="adinp" id="fhEstCivil" onchange="fichaToggleFamilia()"><option value="">Ainda não sei</option><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="viuvo">Viúvo(a)</option><option value="divorciado">Divorciado(a)</option></select></div>
+      <div id="fhConjBox" style="display:none;flex-direction:column;gap:14px">
+        <div><label class="adlbl">Nome do cônjuge</label><input class="adinp" id="fhConjNome" type="text"></div>
+        <div><label class="adlbl">Aniversário do cônjuge</label><input class="adinp" id="fhConjNasc" type="date"></div>
+      </div>
+      <div><label class="adlbl">Filhos</label>
+        <select class="adinp" id="fhFilhosSt" onchange="fichaToggleFamilia()"><option value="">Ainda não sei</option><option value="nao">Não tem filhos</option><option value="sim">Tem filhos</option></select></div>
+      <div id="fhFilhosBox" style="display:none"><div id="fhFilhos"></div><button type="button" class="adbtn" style="background:rgba(255,255,255,.08);color:var(--text2);font-weight:400" onclick="fichaAddFilho()">+ Adicionar filho(a)</button></div>
+      <div><label class="adlbl">Outros familiares e quem mora com ele(a)</label><textarea class="adta" id="fhOutros" style="min-height:60px" placeholder="Pais, irmãos, quem mais faz parte do dia a dia..."></textarea></div>
+      <div><label class="adlbl">Como orar pela família</label><textarea class="adta" id="fhOracao" style="min-height:70px" placeholder="Pedidos, lutas, alegrias, o que sabemos para orar com intenção..."></textarea></div>
+      <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:4px;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)">Parceria</div>
+      <div><label class="adlbl">Contribuição mensal</label><input class="adinp" id="fhValor" type="text" placeholder="Ex: R$ 100"></div>
+      <div><label class="adlbl">Endereço</label><textarea class="adta" id="fhEnd" style="min-height:60px" placeholder="Rua, número, bairro, CEP"></textarea></div>
+      <div><label class="adlbl">Cidade / Estado</label><input class="adinp" id="fhCidade" type="text"></div>
+      <div><label class="adlbl">Observações</label><textarea class="adta" id="fhNotas" style="min-height:80px" placeholder="Como acompanhar, o que ele gosta, ideias de presente, pedidos de oração dele..."></textarea></div>
+      <button class="adbtn" onclick="saveFicha()">Salvar ficha</button>
+    </div>
+  </div>
+</div>
+
 <!-- INSTALAR APP -->
 <div id="installModal" style="display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeInstall()">
   <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
@@ -444,9 +483,13 @@
     </div>
 
     <div class="adtabsec" data-tab="parceiros" style="display:none">
+    <div class="adsl">Próximos aniversários (30 dias)</div>
+    <div class="adcard"><div id="nextBdays"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
+
     <div class="adsl">Parceiros & Contribuições</div>
     <div class="adcard">
       <p style="font-size:0.85rem;color:var(--text2);margin-bottom:14px;line-height:1.6">Acompanhe quem está caminhando junto e o histórico de contribuições.</p>
+      <button class="adbtn" style="margin-bottom:14px" onclick="openFicha()">+ Cadastrar parceiro</button>
       <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
         <button onclick="filterMensais('todos')" id="mfTodos" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:50px;padding:5px 14px;font-size:0.68rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Todos</button>
         <button onclick="filterMensais('cartao')" id="mfCartao" style="background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:5px 14px;font-size:0.68rem;cursor:pointer;font-family:'Inter',sans-serif;display:inline-flex;align-items:center;gap:5px"><svg width="12" height="12"><use href="#icard"/></svg>Cartão</button>
