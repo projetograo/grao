@@ -1,0 +1,51 @@
+name: Avisos (a cada 15 min)
+
+# Manda e-mail de boas-vindas, aviso de informativo e notificações push.
+# Também serve para TESTAR: Actions → "Avisos (a cada 15 min)" → Run workflow.
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'O que rodar'
+        required: true
+        default: 'poll'
+        type: choice
+        options:
+          - poll
+          - teste-boas-vindas
+          - teste-informativo
+          - teste-aniversario
+          - teste-oracoes
+          - teste-push
+
+concurrency:
+  group: grao-avisos
+  cancel-in-progress: false
+
+jobs:
+  avisos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar dependências
+        working-directory: scripts
+        run: npm install --no-audit --no-fund
+      - name: Rodar
+        working-directory: scripts
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          MODO: ${{ github.event.inputs.modo || 'poll' }}
+        run: |
+          case "$MODO" in
+            poll) node run.js poll ;;
+            teste-*) node run.js teste "${MODO#teste-}" ;;
+            *) echo "modo inválido"; exit 1 ;;
+          esac

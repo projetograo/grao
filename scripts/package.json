@@ -1,0 +1,8 @@
+{
+  "name": "grao-avisos",
+  "private": true,
+  "description": "Rotinas automáticas do Projeto Grão: e-mails (Brevo) e notificações push (Firebase).",
+  "dependencies": {
+    "firebase-admin": "^12.7.0"
+  }
+}

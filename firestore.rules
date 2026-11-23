@@ -88,6 +88,20 @@ service cloud.firestore {
       allow update: if false;
     }
 
+    // Aparelhos que ativaram notificações — cada pessoa registra e remove os seus.
+    // Só a rotina do GitHub (conta de serviço) lê a lista para enviar os avisos.
+    match /pushTokens/{token} {
+      allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow read: if false;
+    }
+
+    // Avisos de "o app foi atualizado" — só admin cria; a rotina do GitHub envia.
+    match /announcements/{docId} {
+      allow create: if isAdmin();
+      allow read, update, delete: if false;
+    }
+
     // Aggregate usage counters — any signed-in partner increments them via
     // track(); only admins need to read them (shown in the admin panel).
     // Admin activity is filtered out client-side before it ever reaches here.
