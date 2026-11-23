@@ -331,6 +331,6 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 
 /* chamada de cadastro na tela inicial */
 .lnew{margin-top:18px;padding:16px;border:1px solid var(--border-hi);border-radius:var(--r-md);background:rgba(232,168,112,.07);text-align:center}
-.lnew-t{font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--text);margin-bottom:10px}
+.lnew-t{font-family:'Inter',sans-serif;font-size:.8rem;font-weight:500;letter-spacing:.04em;color:var(--text2);margin-bottom:12px}
 .lnew-b{width:100%;background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:.8rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif}
 .lnew-s{font-size:.74rem;color:var(--text3);margin-top:10px;line-height:1.5}
