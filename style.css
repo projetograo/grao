@@ -309,3 +309,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg-deep);color:var(--text);
 .mbar-h b{color:var(--text);font-weight:500}
 .mbar-t{height:8px;border-radius:8px;background:rgba(255,255,255,.07);overflow:hidden}
 .mbar-f{height:100%;border-radius:8px;background:var(--accent)}
+
+/* bolinha de novidade nas abas */
+.tico{position:relative}
+.tdot{display:none;position:absolute;top:-3px;right:-6px;min-width:16px;height:16px;padding:0 4px;box-sizing:border-box;border-radius:8px;background:#E8553C;color:#fff;font:700 .6rem/16px 'Inter',sans-serif;font-style:normal;text-align:center;border:2px solid var(--bg-deep,#2a1a10);box-sizing:content-box;min-width:12px;height:12px;line-height:12px}
+.tdot.on{display:block}
+
+/* editor numa página só: sem passos */
+.onepage #newsSteps,.onepage button[onclick^="newsGoStep"]{display:none !important}
+.onepage .adform{margin-bottom:6px}
+.onepage #newsStep2,.onepage #newsStep3{border-top:1px solid var(--border);padding-top:16px;margin-top:6px}
+.onepage .adinp,.onepage .adta{font-size:16px} /* evita zoom automático no iPhone */
+.adinp,.adta{font-size:16px}
+#nEditor{min-height:260px}
+@media (max-width:480px){.etbtn{min-height:36px}}
