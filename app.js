@@ -186,6 +186,7 @@ function loginErr(msg){
 function successLogin(user){
   me=user;
   try{ renderBirthdayCard(); }catch(e){}
+  try{ renderPushCard(); }catch(e){}
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   const greetEl=document.querySelector('.hgreet');
@@ -719,24 +720,6 @@ async function markOldNewsAsRead(exceptId){
   }catch(e){}
 }
 
-async function notifyPartnersOfNews(n){
-  const partners=D.users.filter(u=>!u.admin && u.email);
-  let ok=0, fail=0;
-  for(const p of partners){
-    try{
-      await emailjs.send('service_grao','template_novo_informativo',{
-        nome:p.nome||'Parceiro',
-        email_parceiro:p.email,
-        titulo_informativo:n.name,
-        resumo_informativo:n.summary,
-        link_app:'https://projetograo.github.io/grao/'
-      });
-      ok++;
-    }catch(e){ fail++; console.error('Falha ao enviar para', p.email, e); }
-  }
-  return {ok, fail, total:partners.length};
-}
-
 async function addNews(){
   const name=g('nIT'), date=g('nID'), summary=g('nIS');
   if(!name||!summary) return toast('Preencha nome e resumo.');
@@ -773,26 +756,14 @@ async function addNews(){
 async function sendNewsEmail(id){
   const n=D.news.find(x=>x.id===id);
   if(!n) return;
-  const partners=D.users.filter(u=>!u.admin && u.email);
-  const confirmMsg=n.emailSent
-    ? `Esse informativo já teve e-mail enviado em ${new Date(n.emailSentAt).toLocaleString('pt-BR')}. Enviar de novo para ${partners.length} parceiro(s)?`
-    : `Enviar e-mail avisando sobre "${n.name}" para ${partners.length} parceiro(s)?`;
-  if(!confirm(confirmMsg)) return;
-  toast('Enviando e-mails...');
-  const result=await notifyPartnersOfNews(n);
-  if(result.ok>0){
-    n.emailSent=true; n.emailSentAt=new Date().toISOString();
-    saveNews();
-    try{ await getDb().collection('news').doc(String(id)).update({emailSent:true,emailSentAt:n.emailSentAt}); }catch(e){}
-  }
-  renderAdminNewsList();
-  if(result.fail>0 && result.ok===0){
-    toast(`Nenhum e-mail foi enviado. Confira se o template "template_novo_informativo" existe no EmailJS.`);
-  }else if(result.fail>0){
-    toast(`Enviado para ${result.ok} de ${result.total}. ${result.fail} falharam — confira o console.`);
-  }else{
-    toast(`Parceiros avisados! ✉️ (${result.ok}/${result.total})`);
-  }
+  const msg = n.emailSent
+    ? `Esse informativo já foi avisado em ${new Date(n.emailSentAt).toLocaleString('pt-BR')}. Avisar de novo por e-mail e notificação?`
+    : `Avisar todos os parceiros sobre "${n.name}" por e-mail e notificação?`;
+  if(!confirm(msg)) return;
+  try{
+    await getDb().collection('news').doc(String(id)).update({notifyPending:true});
+    toast('Pronto! Os avisos saem em até 15 minutos.');
+  }catch(e){ toast('Não foi possível enviar agora. Tente de novo.'); }
 }
 
 function editNews(id){
@@ -851,7 +822,7 @@ function renderAdminNewsList(){
         <button onclick="shareNews(${n.id},${attrJson(n.name)},${attrJson(n.summary)})" title="Compartilhar" style="background:rgba(255,255,255,0.08);border:1px solid var(--border-md);border-radius:8px;width:32px;height:32px;color:var(--text2);cursor:pointer">↗</button>
         <button onclick="delNews(${n.id})" title="Remover" style="background:rgba(224,120,96,0.12);border:1px solid rgba(224,120,96,0.3);border-radius:8px;width:32px;height:32px;color:var(--red);cursor:pointer;display:flex;align-items:center;justify-content:center"><svg width="14" height="14"><use href="#iclose"/></svg></button>
       </div>
-      <button onclick="sendNewsEmail(${n.id})" style="width:100%;margin-top:8px;background:${n.emailSent?'rgba(255,255,255,0.08)':'var(--green)'};color:${n.emailSent?'var(--text2)':'#fff'};border:none;border-radius:8px;padding:9px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="13" height="13"><use href="#imail"/></svg>${n.emailSent?'Avisar parceiros de novo':'Avisar parceiros por e-mail'}</button>
+      <button onclick="sendNewsEmail(${n.id})" style="width:100%;margin-top:8px;background:${n.emailSent?'rgba(255,255,255,0.08)':'var(--green)'};color:${n.emailSent?'var(--text2)':'#fff'};border:none;border-radius:8px;padding:9px;font-size:0.82rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><svg width="13" height="13"><use href="#imail"/></svg>${n.emailSent?'Avisar parceiros de novo':'Avisar parceiros (e-mail + notificação)'}</button>
     </div>`).join('');
 }
 
@@ -862,7 +833,7 @@ function addPrayer(){
   const id=Date.now();
   D.prayers.push({id,title,body,icon});
   savePrayers();
-  try{ getDb().collection('prayers').doc(String(id)).set({title,body,icon,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
+  try{ getDb().collection('prayers').doc(String(id)).set({title,body,icon,createdAt:new Date().toISOString(),pushPending:true}).catch(()=>{}); }catch(e){}
   ['nPT','nPB'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const sel=document.getElementById('nPI'); if(sel) sel.value='ihrt';
   const prev=document.getElementById('nPIPreview'); if(prev) prev.setAttribute('href','#ihrt');
@@ -914,7 +885,7 @@ function addTimeline(){
   const item={id:Date.now(),date,title,body,status,dot:dotMap[status]||'dn'};
   D.timeline.push(item);
   saveTimeline();
-  try{ getDb().collection('timeline').doc(String(item.id)).set({...item,createdAt:new Date().toISOString()}).catch(()=>{}); }catch(e){}
+  try{ getDb().collection('timeline').doc(String(item.id)).set({...item,createdAt:new Date().toISOString(),pushPending:true}).catch(()=>{}); }catch(e){}
   ['nTD','nTT','nTB'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   renderTimeline(); renderAdminTimeline(); toast('Adicionado!');
 }
@@ -1763,14 +1734,12 @@ function approvePending(docId){
   .then(doc=>{
     if(!doc.exists) throw new Error('Perfil não encontrado.');
     const d=doc.data();
-    return getDb().collection('profiles').doc(docId).update({status:'approved'})
+    return getDb().collection('profiles').doc(docId).update({status:'approved', welcomePending:true, approvedAt:new Date().toISOString()})
       .then(()=>{
-        emailjs.send('service_grao','template_grao_1',{nome:d.nome, email_parceiro:d.email, senha:'Sua conta já está liberada — entre com o e-mail e a senha que você cadastrou.'})
-          .catch(()=>{});
         loadPending();
         loadPartnersFromFirebase();
         renderAdmin();
-        toast('Bem-vindo à equipe! E-mail enviado ✓');
+        toast('Aprovado! O e-mail de boas-vindas sai em até 15 minutos.');
       });
   })
   .catch(e=>toast('Erro: '+e.message));
@@ -2242,3 +2211,82 @@ async function saveBirthday(){
   }catch(e){ toast('Não foi possível salvar agora.'); }
 }
 function skipBirthday(){ try{ localStorage.setItem('grao_bday_skip','1'); }catch(e){} renderBirthdayCard(); }
+
+// ══ ETAPA 2 — notificações push (Firebase Cloud Messaging) ══
+const VAPID_KEY = 'BMZ1IA77FLpmurAJvuMWGxkEbZ1yHfIOzlIgsiYpALwMNI9K4w4FElN_mCIGGa1qSq5hVeRo2SSCxHWQekkKEDI';
+
+function _isIOSDevice(){ return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1); }
+function _isStandalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true; }
+
+// 'needs-install' | 'unsupported' | 'default' | 'granted' | 'denied'
+function pushState(){
+  if(!('Notification' in window) || !('serviceWorker' in navigator)){
+    return (_isIOSDevice() && !_isStandalone()) ? 'needs-install' : 'unsupported';
+  }
+  return Notification.permission;
+}
+
+async function registerPushToken(){
+  if(!me) return false;
+  try{
+    if(!(firebase.messaging && await Promise.resolve(firebase.messaging.isSupported()))) return false;
+    const reg = await navigator.serviceWorker.ready;
+    const token = await firebase.messaging().getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+    if(!token) return false;
+    await getDb().collection('pushTokens').doc(token).set({ uid: me.id, at: new Date().toISOString(), ua: navigator.userAgent.slice(0,140) });
+    try{ localStorage.setItem('grao_push_token', token); }catch(e){}
+    return true;
+  }catch(e){ console.log('push token error:', e); return false; }
+}
+
+async function enablePush(){
+  const st = pushState();
+  if(st==='needs-install'){ if(typeof openInstall==='function') openInstall(); return; }
+  if(st==='unsupported'){ toast('Este navegador não permite notificações.'); return; }
+  if(st==='denied'){ toast('As notificações estão bloqueadas. Libere nos ajustes do aparelho.'); return; }
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=='granted'){ renderPushCard(); return; }
+    const ok = await registerPushToken();
+    toast(ok ? 'Avisos ativados 🔔' : 'Não foi possível ativar agora. Tente de novo.');
+  }catch(e){ toast('Não foi possível ativar agora.'); }
+  renderPushCard();
+}
+
+function dismissPush(){ try{ localStorage.setItem('grao_push_skip', String(Date.now())); }catch(e){} renderPushCard(); }
+
+function renderPushCard(){
+  const c=document.getElementById('pushCard'); if(!c) return;
+  const st = pushState();
+  // já permitiu: só garante (1x por sessão) que o aparelho está registrado
+  if(st==='granted' && me){
+    c.style.display='none';
+    try{ if(!sessionStorage.getItem('grao_push_reg')){ sessionStorage.setItem('grao_push_reg','1'); registerPushToken(); } }catch(e){}
+    return;
+  }
+  let skipped=false; try{ skipped = (Date.now() - (+localStorage.getItem('grao_push_skip')||0)) < 7*86400000; }catch(e){}
+  if(!me || skipped || st==='denied' || st==='unsupported'){ c.style.display='none'; return; }
+  const t=document.getElementById('pushT'), s=document.getElementById('pushS'), b=document.getElementById('pushB');
+  if(st==='needs-install'){
+    t.textContent='Para receber avisos, instale o app';
+    s.textContent='No iPhone, as notificações só funcionam com o Grão na tela inicial.';
+    b.textContent='Como fazer';
+  } else {
+    t.textContent='Receba avisos no celular';
+    s.textContent='Saiba quando sair um informativo ou algo novo no app.';
+    b.textContent='Ativar';
+  }
+  c.style.display='flex';
+}
+
+// Admin: avisa todo mundo que o app foi atualizado (sai em até 15 min)
+async function announceUpdate(){
+  const title=(document.getElementById('annTitle').value||'').trim() || 'O Grão foi atualizado';
+  const body=(document.getElementById('annBody').value||'').trim();
+  if(!confirm('Enviar este aviso para todos que ativaram as notificações?')) return;
+  try{
+    await getDb().collection('announcements').add({ title, body, by: me.email, at: new Date().toISOString(), pushPending:true });
+    document.getElementById('annBody').value='';
+    toast('Aviso na fila! Sai em até 15 minutos.');
+  }catch(e){ toast('Não foi possível enviar o aviso.'); }
+}

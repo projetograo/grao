@@ -1,5 +1,5 @@
 // GRÃO — Service Worker v3
-const CACHE = 'grao-v4';
+const CACHE = 'grao-v5';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
@@ -34,5 +34,30 @@ self.addEventListener('fetch', e => {
         return res;
       })
       .catch(() => caches.match(e.request))
+  );
+});
+
+// ── Notificações push ──
+// Sempre mostramos uma notificação a cada push recebido (exigência do iPhone).
+self.addEventListener('push', e => {
+  let p = {};
+  try { p = e.data ? e.data.json() : {}; } catch (_) { try { p = { data: { body: e.data.text() } }; } catch (__) {} }
+  const d = p.data || {}, n = p.notification || {};
+  const title = d.title || n.title || 'Projeto Grão';
+  const body = d.body || n.body || '';
+  const url = d.url || '/grao/';
+  e.waitUntil(self.registration.showNotification(title, {
+    body, icon: '/grao/icon-192.png', badge: '/grao/icon-192.png', data: { url }
+  }));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/grao/';
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const c of list) { if (c.url.includes('/grao/') && 'focus' in c) return c.focus(); }
+      return clients.openWindow(url);
+    })
   );
 });

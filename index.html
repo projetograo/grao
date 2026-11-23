@@ -207,6 +207,15 @@
           <div class="pill"><span class="pdot pa"></span>Povos não alcançados</div>
         </div>
       </div>
+      <div class="inst-card" id="pushCard" style="display:none">
+        <div class="inst-ico">🔔</div>
+        <div class="inst-txt">
+          <div class="inst-t" id="pushT">Receba avisos no celular</div>
+          <div class="inst-s" id="pushS">Saiba quando sair um informativo ou algo novo no app.</div>
+        </div>
+        <button class="inst-btn" id="pushB" onclick="enablePush()">Ativar</button>
+        <button class="inst-x" onclick="dismissPush()" aria-label="Fechar">×</button>
+      </div>
       <div class="inst-card" id="bdayCard" style="display:none">
         <div class="inst-ico">🎂</div>
         <div class="inst-txt">
@@ -473,6 +482,14 @@
     </div><!-- /tab parceiros -->
 
     <div class="adtabsec" data-tab="config" style="display:none">
+    <div class="adsl">Avisar que o app foi atualizado</div>
+    <div class="adcard"><div class="adform">
+      <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Manda uma notificação para todos que ativaram os avisos. Use quando mudar algo importante no app. Sai em até 15 minutos.</p>
+      <div><label class="adlbl">Título</label><input class="adinp" id="annTitle" type="text" placeholder="O Grão foi atualizado"></div>
+      <div><label class="adlbl">Mensagem (opcional)</label><textarea class="adta" id="annBody" style="min-height:70px" placeholder="Ex: agora dá para curtir e comentar nos informativos."></textarea></div>
+      <button class="adbtn" onclick="announceUpdate()">Enviar aviso</button>
+    </div></div>
+
     <div class="adsl">Versículo da página inicial</div>
     <div class="adcard"><div class="adform">
       <p style="font-size:0.82rem;color:var(--text2);line-height:1.65;margin-bottom:4px">Aparece logo abaixo do título "Você faz parte dessa jornada", na tela de início do app.</p>
@@ -791,6 +808,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
