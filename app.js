@@ -1708,7 +1708,7 @@ function loadPending(){
           <div style="margin-bottom:6px">
             <div style="font-size:0.9rem;font-weight:500;color:var(--text)">${esc(d.nome)}</div>
             <div style="font-size:0.74rem;color:var(--text3)">${esc(d.email)}</div>
-            ${d.whatsapp ? `<div style="font-size:0.78rem;color:var(--text2);margin-top:2px">WhatsApp <a href="https://wa.me/${String(d.whatsapp).replace(/\D/g,'').replace(/^(?!55)/,'55')}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(d.whatsapp)}</a></div>` : ''}
+            ${d.whatsapp ? `<div style="font-size:0.78rem;color:var(--text2);margin-top:2px"><i class="wa-ic"></i><a href="https://wa.me/${String(d.whatsapp).replace(/\D/g,'').replace(/^(?!55)/,'55')}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(d.whatsapp)}</a></div>` : ''}
             ${d.cidade ? `<div style="font-size:0.78rem;color:var(--text2)">${esc(d.cidade)}</div>` : ''}
             ${d.how ? `<div style="font-size:0.74rem;color:var(--text3)">Como conheceu: ${esc(d.how)}</div>` : ''}
             <div style="font-size:0.7rem;color:var(--text3);margin-top:2px">Solicitado em: ${d.requestedAt ? new Date(d.requestedAt).toLocaleDateString('pt-BR') : '—'}</div>
@@ -2549,7 +2549,7 @@ function loadWaPending(){
       .sort((a,b)=>String(b.approvedAt||'').localeCompare(String(a.approvedAt||'')));
     window._waById={}; lista.forEach(p=>{ window._waById[p.id]=p; });
     el.innerHTML = lista.length ? lista.map(p=>`<div class="adrow"><div class="adri"><div class="adrt">${esc(p.nome)}</div><div class="adrm">${esc(p.whatsapp)}${p.cidade?' · '+esc(p.cidade):''}</div></div>
-      <button class="adbtn" style="width:auto;padding:8px 14px;background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(p.id)},window._waById[${JSON.stringify(p.id)}])'>Boas-vindas</button></div>`).join('')
+      <button class="adbtn" style="width:auto;padding:8px 14px;background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(p.id)},window._waById[${JSON.stringify(p.id)}])'><i class="wa-ic"></i>Boas-vindas</button></div>`).join('')
       : '<p style="font-size:.82rem;color:var(--text3)">Ninguém esperando boas-vindas. Quando você aceitar alguém, o botão aparece aqui.</p>';
   }).catch(()=>{ el.innerHTML='<p style="font-size:.82rem;color:var(--red)">Não foi possível carregar.</p>'; });
 }
@@ -2629,7 +2629,7 @@ function renderCuidar(docs){
   el.innerHTML=lista.slice(0,12).map(({d,dias})=>`<div class="adrow"><div class="adri">
       <div class="adrt">${esc(d.nome||'—')}${d.destaque?' <span style="font-size:.7rem;background:rgba(232,168,112,.2);color:var(--accent);border-radius:50px;padding:2px 8px;margin-left:4px">atenção especial</span>':''}</div>
       <div class="adrm">${dias<0?'<b style="color:var(--red)">atrasado '+(-dias)+' dias</b>':dias===0?'<b style="color:var(--accent)">hoje</b>':'em '+dias+' dias'}${d.ultimoContato?' · último '+new Date(d.ultimoContato).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' · primeiro contato'}</div></div>
-      ${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:.8rem;font-weight:600;padding:8px 10px" aria-label="WhatsApp">WhatsApp</a>`:''}
+      ${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:.8rem;font-weight:600;padding:8px 10px;display:inline-flex;align-items:center" aria-label="WhatsApp"><i class="wa-ic"></i>WhatsApp</a>`:''}
       <button class="adbtn" style="width:auto;padding:8px 12px" onclick='openContato(${JSON.stringify(d.id)})'>Registrei</button></div>`).join('')
     + (lista.length>12?`<p style="font-size:.74rem;color:var(--text3)">e mais ${lista.length-12}...</p>`:'');
 }
@@ -2702,7 +2702,7 @@ async function loadAdoption(){
     const faltam=ps.filter(p=>!(p.installedAt||p.standalone)||!p.pushOn).slice(0,12);
     const top=ps.filter(p=>p.acessos>0).sort((a,b)=>(b.acessos||0)-(a.acessos||0)).slice(0,8);
     window._adoptById={}; ps.forEach(p=>{ window._adoptById[p.id]=p; });
-    const zap=p=>p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:.8rem;font-weight:600;padding:8px 10px" aria-label="WhatsApp">WhatsApp</a>`:'';
+    const zap=p=>p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:.8rem;font-weight:600;padding:8px 10px;display:inline-flex;align-items:center" aria-label="WhatsApp"><i class="wa-ic"></i>WhatsApp</a>`:'';
     el.innerHTML = barra('Instalaram o app',inst.length)+barra('Ativaram as notificações',push.length)+barra('Abriram nos últimos 30 dias',ativos.length)
       +'<p style="font-size:.72rem;color:var(--text3);line-height:1.5;margin:0 0 14px">Os números crescem conforme cada pessoa abre o app a partir de agora.</p>'
       +(faltam.length?'<div class="adsl" style="margin-top:6px">Quem ainda pode ser lembrado</div>'+faltam.map(p=>`<div class="adrow"><div class="adri"><div class="adrt">${esc(p.nome)}</div><div class="adrm">${(p.installedAt||p.standalone)?'':'sem app na tela inicial'}${!(p.installedAt||p.standalone)&&!p.pushOn?' · ':''}${p.pushOn?'':'sem avisos'}</div></div>${zap(p)}</div>`).join(''):'')
@@ -2729,7 +2729,7 @@ function showPerfil(uid){
   document.getElementById('pfInfo').innerHTML =
     perfilLinha('Função',p.admin?'Administrador':'Parceiro')+
     perfilLinha('E-mail',esc(p.email))+
-    perfilLinha('WhatsApp',p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366">${esc(p.whatsapp)}</a>`:'')+
+    perfilLinha('WhatsApp',p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366"><i class="wa-ic"></i>${esc(p.whatsapp)}</a>`:'')+
     perfilLinha('Cidade',esc(p.cidade||''))+
     perfilLinha('Nascimento',nasc)+
     perfilLinha('Pediu acesso em',fmtData(p.requestedAt))+
@@ -2739,7 +2739,7 @@ function showPerfil(uid){
     perfilLinha('Notificações',p.pushOn?'Ativadas':'Ainda não');
   document.getElementById('pfAcoes').innerHTML =
     `<button class="adbtn" onclick='perfilFicha(${JSON.stringify(uid)})'>Abrir ficha de acompanhamento</button>`+
-    (p.whatsapp?`<button class="adbtn" style="background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(uid)},_perfis[${JSON.stringify(uid)}]);closePerfil()'>Mandar mensagem no WhatsApp</button>`:'')+
+    (p.whatsapp?`<button class="adbtn" style="background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(uid)},_perfis[${JSON.stringify(uid)}]);closePerfil()'><i class="wa-ic"></i>Mandar mensagem no WhatsApp</button>`:'')+
     (p.admin?`<button class="adbtn" style="background:transparent;border:1px solid var(--red);color:var(--red)" onclick='setAdmin(${JSON.stringify(uid)},false)'>Remover como admin</button>`
             :`<button class="adbtn" style="background:var(--green);color:#fff" onclick='setAdmin(${JSON.stringify(uid)},true)'>Tornar admin</button>`);
   const m=document.getElementById('perfilModal'); document.body.appendChild(m); m.style.display='flex';
@@ -2785,7 +2785,7 @@ function openParceiro(id){
   document.getElementById('ppCorpo').innerHTML =
     titulo('Contato')+
     perfilLinha('E-mail',esc(d.email||''))+
-    perfilLinha('WhatsApp',d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366">${esc(d.phone)}</a>`:'')+
+    perfilLinha('WhatsApp',d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366"><i class="wa-ic"></i>${esc(d.phone)}</a>`:'')+
     perfilLinha('Contribuição',esc(d.valor||''))+
     perfilLinha('Cadastrado em',esc(d.data||''))+
     titulo('Acompanhamento')+
