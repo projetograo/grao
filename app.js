@@ -186,6 +186,7 @@ function loginErr(msg){
 function successLogin(user){
   me=user;
   try{ renderPushCard(); }catch(e){}
+  setTimeout(()=>{ try{ trackPerfil(); }catch(e){} },2500);
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   const greetEl=document.querySelector('.hgreet');
@@ -376,6 +377,7 @@ function showAdminTab(tab){
   // pull the form back here and clear it, even if it was left mid-edit elsewhere.
   if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
   if(tab==='historico'){ try{ loadAudit(); }catch(e){} }
+  if(tab==='metricas'){ try{ loadAdoption(); }catch(e){} }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
 }
@@ -1103,7 +1105,7 @@ const T = {
   pt: {
     // Login
     login_tag: 'vida compartilhada, pessoa a pessoa',
-    login_chip: 'área de parceiros',
+    login_chip: 'entre ou cadastre-se',
     email_label: 'E-mail', pass_label: 'Senha', enter: 'Entrar',
     login_hint: 'Quer fazer parte da equipe?',
     join_btn: 'Quero entrar para a equipe',
@@ -1194,7 +1196,7 @@ const T = {
   en: {
     // Login
     login_tag: 'shared life, person to person',
-    login_chip: 'partner area',
+    login_chip: 'sign in or sign up',
     email_label: 'Email', pass_label: 'Password', enter: 'Sign in',
     login_hint: 'Want to be part of the team?',
     join_btn: 'I want to join the team',
@@ -2247,6 +2249,7 @@ async function registerPushToken(){
     if(!token) return false;
     await getDb().collection('pushTokens').doc(token).set({ uid: me.id, at: new Date().toISOString(), ua: navigator.userAgent.slice(0,140) });
     try{ localStorage.setItem('grao_push_token', token); }catch(e){}
+    try{ marcarPushAtivo(); }catch(e){}
     return true;
   }catch(e){ console.log('push token error:', e); return false; }
 }
@@ -2339,7 +2342,7 @@ function fichaAniversarios(d){
 function renderNextBdays(docs){
   const el=document.getElementById('nextBdays'); if(!el) return;
   const lista=[];
-  docs.forEach(d=>fichaAniversarios(d).forEach(a=>{ const nb=fichaNextBirthday(a.nasc); if(nb && nb.dias<=30) lista.push({d,a,nb}); }));
+  docs.filter(d=>d.categoria!=='inscrito'||d.destaque).forEach(d=>fichaAniversarios(d).forEach(a=>{ const nb=fichaNextBirthday(a.nasc); if(nb && nb.dias<=30) lista.push({d,a,nb}); }));
   lista.sort((x,y)=>x.nb.dias-y.nb.dias);
   if(!lista.length){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Nenhum aniversário nos próximos 30 dias entre os parceiros e suas famílias.</p>'; return; }
   el.innerHTML = lista.map(({d,a,nb})=>`
@@ -2352,7 +2355,7 @@ function renderNextBdays(docs){
 const ESTADO_CIVIL = {solteiro:'Solteiro(a)', casado:'Casado(a)', viuvo:'Viúvo(a)', divorciado:'Divorciado(a)'};
 
 function fichaResumoHtml(d){
-  const cat = d.categoria==='adotou' ? 'Adotou o projeto' : (d.categoria==='financeiro' ? 'Parceiro financeiro' : '');
+  const cat = (d.destaque?'⭐ ':'')+(d.categoria==='adotou' ? 'Adotou o projeto' : (d.categoria==='financeiro' ? 'Parceiro financeiro' : (d.categoria==='inscrito'?'Inscrito no app':'')));
   const L=[];  // linhas de texto
   const nb=fichaNextBirthday(d.nascimento);
   if(nb) L.push(`🎂 ${new Date(d.nascimento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}${nb.dias<=30?' · '+(nb.dias===0?'hoje!':'em '+nb.dias+' dias'):''}`);
@@ -2406,7 +2409,7 @@ function openFicha(id){
   set('fhNome',d.nome); set('fhEmail',d.email); set('fhPhone',d.phone); set('fhNasc',d.nascimento);
   set('fhCateg',d.categoria||'financeiro'); set('fhValor',d.valor); set('fhEnd',d.endereco); set('fhCidade',d.cidade); set('fhNotas',d.notas);
   set('fhEstCivil',d.estadoCivil); set('fhConjNome',d.conjuge&&d.conjuge.nome); set('fhConjNasc',d.conjuge&&d.conjuge.nascimento);
-  set('fhFilhosSt',d.filhosStatus); set('fhOutros',d.outrosFamiliares); set('fhOracao',d.oracao);
+  set('fhFilhosSt',d.filhosStatus); document.getElementById('fhDestaque').checked=!!d.destaque; set('fhOutros',d.outrosFamiliares); set('fhOracao',d.oracao);
   const box=document.getElementById('fhFilhos'); box.innerHTML='';
   (d.filhos||[]).forEach(f=>fichaAddFilho(f));
   if(d.filhosStatus==='sim' && !(d.filhos||[]).length) fichaAddFilho();
@@ -2426,7 +2429,7 @@ async function saveFicha(){
     })).filter(f=>f.nome||f.nascimento) : [];
   const dados={ nome, email:v('fhEmail').toLowerCase(), phone:v('fhPhone'), nascimento:v('fhNasc'), categoria:v('fhCateg')||'financeiro',
     valor:v('fhValor'), endereco:v('fhEnd'), cidade:v('fhCidade'), notas:v('fhNotas'),
-    estadoCivil:v('fhEstCivil'), conjuge: casado ? { nome:v('fhConjNome'), nascimento:v('fhConjNasc') } : null,
+    destaque:document.getElementById('fhDestaque').checked, estadoCivil:v('fhEstCivil'), conjuge: casado ? { nome:v('fhConjNome'), nascimento:v('fhConjNasc') } : null,
     filhosStatus:v('fhFilhosSt'), filhos, outrosFamiliares:v('fhOutros'), oracao:v('fhOracao'),
     fichaAt:new Date().toISOString() };
   try{
@@ -2625,8 +2628,8 @@ function loadAudit(){
 }
 
 // ══ Acompanhamento dos parceiros (CRM leve) ══
-const CRM_FREQ={ financeiro:45, adotou:30 };
-function crmFreq(d){ return CRM_FREQ[d.categoria]||45; }
+const CRM_FREQ={ financeiro:45, adotou:30, inscrito:90 };
+function crmFreq(d){ return d.destaque ? 21 : (CRM_FREQ[d.categoria]||45); }
 function isoMaisDias(base,dias){ const t=new Date(base); t.setDate(t.getDate()+dias); const p=n=>String(n).padStart(2,'0'); return t.getFullYear()+'-'+p(t.getMonth()+1)+'-'+p(t.getDate()); }
 function crmProximo(d){
   if(d.proximoContato) return d.proximoContato;
@@ -2646,10 +2649,10 @@ function crmLinha(d){
 function waLink(fone,txt){ let n=String(fone||'').replace(/\D/g,''); if(!n) return ''; if(n.length<=11) n='55'+n; return 'https://wa.me/'+n+(txt?'?text='+encodeURIComponent(txt):''); }
 function renderCuidar(docs){
   const el=document.getElementById('cuidarSemana'); if(!el) return;
-  const lista=docs.map(d=>({d,dias:crmDiasAte(crmProximo(d))})).filter(x=>x.dias!==null&&x.dias<=7).sort((a,b)=>a.dias-b.dias);
+  const lista=docs.map(d=>({d,dias:crmDiasAte(crmProximo(d))})).filter(x=>x.dias!==null&&x.dias<=7).sort((a,b)=>(a.dias-b.dias)||((b.d.destaque?1:0)-(a.d.destaque?1:0)));
   if(!lista.length){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Tudo em dia. Ninguém precisa de contato nos próximos 7 dias.</p>'; return; }
   el.innerHTML=lista.slice(0,12).map(({d,dias})=>`<div class="adrow"><div class="adri">
-      <div class="adrt">${esc(d.nome||'—')}</div>
+      <div class="adrt">${d.destaque?'⭐ ':''}${esc(d.nome||'—')}</div>
       <div class="adrm">${dias<0?'<b style="color:var(--red)">atrasado '+(-dias)+' dias</b>':dias===0?'<b style="color:var(--accent)">hoje</b>':'em '+dias+' dias'}${d.ultimoContato?' · último '+new Date(d.ultimoContato).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):' · primeiro contato'}</div></div>
       ${d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:1.2rem;padding:6px" aria-label="WhatsApp">💬</a>`:''}
       <button class="adbtn" style="width:auto;padding:8px 12px" onclick='openContato(${JSON.stringify(d.id)})'>Registrei</button></div>`).join('')
@@ -2673,4 +2676,70 @@ async function saveContato(){
       contatos:firebase.firestore.FieldValue.arrayUnion({data:agora,canal,nota,por:(me&&me.nome||'').split(' ')[0]||''}) });
     closeContato(); toast('Contato registrado ✓'); loadMensais();
   }catch(e){ toast('Não foi possível salvar: '+e.message); }
+}
+
+// ══ Trazer inscritos do app para a ficha de acompanhamento ══
+async function trazerInscritos(){
+  if(!confirm('Criar uma ficha de acompanhamento para cada inscrito aprovado que ainda não tem? Os primeiros contatos são espalhados nos próximos meses para não acumular.')) return;
+  try{
+    const [pf,fs]=await Promise.all([ getDb().collection('profiles').where('status','==','approved').get(), getDb().collection('parceiros_mensais').get() ]);
+    const tem=new Set(fs.docs.map(d=>String(d.data().email||'').toLowerCase()).filter(Boolean));
+    const novos=pf.docs.map(d=>({id:d.id,...d.data()})).filter(p=>!p.admin && p.email && !tem.has(p.email.toLowerCase()));
+    let i=0;
+    for(const p of novos){
+      await getDb().collection('parceiros_mensais').add({ nome:p.nome||'', email:p.email.toLowerCase(), phone:p.whatsapp||'', cidade:p.cidade||'', nascimento:p.nascimento||'',
+        categoria:'inscrito', profileUid:p.id, tipo:'manual', data:new Date().toLocaleDateString('pt-BR'), timestamp:new Date().toISOString(), contribuicoes:[],
+        proximoContato:isoMaisDias(new Date(), 7+((i++*5)%84)) });
+    }
+    toast(novos.length? novos.length+' inscritos trazidos ✓' : 'Todos os inscritos já estão no acompanhamento.');
+    logAcao('Trouxe '+novos.length+' inscritos para o acompanhamento');
+    loadMensais();
+  }catch(e){ toast('Erro: '+e.message); }
+}
+
+// ══ Instalação e notificações (métricas) ══
+function souStandalone(){ return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone===true; }
+async function trackPerfil(){
+  try{
+    const u=getAuth().currentUser; if(!u||!me||me.admin) return;
+    const inc=firebase.firestore.FieldValue.increment, agora=new Date().toISOString();
+    const upd={ lastSeenAt:agora, acessos:inc(1) };
+    if(souStandalone()){ upd.standalone=true; if(!localStorage.getItem('grao_inst_logged')){ upd.installedAt=agora; localStorage.setItem('grao_inst_logged','1'); } }
+    await getDb().collection('profiles').doc(u.uid).update(upd);
+  }catch(e){}
+}
+function marcarPushAtivo(){
+  try{
+    const u=getAuth().currentUser; if(!u||(me&&me.admin)) return;
+    if(localStorage.getItem('grao_push_logged')) return;
+    getDb().collection('profiles').doc(u.uid).update({ pushOn:true, pushAt:new Date().toISOString() }).then(()=>{ localStorage.setItem('grao_push_logged','1'); }).catch(()=>{});
+  }catch(e){}
+}
+async function loadAdoption(){
+  const el=document.getElementById('metricsAdopt'); if(!el) return;
+  try{
+    const snap=await getDb().collection('profiles').where('status','==','approved').get();
+    const ps=snap.docs.map(d=>({id:d.id,...d.data()})).filter(p=>!p.admin);
+    const N=ps.length; if(!N){ el.innerHTML='<p style="font-size:.82rem;color:var(--text3)">Ainda não há parceiros aprovados.</p>'; return; }
+    const trinta=Date.now()-30*86400000;
+    const inst=ps.filter(p=>p.installedAt||p.standalone), push=ps.filter(p=>p.pushOn), ativos=ps.filter(p=>p.lastSeenAt&&Date.parse(p.lastSeenAt)>trinta);
+    const barra=(t,n)=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:.8rem;color:var(--text2);margin-bottom:4px"><span>${t}</span><b style="color:var(--text)">${n} de ${N}</b></div><div style="height:8px;background:rgba(255,255,255,.08);border-radius:8px;overflow:hidden"><div style="height:100%;width:${Math.round(n/N*100)}%;background:var(--accent)"></div></div></div>`;
+    const faltam=ps.filter(p=>!(p.installedAt||p.standalone)||!p.pushOn).slice(0,12);
+    const top=ps.filter(p=>p.acessos>0).sort((a,b)=>(b.acessos||0)-(a.acessos||0)).slice(0,8);
+    window._adoptById={}; ps.forEach(p=>{ window._adoptById[p.id]=p; });
+    const zap=p=>p.whatsapp?`<a href="${waLink(p.whatsapp)}" target="_blank" rel="noopener" style="color:#25D366;text-decoration:none;font-size:1.15rem;padding:4px" aria-label="WhatsApp">💬</a>`:'';
+    el.innerHTML = barra('Instalaram o app',inst.length)+barra('Ativaram as notificações',push.length)+barra('Abriram nos últimos 30 dias',ativos.length)
+      +'<p style="font-size:.72rem;color:var(--text3);line-height:1.5;margin:0 0 14px">Os números crescem conforme cada pessoa abre o app a partir de agora.</p>'
+      +(faltam.length?'<div class="adsl" style="margin-top:6px">Quem ainda pode ser lembrado</div>'+faltam.map(p=>`<div class="adrow"><div class="adri"><div class="adrt">${esc(p.nome)}</div><div class="adrm">${(p.installedAt||p.standalone)?'':'sem app na tela inicial'}${!(p.installedAt||p.standalone)&&!p.pushOn?' · ':''}${p.pushOn?'':'sem avisos'}</div></div>${zap(p)}</div>`).join(''):'')
+      +(top.length?'<div class="adsl" style="margin-top:14px">Quem mais acompanha</div>'+top.map(p=>`<div class="adrow"><div class="adri"><div class="adrt">${esc(p.nome)}</div><div class="adrm">${p.acessos} acessos${p.lastSeenAt?' · último '+new Date(p.lastSeenAt).toLocaleDateString('pt-BR'):''}</div></div><button class="adbtn" style="width:auto;padding:8px 12px" onclick='destacarInscrito(${JSON.stringify(p.id)})'>⭐ Atenção</button></div>`).join(''):'');
+  }catch(e){ el.innerHTML='<p style="font-size:.82rem;color:var(--red)">Não foi possível carregar: '+esc(e.message)+'</p>'; }
+}
+async function destacarInscrito(uid){
+  const p=(window._adoptById||{})[uid]; if(!p) return;
+  try{
+    const fs=await getDb().collection('parceiros_mensais').where('email','==',String(p.email||'').toLowerCase()).get();
+    if(!fs.empty){ await fs.docs[0].ref.update({destaque:true,proximoContato:isoMaisDias(new Date(),3)}); }
+    else{ await getDb().collection('parceiros_mensais').add({ nome:p.nome||'', email:String(p.email||'').toLowerCase(), phone:p.whatsapp||'', cidade:p.cidade||'', nascimento:p.nascimento||'', categoria:'inscrito', destaque:true, profileUid:uid, tipo:'manual', data:new Date().toLocaleDateString('pt-BR'), timestamp:new Date().toISOString(), contribuicoes:[], proximoContato:isoMaisDias(new Date(),3) }); }
+    toast('⭐ '+(p.nome||'').split(' ')[0]+' agora tem atenção especial'); logAcao('Deu atenção especial a '+(p.nome||''));
+  }catch(e){ toast('Erro: '+e.message); }
 }
