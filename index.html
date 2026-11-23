@@ -50,6 +50,9 @@
   <symbol id="icard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><line x1="6" y1="15" x2="10" y2="15"/></symbol>
   <symbol id="icamera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></symbol>
   <symbol id="ilink" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></symbol>
+  <symbol id="ibell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="iphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></symbol>
+  <symbol id="isprout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-9"/><path d="M12 12c0-4 3-6.5 7-6.5 0 4-3 6.5-7 6.5z"/><path d="M12 15c0-3-2.2-5-5.5-5 0 3 2.2 5 5.5 5z"/></symbol>
   <symbol id="icheck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="8,12.5 11,15.5 16,9"/></symbol>
   <symbol id="iclose" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></symbol>
   <symbol id="iedit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H5a2 2 0 00-2 2v13a2 2 0 002 2h13a2 2 0 002-2v-6"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4z"/></symbol>
@@ -165,7 +168,7 @@
       <div><label class="adlbl">Nome *</label><input class="adinp" id="fhNome" type="text"></div>
       <div><label class="adlbl">Tipo</label>
         <select class="adinp" id="fhCateg"><option value="financeiro">Parceiro financeiro</option><option value="adotou">Adotou o projeto (acompanha de perto)</option><option value="inscrito">Inscrito no app</option></select></div>
-      <label style="display:flex;gap:10px;align-items:flex-start;font-size:.84rem;color:var(--text2);line-height:1.5;cursor:pointer"><input type="checkbox" id="fhDestaque" style="width:20px;height:20px;accent-color:var(--accent);flex:none;margin-top:1px"><span>⭐ Atenção especial: caminha de perto com a gente (contato a cada 3 semanas)</span></label>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:.84rem;color:var(--text2);line-height:1.5;cursor:pointer"><input type="checkbox" id="fhDestaque" style="width:20px;height:20px;accent-color:var(--accent);flex:none;margin-top:1px"><span><b>Atenção especial:</b> caminha de perto com a gente (contato a cada 3 semanas)</span></label>
       <div><label class="adlbl">E-mail</label><input class="adinp" id="fhEmail" type="email"></div>
       <div><label class="adlbl">Telefone / WhatsApp</label><input class="adinp" id="fhPhone" type="tel"></div>
       <div><label class="adlbl">Data de nascimento</label><input class="adinp" id="fhNasc" type="date"></div>
@@ -239,10 +242,10 @@
       <p style="font-size:0.7rem;color:var(--text3);text-align:center;line-height:1.6">Ao se cadastrar, você concorda que a família guarde seus dados só para cuidar do projeto e de você. <a href="#" onclick="openPrivacidade();return false" style="color:var(--accent)">Como cuidamos dos seus dados</a></p>
     </div>
     <div id="regSuccess" style="display:none;text-align:center;padding:32px 0">
-      <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
+      <div style="margin-bottom:16px;color:var(--accent)"><svg width="44" height="44"><use href="#isprout"/></svg></div>
       <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Solicitação enviada!</div>
       <p style="font-size:0.9rem;color:var(--text2);line-height:1.75">Recebemos seu pedido. Em breve você estará dentro da equipe e poderá acompanhar cada passo dessa jornada de perto.</p>
-      <p style="font-size:0.78rem;color:var(--text3);line-height:1.6;margin-top:12px;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px">📬 Quando aprovado, você receberá um e-mail de boas-vindas. Se não encontrar na caixa de entrada, verifique a pasta de <strong>spam</strong>.</p>
+      <p style="font-size:0.78rem;color:var(--text3);line-height:1.6;margin-top:12px;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px"> Quando aprovado, você receberá um e-mail de boas-vindas. Se não encontrar na caixa de entrada, verifique a pasta de <strong>spam</strong>.</p>
       <button onclick="closeRegister()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:24px">Fechar</button>
     </div>
   </div>
@@ -288,7 +291,7 @@
         </div>
       </div>
       <div class="inst-card" id="pushCard" style="display:none">
-        <div class="inst-ico">🔔</div>
+        <div class="inst-ico"><svg width="24" height="24"><use href="#ibell"/></svg></div>
         <div class="inst-txt">
           <div class="inst-t" id="pushT">Receba avisos no celular</div>
           <div class="inst-s" id="pushS">Saiba quando sair um informativo ou algo novo no app.</div>
@@ -297,7 +300,7 @@
         <button class="inst-x" onclick="dismissPush()" aria-label="Fechar">×</button>
       </div>
       <div class="inst-card" id="installCard" style="display:none">
-        <div class="inst-ico">📲</div>
+        <div class="inst-ico"><svg width="24" height="24"><use href="#iphone"/></svg></div>
         <div class="inst-txt">
           <div class="inst-t" id="instCardT">Coloque o Grão na sua tela inicial</div>
           <div class="inst-s" id="instCardS">Abre com um toque, em tela cheia, como qualquer app.</div>
@@ -465,10 +468,10 @@
             <p id="monthlyBody" style="font-size:0.88rem;color:var(--text2);line-height:1.8;margin-bottom:16px">O parceiro mensal é quem torna possível planejar, avançar e permanecer. Uma contribuição regular — de qualquer valor — é o que sustenta a presença onde o evangelho ainda não chegou. A constância de muitos libera os poucos que vão.</p>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
               <button onclick="openContribuicao('cartao')" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
-                <span style="font-size:1.2rem">💳</span>Cartão
+                <svg width="20" height="20"><use href="#icard"/></svg>Cartão
               </button>
               <button onclick="openContribuicao('pix')" style="background:transparent;border:1px solid var(--border-hi);color:var(--text2);border-radius:var(--r-md);padding:14px 8px;font-size:0.75rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
-                <span style="font-size:1.2rem">🔑</span>Pix
+                <svg width="20" height="20"><use href="#ipix"/></svg>Pix
               </button>
             </div>
             <p style="font-size:0.72rem;color:var(--text3);text-align:center" data-tk="both_email">Ambos recebem confirmação por e-mail</p>
@@ -619,7 +622,7 @@
     <div class="adtabsec" data-tab="novo" style="display:none">
     <div id="newsFormNovoSlot"></div>
     <div id="newsFormBlock" class="onepage">
-      <div id="draftNote" style="display:none;background:rgba(232,168,112,.12);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.78rem;color:var(--accent);justify-content:space-between"><span>Rascunho recuperado ✓</span><span style="text-decoration:underline;cursor:pointer" onclick="discardDraft()">descartar</span></div>
+      <div id="draftNote" style="display:none;background:rgba(232,168,112,.12);border:1px solid var(--accent);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:.78rem;color:var(--accent);justify-content:space-between"><span>Rascunho recuperado </span><span style="text-decoration:underline;cursor:pointer" onclick="discardDraft()">descartar</span></div>
         <div class="adsl">Publicar informativo</div>
     <div class="adcard">
       <!-- Step indicator -->
@@ -638,7 +641,7 @@
         <div><label class="adlbl">Nome do informativo *</label><input class="adinp" id="nIT" placeholder="Ex: Quarto Informativo"></div>
         <div><label class="adlbl">Período *</label><input class="adinp" id="nID" placeholder="Ex: Segundo trimestre de 2026"></div>
         <div><label class="adlbl">Resumo (1 frase) *</label><input class="adinp" id="nIS" placeholder="Uma frase resumindo o informativo..."></div>
-        <div><label class="adlbl">Assinatura</label><input class="adinp" id="nISg" placeholder="Com carinho, Malu Kassar 🌱"></div>
+        <div><label class="adlbl">Assinatura</label><input class="adinp" id="nISg" placeholder="Com carinho, Malu Kassar "></div>
         <button class="adbtn" onclick="newsGoStep(2)">Próximo → Conteúdo</button>
       </div>
 
@@ -831,7 +834,7 @@
 
     <!-- Success -->
     <div id="contSuccess" style="display:none;text-align:center;padding:32px 0">
-      <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
+      <div style="margin-bottom:16px;color:var(--accent)"><svg width="44" height="44"><use href="#isprout"/></svg></div>
       <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Obrigado!</div>
       <p style="font-size:0.9rem;color:var(--text2);line-height:1.75;margin-bottom:24px" id="contSuccessMsg"></p>
       <button onclick="closeContribuicao()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer">Fechar</button>
@@ -892,7 +895,7 @@
       <button onclick="submitPartnerForm()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:14px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;transition:background 0.2s;margin-top:4px">Enviar cadastro</button>
     </div>
     <div id="pfSuccess" style="display:none;text-align:center;padding:32px 0">
-      <div style="font-size:2.5rem;margin-bottom:16px">🌱</div>
+      <div style="margin-bottom:16px;color:var(--accent)"><svg width="44" height="44"><use href="#isprout"/></svg></div>
       <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text);margin-bottom:10px">Obrigado!</div>
       <p style="font-size:0.9rem;color:var(--text2);line-height:1.75">Recebemos! Em breve entramos em contato. Bem-vindo à equipe — você não está ajudando, você está junto nesse projeto.</p>
       <button onclick="closePartnerForm()" style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:var(--r-md);padding:12px 32px;font-size:0.78rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',sans-serif;cursor:pointer;margin-top:24px">Fechar</button>
