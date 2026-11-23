@@ -185,6 +185,7 @@ function loginErr(msg){
 
 function successLogin(user){
   me=user;
+  try{ renderBirthdayCard(); }catch(e){}
   document.getElementById('loginScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
   const greetEl=document.querySelector('.hgreet');
@@ -226,7 +227,7 @@ async function doLogin(){
       await getAuth().signOut();
       return;
     }
-    successLogin({email:p.email, nome:p.nome, genero:p.genero||'', admin:!!p.admin, id:uid});
+    successLogin({email:p.email, nome:p.nome, genero:p.genero||'', nascimento:p.nascimento||'', admin:!!p.admin, id:uid});
   }catch(e){
     if(e.code==='auth/invalid-credential'||e.code==='auth/wrong-password'||e.code==='auth/user-not-found'){
       loginErr('E-mail ou senha inválidos.');
@@ -314,6 +315,7 @@ function renderAdmin(){
       <div class="mcard2"><div class="mnum">${d[today]||0}</div><div class="mlbl2">Hoje</div></div>
       <div class="mcard2"><div class="mnum">${Object.keys(d).length}</div><div class="mlbl2">Dias ativos</div></div>
       <div class="mcard2"><div class="mnum">${data.shares||0}</div><div class="mlbl2">Compartilhamentos</div></div>`;
+    try{ renderMetricsExtra(data); }catch(e){}
   }
   // Show localStorage immediately as placeholder, then replace with Firebase
   const local = JSON.parse(localStorage.getItem('gm')||'{}');
@@ -401,7 +403,7 @@ function closeAdmin(){
   document.getElementById('adminScreen').classList.remove('active');
   document.getElementById('appScreen').classList.add('active');
 }
-function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;}
+function navTo(t){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));document.getElementById('view-'+t).classList.add('active');document.querySelector(`[data-tab="${t}"]`)?.classList.add('active');document.getElementById('abody').scrollTop=0;try{trackTab(t);}catch(e){}}
 
 let ytPlayer=null;
 
@@ -1417,8 +1419,8 @@ function track(a){
   try{
     const inc = firebase.firestore.FieldValue.increment;
     const upd = { t: inc(1) };
-    if(a==='login') upd.s = inc(1);
-    upd['d.'+d] = inc(1);
+    if(a==='login'){ upd.s = inc(1); trackGeo(); }
+    upd.d = { [d]: inc(1) };
     getDb().collection('metrics').doc('global').set(upd, {merge:true}).catch(()=>{});
   }catch(e){}
 }
@@ -1484,6 +1486,7 @@ function renderNews(){
       <button class="nitog" id="ntog-${n.id}" onclick="toggleNi(${n.id})"><span>Ler informativo completo</span><span>↓</span></button>
       <div class="nibody" id="nb-${n.id}">
         <div class="niinn">${bodyHTML}${hasVids}${prHTML}${signHTML}</div>
+        <div class="nisocial" id="soc-${n.id}"></div>
         <button onclick="shareNews(${n.id},${attrJson(n.name)},${attrJson(n.summary)})" style="display:flex;align-items:center;gap:6px;margin-top:16px;background:rgba(255,255,255,0.06);border:1px solid var(--border-md);border-radius:50px;padding:9px 16px;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text2);cursor:pointer;font-family:'Inter',sans-serif">↗ Compartilhar este informativo</button>
       </div>
     </div>`;
@@ -1497,7 +1500,7 @@ function toggleNi(id){
   tog.querySelector('span:last-child').textContent=open?'↑':'↓';
   tog.querySelector('span:first-child').textContent=open?'Fechar':'Ler informativo completo';
   item.classList.toggle('open',open);
-  if(open)track('read-'+id);
+  if(open){ track('read-'+id); try{ loadNiSocial(id); }catch(e){} }
 }
 
 function calcAge(birth){
@@ -1856,7 +1859,7 @@ async function submitRegister(){
     const cred = await getAuth().createUserWithEmailAndPassword(email, pass);
     const uid = cred.user.uid;
     await getDb().collection('profiles').doc(uid).set({
-      nome: name, email, genero, how,
+      nome: name, email, genero, how, nascimento: (document.getElementById('regNasc')||{}).value||'',
       admin:false, status:'pending',
       requestedAt: new Date().toISOString()
     });
@@ -2124,3 +2127,118 @@ document.addEventListener('DOMContentLoaded', function(){
   document.addEventListener('DOMContentLoaded', function(){ refresh(); setTimeout(refresh, 1500); });
 })();
 
+// ══ ETAPA 1 — métricas por aba e localidade, curtidas/comentários, aniversário ══
+const TAB_LABELS = {home:'Início', about:'Família', news:'Notícias', journey:'Caminhada', partner:'Parceria'};
+
+function metricKey(s){ return String(s||'').replace(/[.~*\/\[\]]/g,' ').replace(/\s+/g,' ').trim().slice(0,60) || 'Desconhecido'; }
+
+// Cliques nas abas do menu (admin não conta, igual ao track())
+function trackTab(t){
+  if(!me || me.admin) return;
+  try{
+    const inc = firebase.firestore.FieldValue.increment;
+    getDb().collection('metrics').doc('global').set({ tabs:{ [t]: inc(1) } }, {merge:true}).catch(()=>{});
+  }catch(e){}
+}
+
+// Localidade: cidade/estado aproximados pelo IP, uma vez por sessão do navegador.
+// Só o total por cidade é guardado — nunca o IP nem quem acessou.
+async function trackGeo(){
+  try{
+    if(sessionStorage.getItem('grao_geo')) return;
+    sessionStorage.setItem('grao_geo','1');
+  }catch(e){}
+  try{
+    const ctl = new AbortController(); const to = setTimeout(()=>ctl.abort(), 5000);
+    const r = await fetch('https://ipwho.is/?fields=success,city,region_code,country_code', {signal:ctl.signal});
+    clearTimeout(to);
+    const g = await r.json();
+    if(!g || !g.success) return;
+    const place = g.country_code==='BR' ? (g.city+', '+g.region_code) : (g.city+', '+g.country_code);
+    const inc = firebase.firestore.FieldValue.increment;
+    getDb().collection('metrics').doc('global').set({ geo:{ [metricKey(place)]: inc(1) } }, {merge:true}).catch(()=>{});
+  }catch(e){}
+}
+
+function metricBars(obj, labelFn, max){
+  const rows = Object.entries(obj||{}).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,max||8);
+  if(!rows.length) return '<p style="font-size:.82rem;color:var(--text3)">Ainda sem dados. Os números começam a contar a partir de agora.</p>';
+  const top = rows[0][1];
+  return rows.map(([k,v])=>`<div class="mbar"><div class="mbar-h"><span>${esc(labelFn?labelFn(k):k)}</span><b>${v}</b></div><div class="mbar-t"><div class="mbar-f" style="width:${Math.max(4,Math.round(v/top*100))}%"></div></div></div>`).join('');
+}
+function renderMetricsExtra(data){
+  const a=document.getElementById('metricsTabs'), b=document.getElementById('metricsGeo');
+  if(a) a.innerHTML = metricBars(data.tabs, k=>TAB_LABELS[k]||k, 8);
+  if(b) b.innerHTML = metricBars(data.geo, null, 10);
+}
+
+// ── Curtidas e comentários nos informativos ──
+function niFirstName(n){ return String(n||'').trim().split(/\s+/)[0] || 'Parceiro'; }
+function loadNiSocial(id){
+  const box=document.getElementById('soc-'+id); if(!box || box.dataset.loaded) return;
+  box.dataset.loaded='1';
+  box.innerHTML='<p style="font-size:.8rem;color:var(--text3)">Carregando...</p>';
+  refreshNiSocial(id);
+}
+async function refreshNiSocial(id){
+  const box=document.getElementById('soc-'+id); if(!box) return;
+  try{
+    const ref=getDb().collection('news').doc(String(id));
+    const [likes, coms] = await Promise.all([ ref.collection('likes').get(), ref.collection('comments').orderBy('at','asc').limit(100).get() ]);
+    const liked = !!(me && likes.docs.some(d=>d.id===me.id));
+    const draft = (box.querySelector('textarea')||{}).value || '';
+    const cHtml = coms.docs.map(d=>{
+      const c=d.data(), mine = me && c.uid===me.id, canDel = mine || (me && me.admin);
+      const when = c.at ? new Date(c.at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+      return `<div class="soc-c"><div class="soc-ch"><span><b>${esc(c.nome||'Parceiro')}</b> · ${when}</span>${canDel?`<button class="soc-x" title="Apagar" onclick="deleteNiComment('${id}','${d.id}')">×</button>`:''}</div><div class="soc-ct">${esc(c.text)}</div></div>`;
+    }).join('');
+    box.innerHTML = `
+      <div class="soc-bar">
+        <button class="soc-like ${liked?'on':''}" onclick="toggleNiLike('${id}')"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>${likes.size}</span></button>
+        <span class="soc-cnt">${coms.size} ${coms.size===1?'comentário':'comentários'}</span>
+      </div>
+      ${cHtml}
+      <div class="soc-form"><textarea id="soc-in-${id}" rows="1" maxlength="500" placeholder="Deixe um comentário ou uma palavra de ânimo...">${esc(draft)}</textarea><button class="soc-send" onclick="sendNiComment('${id}')">Enviar</button></div>`;
+  }catch(e){
+    box.innerHTML='<p style="font-size:.8rem;color:var(--text3)">Não foi possível carregar curtidas e comentários agora.</p>';
+  }
+}
+async function toggleNiLike(id){
+  if(!me) return;
+  const ref=getDb().collection('news').doc(String(id)).collection('likes').doc(me.id);
+  try{
+    const s=await ref.get();
+    if(s.exists) await ref.delete(); else { await ref.set({at:new Date().toISOString(), nome:niFirstName(me.nome||me.email)}); track('like-'+id); }
+  }catch(e){ toast('Não foi possível curtir agora.'); }
+  refreshNiSocial(id);
+}
+async function sendNiComment(id){
+  const inp=document.getElementById('soc-in-'+id); if(!inp||!me) return;
+  const text=inp.value.trim(); if(!text) return;
+  try{
+    await getDb().collection('news').doc(String(id)).collection('comments').add({ uid:me.id, nome:niFirstName(me.nome||me.email), text:text.slice(0,500), at:new Date().toISOString() });
+    inp.value=''; track('comment-'+id); toast('Comentário enviado 🌱');
+  }catch(e){ toast('Não foi possível enviar o comentário.'); }
+  refreshNiSocial(id);
+}
+async function deleteNiComment(id,cid){
+  if(!confirm('Apagar este comentário?')) return;
+  try{ await getDb().collection('news').doc(String(id)).collection('comments').doc(cid).delete(); }catch(e){ toast('Não foi possível apagar.'); }
+  refreshNiSocial(id);
+}
+
+// ── Aniversário (para quem já tem conta e ainda não informou) ──
+function renderBirthdayCard(){
+  const c=document.getElementById('bdayCard'); if(!c) return;
+  let skip=false; try{ skip = !!localStorage.getItem('grao_bday_skip'); }catch(e){}
+  c.style.display = (me && !me.nascimento && !skip) ? 'flex' : 'none';
+}
+async function saveBirthday(){
+  const v=(document.getElementById('bdayIn')||{}).value;
+  if(!v || !me) return toast('Escolha a data.');
+  try{
+    await getDb().collection('profiles').doc(me.id).update({nascimento:v});
+    me.nascimento=v; renderBirthdayCard(); toast('Anotado! Vamos te dar parabéns 🎂');
+  }catch(e){ toast('Não foi possível salvar agora.'); }
+}
+function skipBirthday(){ try{ localStorage.setItem('grao_bday_skip','1'); }catch(e){} renderBirthdayCard(); }

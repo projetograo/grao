@@ -67,6 +67,27 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // Curtidas e comentários nos informativos — só quem está logado lê e participa.
+    // Cada pessoa tem no máximo 1 curtida por informativo (o ID do doc é o UID dela).
+    match /news/{docId}/likes/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(uid);
+      allow delete: if isOwner(uid) || isAdmin();
+      allow update: if false;
+    }
+    match /news/{docId}/comments/{cid} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() <= 500
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() <= 80;
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow update: if false;
+    }
+
     // Aggregate usage counters — any signed-in partner increments them via
     // track(); only admins need to read them (shown in the admin panel).
     // Admin activity is filtered out client-side before it ever reaches here.

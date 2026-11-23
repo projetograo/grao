@@ -147,6 +147,10 @@
         </select>
       </div>
       <div>
+        <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Data de nascimento <span style="text-transform:none;letter-spacing:0;color:var(--text3)">(opcional — para te dar parabéns 🎂)</span></label>
+        <input id="regNasc" type="date" style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
+      </div>
+      <div>
         <label style="font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--text2);margin-bottom:6px;display:block">Como nos conheceu?</label>
         <input id="regHow" type="text" placeholder="Ex: indicação de um amigo, redes sociais..." style="background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:12px;padding:12px 16px;font-size:0.95rem;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:100%">
       </div>
@@ -202,6 +206,16 @@
           <div class="pill"><span class="pdot pa"></span>APMT & Pioneiros</div>
           <div class="pill"><span class="pdot pa"></span>Povos não alcançados</div>
         </div>
+      </div>
+      <div class="inst-card" id="bdayCard" style="display:none">
+        <div class="inst-ico">🎂</div>
+        <div class="inst-txt">
+          <div class="inst-t">Quer parabéns no seu aniversário?</div>
+          <div class="inst-s">Informe sua data e a família manda um abraço por e-mail.</div>
+          <input id="bdayIn" type="date" style="margin-top:8px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:10px;padding:8px 12px;font-size:.85rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
+        </div>
+        <button class="inst-btn" onclick="saveBirthday()">Salvar</button>
+        <button class="inst-x" onclick="skipBirthday()" aria-label="Fechar">×</button>
       </div>
       <div class="inst-card" id="installCard" style="display:none">
         <div class="inst-ico">📲</div>
@@ -618,6 +632,15 @@
     <div class="adtabsec" data-tab="metricas" style="display:none">
     <div class="adsl">Métricas</div>
     <div class="adcard"><div class="mgrid" id="metricsGrid"></div><button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,0.08);color:var(--text2);font-weight:400" onclick="clearMetrics()">Zerar métricas</button></div>
+
+    <div class="adsl">Cliques por aba</div>
+    <div class="adcard"><div id="metricsTabs"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
+
+    <div class="adsl">De onde acessam</div>
+    <div class="adcard">
+      <p style="font-size:.78rem;color:var(--text3);line-height:1.5;margin-bottom:12px">Cidade aproximada, estimada pelo endereço de internet no login. Guardamos só o total por cidade — nem o endereço nem o nome da pessoa.</p>
+      <div id="metricsGeo"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div>
+    </div>
 
     <div class="adsl">Compartilhamentos</div>
     <div class="adcard">
