@@ -43,7 +43,7 @@ function welcome({ nome, genero }) {
   const n = esc(firstName(nome));
   const html = layout({
     preheader: 'Sua conta no Grão foi aprovada.',
-    title: `${saud} ao Grão, ${n}!`,
+    title: genero === 'F' || genero === 'M' ? `${saud} ao Grão, ${n}!` : `Que bom ter você no Grão, ${n}!`,
     bodyHtml: `
       <p style="margin:0 0 14px">Sua conta foi aprovada e já está liberada. Que alegria ter você caminhando com a nossa família nesta jornada.</p>
       <p style="margin:0 0 8px"><b>Dois passos para aproveitar melhor o app:</b></p>
