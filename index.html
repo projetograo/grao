@@ -514,6 +514,7 @@
   <div class="adhdr"><div class="adtitle">Painel <em>Admin</em></div><button class="hbtn" id="adminBackBtn" onclick="adminBackClick()">← Voltar</button></div>
   <div class="adcont">
     <div class="qgrid" id="adminMenu" style="margin-bottom:10px">
+      <div class="qcard qa" id="menuPendCard" onclick="showAdminTab('pendentes')" style="grid-column:1/-1;position:relative"><div class="qico"><svg><use href="#icheck"/></svg></div><div class="qlbl">Inscrições <span id="menuPendN" style="display:none;background:#E8553C;color:#fff;border-radius:50px;padding:1px 9px;font-size:.78rem;margin-left:6px;vertical-align:middle"></span></div><div class="qsub">Aceitar quem quer entrar e dar boas-vindas</div></div>
       <div class="qcard qa" onclick="showAdminTab('parceiros')"><div class="qico"><svg><use href="#if"/></svg></div><div class="qlbl">Parceiros</div><div class="qsub">Pedidos, lista, contribuições</div></div>
       <div class="qcard qg" onclick="showAdminTab('config')"><div class="qico"><svg><use href="#ih"/></svg></div><div class="qlbl">Tela de início</div><div class="qsub">Versículo, música, foto</div></div>
       <div class="qcard qw" onclick="showAdminTab('novo')"><div class="qico"><svg><use href="#in"/></svg></div><div class="qlbl">Novo informativo</div><div class="qsub">Publicar</div></div>
@@ -522,6 +523,17 @@
       <div class="qcard qg" onclick="showAdminTab('caminhada')"><div class="qico"><svg><use href="#im"/></svg></div><div class="qlbl">Linha do tempo</div><div class="qsub">Caminhada e marcos</div></div>
       <div class="qcard qp" onclick="showAdminTab('historico')"><div class="qico"><svg><use href="#ibk"/></svg></div><div class="qlbl">Histórico</div><div class="qsub">Quem mudou o quê e quando</div></div>
       <div class="qcard qw" onclick="showAdminTab('metricas')"><div class="qico"><svg><use href="#ichart"/></svg></div><div class="qlbl">Métricas</div><div class="qsub">Uso, compartilhamentos, GA</div></div>
+    </div>
+
+    <div class="adtabsec" data-tab="pendentes" style="display:none">
+    <div class="adsl">Dar boas-vindas no WhatsApp</div>
+    <div class="adcard"><div id="waPendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div></div>
+
+    <div class="adsl">Solicitações de acesso pendentes</div>
+    <div class="adcard">
+      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Pessoas que querem entrar para a equipe do GRÃO. Aprove para liberar o acesso.</p>
+      <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
+    </div>
     </div>
 
     <div class="adtabsec" data-tab="historico" style="display:none">
@@ -549,14 +561,6 @@
       <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
 
-    <div class="adsl">Dar boas-vindas no WhatsApp</div>
-    <div class="adcard"><div id="waPendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div></div>
-
-    <div class="adsl">Solicitações de acesso pendentes</div>
-    <div class="adcard">
-      <p style="font-size:0.84rem;color:var(--text2);line-height:1.6;margin-bottom:12px">Pessoas que querem entrar para a equipe do GRÃO. Aprove para liberar o acesso.</p>
-      <div id="pendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
-    </div>
 
     <div class="adsl">Gerenciar parceiros</div>
     <div class="adcard"><div id="userList" style="margin-bottom:16px"></div>

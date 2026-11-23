@@ -359,7 +359,7 @@ function renderShares(){
   }).catch(e=>{ console.log('renderShares error:',e); el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Não foi possível carregar.</p>'; });
 }
 
-const ADMIN_TABS = ['parceiros','config','novo','antigos','oracao','caminhada','metricas','historico'];
+const ADMIN_TABS = ['pendentes','parceiros','config','novo','antigos','oracao','caminhada','metricas','historico'];
 let adminCurrentTab = null;
 
 function moveNewsFormTo(where){
@@ -377,6 +377,7 @@ function showAdminTab(tab){
   // pull the form back here and clear it, even if it was left mid-edit elsewhere.
   if(tab==='novo'){ moveNewsFormTo('novo'); clearNewsForm(); }
   if(tab==='historico'){ try{ loadAudit(); }catch(e){} }
+  if(tab==='pendentes'){ try{ loadPending(); }catch(e){} }
   if(tab==='metricas'){ try{ loadAdoption(); }catch(e){} }
   adminCurrentTab = tab;
   document.getElementById('adminBackBtn').textContent = '← Menu';
@@ -401,6 +402,7 @@ function openAdmin(){
   document.getElementById('adminScreen').classList.add('active');
   renderAdmin();
   showAdminMenu();
+  try{ loadPending(); }catch(e){}
 }
 
 function closeAdmin(){
@@ -1723,6 +1725,7 @@ function loadPending(){
       // Update badge on admin button
       const badge = document.getElementById('pendingBadge');
       if(badge){ badge.textContent = snap.size; badge.style.display = snap.size>0 ? 'flex' : 'none'; }
+      const mn=document.getElementById('menuPendN'); if(mn){ mn.textContent=snap.size; mn.style.display=snap.size>0?'inline-block':'none'; }
       if(snap.empty){
         el.innerHTML = '<p style="font-size:0.82rem;color:var(--text3)">Nenhuma solicitação pendente.</p>';
         return;
@@ -2531,7 +2534,7 @@ function discardDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} cl
 // Toque na notificação de nova inscrição → abre direto a lista para aceitar
 function abrirPendentes(){
   if(!me || !me.admin){ window.__abrirPendentes=true; return; }
-  window.__abrirPendentes=false; openAdmin(); showAdminTab('config'); loadPending();
+  window.__abrirPendentes=false; openAdmin(); showAdminTab('pendentes');
 }
 if(/[?&]aprovar=1/.test(location.search)){ window.__abrirPendentes=true; try{ history.replaceState(null,'',location.pathname); }catch(e){} }
 if('serviceWorker' in navigator){ navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.go==='aprovar') abrirPendentes(); }); }
