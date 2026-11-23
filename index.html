@@ -131,6 +131,25 @@
   </div>
 </div>
 
+<!-- REGISTRAR CONTATO (CRM) -->
+<div id="contatoModal" style="display:none;position:fixed;inset:0;z-index:470;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeContato()">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div><div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)" id="ctTitle">Registrar contato</div>
+      <div style="font-size:.75rem;color:var(--text3);margin-top:2px">Anote em 10 segundos</div></div>
+      <button onclick="closeContato()" style="background:none;border:none;color:var(--text3);font-size:1.5rem;cursor:pointer;line-height:1" aria-label="Fechar">×</button>
+    </div>
+    <div class="adform">
+      <div><label class="adlbl">Como foi</label>
+        <select class="adinp" id="ctCanal"><option>WhatsApp</option><option>Ligação</option><option>Visita</option><option>Presente / carta</option><option>E-mail</option><option>Pedido de oração</option></select></div>
+      <div><label class="adlbl">O que conversaram (opcional)</label><textarea class="adta" id="ctNota" style="min-height:80px" placeholder="Como ele está, o que pediu para orar, ideia para o próximo contato..."></textarea></div>
+      <div><label class="adlbl">Falar de novo em</label>
+        <select class="adinp" id="ctDias"><option value="15">15 dias</option><option value="30">30 dias</option><option value="45">45 dias</option><option value="60">60 dias</option><option value="90">90 dias</option></select></div>
+      <button class="adbtn" onclick="saveContato()">Salvar contato</button>
+    </div>
+  </div>
+</div>
+
 <!-- FICHA DO PARCEIRO (admin) -->
 <div id="fichaModal" style="display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeFicha()">
   <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
@@ -500,10 +519,19 @@
       <div class="qcard qp" onclick="showAdminTab('antigos')"><div class="qico"><svg><use href="#ibk"/></svg></div><div class="qlbl">Informativos antigos</div><div class="qsub">Editar, avisar parceiros</div></div>
       <div class="qcard qa" onclick="showAdminTab('oracao')"><div class="qico"><svg><use href="#ihands"/></svg></div><div class="qlbl">Oração</div><div class="qsub">Motivos gerais</div></div>
       <div class="qcard qg" onclick="showAdminTab('caminhada')"><div class="qico"><svg><use href="#im"/></svg></div><div class="qlbl">Linha do tempo</div><div class="qsub">Caminhada e marcos</div></div>
+      <div class="qcard qp" onclick="showAdminTab('historico')"><div class="qico"><svg><use href="#ibk"/></svg></div><div class="qlbl">Histórico</div><div class="qsub">Quem mudou o quê e quando</div></div>
       <div class="qcard qw" onclick="showAdminTab('metricas')"><div class="qico"><svg><use href="#ichart"/></svg></div><div class="qlbl">Métricas</div><div class="qsub">Uso, compartilhamentos, GA</div></div>
     </div>
 
+    <div class="adtabsec" data-tab="historico" style="display:none">
+    <div class="adsl">Histórico de modificações</div>
+    <div class="adcard"><div id="auditList"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
+    </div>
+
     <div class="adtabsec" data-tab="parceiros" style="display:none">
+    <div class="adsl">Cuidar desta semana</div>
+    <div class="adcard"><div id="cuidarSemana"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
+
     <div class="adsl">Próximos aniversários (30 dias)</div>
     <div class="adcard"><div id="nextBdays"><p style="font-size:.82rem;color:var(--text3)">Carregando...</p></div></div>
 

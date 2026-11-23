@@ -303,9 +303,61 @@ async function oracoesDoMes(ctx) {
   await ref.set({ lastMonthlyPrayer: mesChave }, { merge: true });
 }
 
+// ── Resumo semanal (segunda-feira): quem cuidar, aniversários, boas-vindas e inscrições ──
+function proximoContato(f) {
+  if (f.proximoContato) return f.proximoContato;
+  const t = f.timestamp || f.fichaAt;
+  return t ? somarDias(hojeMaceio(new Date(t)), 2) : null;
+}
+async function resumoSemanal(ctx) {
+  const hoje = hojeMaceio(ctx.now());
+  const [y, m, d] = hoje.split('-').map(Number);
+  if (new Date(Date.UTC(y, m - 1, d)).getUTCDay() !== 1) return; // só segunda
+  const ref = ctx.db.collection('system').doc('state');
+  const st = await ref.get();
+  if ((st.exists ? st.data() : {}).lastWeeklyDigest === hoje) return;
+  const lim = somarDias(hoje, 7);
+  const cuidar = [], aniversarios = [];
+  const fichas = await ctx.db.collection('parceiros_mensais').get();
+  for (const doc of fichas.docs) {
+    const f = doc.data();
+    const p = proximoContato(f);
+    if (p && p <= lim) {
+      const dias = Math.round((Date.parse(p) - Date.parse(hoje)) / 86400000);
+      const ult = (f.contatos || []).slice(-1)[0];
+      cuidar.push({ nome: f.nome || 'Parceiro', phone: f.phone, dias, quando: dias < 0 ? `atrasado ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`, nota: ult && ult.nota });
+    }
+    for (const a of datasDaFicha(f)) {
+      for (let i = 0; i <= 7; i++) {
+        const dia = somarDias(hoje, i);
+        if (ehAniversarioHoje(a.nasc, dia)) aniversarios.push({ quem: a.quem, rel: a.rel, quando: i === 0 ? 'hoje' : i === 1 ? 'amanhã' : `em ${i} dias` });
+      }
+    }
+  }
+  cuidar.sort((a, b) => a.dias - b.dias);
+  const perfis = await ctx.db.collection('profiles').get();
+  const quinze = somarDias(hoje, -14);
+  const boasVindas = [], pendentes = [];
+  perfis.docs.forEach((x) => {
+    const p = x.data();
+    if (p.status === 'pending') pendentes.push({ nome: p.nome, cidade: p.cidade });
+    else if (p.status === 'approved' && !p.admin && p.whatsapp && !p.waWelcomeAt && String(p.approvedAt || '') >= quinze) boasVindas.push({ nome: p.nome, phone: p.whatsapp });
+  });
+  const total = cuidar.length + aniversarios.length + boasVindas.length + pendentes.length;
+  if (total) {
+    const tpl = emails.weeklyCare({ cuidar: cuidar.slice(0, 15), aniversarios, boasVindas, pendentes });
+    log(`resumo semanal: ${total} itens`);
+    try { await ctx.sendMail({ to: SENDER.email, name: SENDER.name, subject: tpl.subject, html: tpl.html, text: tpl.text }); }
+    catch (e) { log('  falhou o resumo semanal: ' + e.message); return; }
+    await pushAdmins(ctx, { title: 'Semana de cuidado 🌱', body: [cuidar.length ? `${cuidar.length} para conversar` : '', pendentes.length ? `${pendentes.length} inscrição(ões)` : '', boasVindas.length ? `${boasVindas.length} boas-vindas` : ''].filter(Boolean).join(' · ') || 'Veja o resumo no e-mail.' });
+  }
+  await ref.set({ lastWeeklyDigest: hoje }, { merge: true });
+}
+
 async function daily(ctx) {
   await aniversarios(ctx);
   await alertaFamilia(ctx);
+  await resumoSemanal(ctx);
   await oracoesDoMes(ctx);
 }
 
@@ -343,7 +395,7 @@ async function main() {
   else throw new Error('Uso: node run.js poll | daily | teste <tipo>');
 }
 
-module.exports = { pollInscricoes, poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
+module.exports = { resumoSemanal, pollInscricoes, poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
 
 if (require.main === module) {
   main().then(() => process.exit(0)).catch((e) => { console.error('ERRO:', e.message); process.exit(1); });

@@ -137,6 +137,13 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Histórico de modificações: admin escreve (como si mesmo) e lê; ninguém edita nem apaga.
+    match /auditoria/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     // Everything else (including the now-retired 'partners' and 'admins'
     // collections) is denied by default — no rule below means no access.
   }
