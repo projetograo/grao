@@ -1624,7 +1624,7 @@ function loadMensais(filter){
   if(!el) return;
   el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
   
-  getDb().collection('parceiros_mensais').orderBy('timestamp','desc').get()
+  return getDb().collection('parceiros_mensais').orderBy('timestamp','desc').get()
   .then(snap=>{
     if(snap.empty){
       el.innerHTML='<p style="font-size:0.82rem;color:var(--text3)">Nenhum parceiro ainda. Que o Senhor levante!</p>';
@@ -1641,47 +1641,18 @@ function loadMensais(filter){
       return;
     }
 
-    el.innerHTML = docs.map(d=>`
-      <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:8px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px">
-          <div style="flex:1">
-            <div style="font-size:0.9rem;font-weight:500;color:var(--text);margin-bottom:2px">${esc(d.nome)||'—'}</div>
-            <div style="font-size:0.74rem;color:var(--text3)">${esc(d.email)} ${d.phone?'· '+esc(d.phone):''}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0">
-            <span style="font-size:0.88rem;font-weight:600;color:var(--accent)">${esc(d.valor)||'—'}</span>
-            <span style="font-size:0.6rem;padding:2px 8px;border-radius:50px;background:${d.tipo==='cartao'?'rgba(232,168,112,0.15)':'rgba(122,158,120,0.15)'};color:${d.tipo==='cartao'?'var(--accent)':'var(--green)'};display:inline-flex;align-items:center;gap:4px">
-              <svg width="9" height="9"><use href="#${d.tipo==='cartao'?'icard':'ipix'}"/></svg>${d.tipo==='cartao'?'Cartão':(d.tipo==='pix'?'Pix':'Manual')}
-            </span>
-          </div>
+    el.innerHTML = docs.map(d=>{
+      const dias=crmDiasAte(crmProximo(d));
+      const prox = dias===null?'' : dias<0?'<b style="color:var(--red)">contato atrasado</b>' : dias===0?'<b style="color:var(--accent)">contato hoje</b>' : dias<=7?'contato em '+dias+' dias':'';
+      const cat = d.categoria==='adotou'?'Adotou o projeto':d.categoria==='inscrito'?'Inscrito no app':'Parceiro financeiro';
+      return `<div class="adrow" style="cursor:pointer" onclick='openParceiro(${JSON.stringify(d.id)})'>
+        <div class="adri">
+          <div class="adrt">${esc(d.nome)||'—'}${d.destaque?' <span style="font-size:.7rem;background:rgba(232,168,112,.2);color:var(--accent);border-radius:50px;padding:2px 8px;margin-left:4px">atenção especial</span>':''}</div>
+          <div class="adrm">${cat}${prox?' · '+prox:''}</div>
         </div>
-        <div style="font-size:0.72rem;color:var(--text3);margin-bottom:10px">Cadastrado em ${esc(d.data)||'—'}</div>
-        
-        <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-            <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3)">Ficha</div>
-            <button onclick='openContato(${JSON.stringify(d.id)})' style="background:rgba(232,168,112,.15);color:var(--accent);border:1px solid var(--accent);border-radius:50px;padding:4px 12px;font-size:.68rem;cursor:pointer;font-family:'Inter',sans-serif;margin-right:6px">Registrei contato</button>
-            <button onclick='openFicha(${JSON.stringify(d.id)})' style="background:rgba(255,255,255,0.08);color:var(--text2);border:1px solid var(--border-md);border-radius:50px;padding:4px 12px;font-size:.68rem;cursor:pointer;font-family:'Inter',sans-serif">Editar</button>
-          </div>
-          ${fichaResumoHtml(d)}
-        </div>
-        <!-- Contribution tracking -->
-        <div style="background:var(--card-lo);border-radius:8px;padding:10px;margin-bottom:10px">
-          <div style="font-size:0.6rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px">Registro de contribuições</div>
-          <div id="contLog_${d.id}" style="font-size:0.78rem;color:var(--text2);margin-bottom:8px">
-            ${(d.contribuicoes||[]).length===0
-              ? '<span style="color:var(--text3);font-style:italic">Nenhuma registrada ainda</span>'
-              : (d.contribuicoes||[]).map(c=>`<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>${esc(c.mes)}</span><span style="color:var(--accent)">${esc(c.valor)}</span></div>`).join('')
-            }
-          </div>
-          <div style="display:flex;gap:6px">
-            <input id="contMes_${d.id}" type="text" placeholder="Ex: Maio/2026" style="flex:1;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
-            <input id="contVal_${d.id}" type="text" placeholder="R$ 50" style="width:80px;background:rgba(255,255,255,0.07);border:1px solid var(--border-md);border-radius:8px;padding:7px 10px;font-size:0.78rem;color:var(--text);font-family:'Inter',sans-serif;outline:none">
-            <button onclick='addContribuicao(${JSON.stringify(d.id)})' style="background:var(--accent);color:var(--bg-deep);border:none;border-radius:8px;padding:7px 12px;font-size:0.72rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap">+ Registrar</button>
-          </div>
-        </div>
-        <button onclick='deleteParceiro(${JSON.stringify(d.id)},${JSON.stringify(d.nome||"")},this)' style="width:100%;background:transparent;border:1px solid rgba(224,120,96,0.3);color:var(--red);border-radius:8px;padding:7px;font-size:0.72rem;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s">Encerrar parceria</button>
-      </div>`).join('');
+        <div style="text-align:right;flex:none"><div style="font-size:.95rem;font-weight:600;color:var(--accent)">${esc(d.valor)||''}</div><div style="font-size:.8rem;color:var(--text2)">ver</div></div>
+      </div>`; }).join('');
+    try{ const pm=document.getElementById('parceiroModal'); if(window._parceiroAberto && pm && pm.style.display==='flex') openParceiro(window._parceiroAberto); }catch(e){}
   })
   .catch(e=>{ el.innerHTML='<p style="font-size:0.82rem;color:var(--red)">Erro: '+e.message+'</p>'; });
 }
@@ -1711,7 +1682,7 @@ function deleteParceiro(docId, nome, btn){
   if(!confirm('Encerrar a parceria com '+nome+'? Isso remove o registro, mas nao cancela cobranças no Stripe.')) return;
   btn.textContent='Encerrando...';
   getDb().collection('parceiros_mensais').doc(docId).delete()
-  .then(()=>{ toast('Parceria encerrada. Que Deus abençoe '+nome+'.'); loadMensais(); })
+  .then(()=>{ closeParceiro(); toast('Parceria encerrada. Que Deus abençoe '+nome+'.'); loadMensais(); })
   .catch(e=>toast('Erro: '+e.message));
 }
 
@@ -2359,7 +2330,7 @@ function renderNextBdays(docs){
 
 const ESTADO_CIVIL = {solteiro:'Solteiro(a)', casado:'Casado(a)', viuvo:'Viúvo(a)', divorciado:'Divorciado(a)'};
 
-function fichaResumoHtml(d){
+function fichaResumoHtml(d,semChip){
   const cat = (d.destaque?'Atenção especial · ':'')+(d.categoria==='adotou' ? 'Adotou o projeto' : (d.categoria==='financeiro' ? 'Parceiro financeiro' : (d.categoria==='inscrito'?'Inscrito no app':'')));
   const L=[];  // linhas de texto
   const nb=fichaNextBirthday(d.nascimento);
@@ -2378,7 +2349,6 @@ function fichaResumoHtml(d){
   if(d.outrosFamiliares) L.push(`<b>Em casa</b> ${esc(d.outrosFamiliares)}`);
   if(d.oracao) L.push(`<b>Orar por</b> ${esc(d.oracao)}`);
   if(d.notas) L.push(`<b>Notas</b> ${esc(d.notas)}`);
-  const crm=crmLinha(d); if(crm) L.push(crm);
   // o que ainda não sabemos — convite gentil para ir conhecendo aos poucos
   const falta=[];
   if(!d.nascimento) falta.push('aniversário');
@@ -2386,7 +2356,7 @@ function fichaResumoHtml(d){
   if(!d.filhosStatus) falta.push('se tem filhos');
   if(!d.endereco && !d.cidade) falta.push('onde mora');
   let html='';
-  if(cat) html+=`<div style="margin-bottom:6px"><span style="font-size:.6rem;padding:2px 8px;border-radius:50px;background:rgba(232,168,112,.15);color:var(--accent)">${cat}</span></div>`;
+  if(cat && !semChip) html+=`<div style="margin-bottom:6px"><span style="font-size:.6rem;padding:2px 8px;border-radius:50px;background:rgba(232,168,112,.15);color:var(--accent)">${cat}</span></div>`;
   html+=L.map(l=>`<div style="font-size:.78rem;color:var(--text2);line-height:1.5;margin-bottom:4px;white-space:pre-wrap">${l}</div>`).join('');
   if(falta.length) html+=`<div style="font-size:.72rem;color:var(--text3);font-style:italic;margin-top:6px">Ainda não sabemos: ${falta.join(', ')}.</div>`;
   return html;
@@ -2527,7 +2497,7 @@ function discardDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} cl
 })();
 // botão voltar do celular fecha o modal aberto em vez de sair do app
 (function(){
-  const MODS=['fichaModal','privModal','installModal','contribuicaoModal','perfilModal','waModal','contatoModal'];
+  const MODS=['parceiroModal','fichaModal','privModal','installModal','contribuicaoModal','perfilModal','waModal','contatoModal'];
   const aberto=()=>MODS.map(i=>document.getElementById(i)).find(m=>m&&m.style.display&&m.style.display!=='none');
   new MutationObserver(()=>{ if(aberto() && !history.state?.modal) history.pushState({modal:1},''); }).observe(document.body,{subtree:true,attributes:true,attributeFilter:['style']});
   window.addEventListener('popstate',()=>{ const m=aberto(); if(m) m.style.display='none'; });
@@ -2798,5 +2768,45 @@ async function perfilFicha(uid){
       id=ref.id; _mensaisById[id]={id,nome:p.nome||'',email,phone:p.whatsapp||'',cidade:p.cidade||'',nascimento:p.nascimento||'',categoria:'inscrito'};
     }
     closePerfil(); openFicha(id);
+  }catch(e){ toast('Erro: '+e.message); }
+}
+
+// ══ Parceiro: lista compacta + tela de detalhes ══
+function openParceiro(id){
+  const d=_mensaisById[id]; if(!d) return;
+  window._parceiroAberto=id;
+  const cat = d.categoria==='adotou'?'Adotou o projeto':d.categoria==='inscrito'?'Inscrito no app':'Parceiro financeiro';
+  const forma = d.tipo==='cartao'?'Cartão':d.tipo==='pix'?'Pix':'Cadastro manual';
+  document.getElementById('ppNome').textContent=d.nome||'—';
+  document.getElementById('ppChips').innerHTML=[cat,forma].concat(d.destaque?['Atenção especial']:[]).map(t=>`<span style="font-size:.78rem;padding:4px 12px;border-radius:50px;background:rgba(232,168,112,.16);color:var(--accent)">${t}</span>`).join(' ');
+  const titulo=t=>`<div style="font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:28px 0 10px">${t}</div>`;
+  const hist=(d.contatos||[]).slice(-4).reverse().map(c=>`<div style="padding:9px 0;border-bottom:1px solid var(--border);font-size:.92rem;color:var(--text2);line-height:1.5"><b style="color:var(--text)">${new Date(c.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</b> · ${esc(c.canal||'')}${c.por?' · '+esc(c.por):''}${c.nota?'<br>'+esc(c.nota):''}</div>`).join('');
+  const contrib=(d.contribuicoes||[]).length?(d.contribuicoes||[]).map(c=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:.95rem;color:var(--text2)"><span>${esc(c.mes)}</span><span style="color:var(--accent);font-weight:600">${esc(c.valor)}</span></div>`).join(''):'<div style="font-size:.92rem;color:var(--text3)">Nenhuma registrada ainda.</div>';
+  document.getElementById('ppCorpo').innerHTML =
+    titulo('Contato')+
+    perfilLinha('E-mail',esc(d.email||''))+
+    perfilLinha('WhatsApp',d.phone?`<a href="${waLink(d.phone)}" target="_blank" rel="noopener" style="color:#25D366">${esc(d.phone)}</a>`:'')+
+    perfilLinha('Contribuição',esc(d.valor||''))+
+    perfilLinha('Cadastrado em',esc(d.data||''))+
+    titulo('Acompanhamento')+
+    `<div style="font-size:.95rem;color:var(--text2);line-height:1.6;margin-bottom:10px">${crmLinha(d).replace(/\n/g,'<br>')}</div>`+hist+
+    `<button class="adbtn" style="margin-top:14px" onclick='openContato(${JSON.stringify(id)})'>Registrei contato</button>`+
+    titulo('Ficha')+
+    `<div style="line-height:1.6">${fichaResumoHtml(d,true)}</div>`+
+    `<button class="adbtn" style="margin-top:14px;background:rgba(255,255,255,.1);color:var(--text)" onclick='openFicha(${JSON.stringify(id)})'>Editar ficha</button>`+
+    titulo('Contribuições')+contrib+
+    `<div class="adform" style="margin-top:14px"><div><label class="adlbl">Mês</label><input class="adinp" id="contMes_${id}" type="text" placeholder="Ex: Maio/2026"></div>
+     <div><label class="adlbl">Valor</label><input class="adinp" id="contVal_${id}" type="text" placeholder="R$ 50"></div>
+     <button class="adbtn" style="background:rgba(255,255,255,.1);color:var(--text)" onclick='addContribModal(${JSON.stringify(id)})'>Registrar contribuição</button></div>`+
+    `<button class="adbtn" style="margin-top:34px;background:transparent;border:1px solid var(--red);color:var(--red)" onclick='deleteParceiro(${JSON.stringify(id)},${JSON.stringify(d.nome||"")},this)'>Encerrar parceria</button>`;
+  const m=document.getElementById('parceiroModal'); document.body.appendChild(m); m.style.display='flex';
+}
+function closeParceiro(){ document.getElementById('parceiroModal').style.display='none'; window._parceiroAberto=null; }
+async function addContribModal(id){
+  const mes=(document.getElementById('contMes_'+id)||{}).value||'', val=(document.getElementById('contVal_'+id)||{}).value||'';
+  if(!mes.trim()||!val.trim()) return toast('Preencha mês e valor.');
+  try{
+    await getDb().collection('parceiros_mensais').doc(id).update({ contribuicoes:firebase.firestore.FieldValue.arrayUnion({mes:mes.trim(),valor:val.trim(),data:new Date().toLocaleDateString('pt-BR')}) });
+    toast('Contribuição registrada'); loadMensais();
   }catch(e){ toast('Erro: '+e.message); }
 }
