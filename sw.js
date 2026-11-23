@@ -1,5 +1,5 @@
 // GRÃO — Service Worker v3
-const CACHE = 'grao-v16';
+const CACHE = 'grao-v17';
 const ASSETS = [
   '/grao/',
   '/grao/index.html',
