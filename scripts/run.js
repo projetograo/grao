@@ -3,7 +3,7 @@
 //   node run.js poll          -> a cada 15 min: boas-vindas, aviso de informativo, push de novidades
 //   node run.js daily         -> 1x por dia: aniversários e pedidos de oração do mês
 //   node run.js teste <tipo>  -> manda um exemplo SÓ para o e-mail da organização
-//                                (tipos: boas-vindas, informativo, aniversario, oracoes, push)
+//                                (tipos: boas-vindas, informativo, aniversario, aniversario-parceiro, oracoes, push)
 // Segredos (GitHub → Settings → Secrets): BREVO_API_KEY e FIREBASE_SERVICE_ACCOUNT.
 
 const emails = require('./emails');
@@ -79,6 +79,18 @@ async function pushTodos(ctx, { title, body, url }) {
   const snap = await ctx.db.collection('pushTokens').get();
   const tokens = [...new Set(snap.docs.map((d) => d.id))];
   return pushPara(ctx, tokens, { title, body, url });
+}
+
+async function pushAdmins(ctx, msg) {
+  const admins = await ctx.db.collection('profiles').where('admin', '==', true).get();
+  const uids = admins.docs.map((d) => d.id);
+  const tokens = [];
+  for (let i = 0; i < uids.length; i += 30) {
+    const t = await ctx.db.collection('pushTokens').where('uid', 'in', uids.slice(i, i + 30)).get();
+    t.docs.forEach((d) => tokens.push(d.id));
+  }
+  if (!tokens.length) { log('  nenhum aparelho de admin com notificação ativada.'); return { ok: 0, fail: 0 }; }
+  return pushPara(ctx, tokens, msg);
 }
 
 async function pushPara(ctx, tokens, { title, body, url }) {
@@ -181,14 +193,75 @@ function ehAniversarioHoje(nascimento, hoje) {
 async function aniversarios(ctx) {
   const hoje = hojeMaceio(ctx.now());
   const ano = Number(hoje.slice(0, 4));
+  const jaTratados = new Set(); // e-mails de quem faz aniversário hoje (evita mandar duas vezes)
   const lista = await parceiros(ctx, { incluirAdmin: true });
   for (const p of lista) {
-    if (!ehAniversarioHoje(p.nascimento, hoje) || p.birthdayEmailYear === ano) continue;
+    if (!ehAniversarioHoje(p.nascimento, hoje)) continue;
+    jaTratados.add(String(p.email).toLowerCase());
+    if (p.birthdayEmailYear === ano) continue;
     log(`aniversário → ${p.email}`);
     if (await mandar(ctx, p, emails.birthday({ nome: p.nome }))) {
       await ctx.db.collection('profiles').doc(p.id).update({ birthdayEmailYear: ano });
     }
   }
+  // parceiros de perto cadastrados na ficha (podem não ter conta no app)
+  const fichas = await ctx.db.collection('parceiros_mensais').get();
+  for (const d of fichas.docs) {
+    const f = d.data();
+    if (!f.email || f.emailOptOut === true || !ehAniversarioHoje(f.nascimento, hoje)) continue;
+    if (jaTratados.has(String(f.email).toLowerCase())) { continue; }
+    jaTratados.add(String(f.email).toLowerCase());
+    if (f.birthdayEmailYear === ano) continue;
+    log(`aniversário (ficha) → ${f.email}`);
+    if (await mandar(ctx, { email: f.email, nome: f.nome }, emails.birthday({ nome: f.nome }))) {
+      await d.ref.update({ birthdayEmailYear: ano });
+    }
+  }
+}
+
+// ── Aviso para a FAMÍLIA: aniversário de parceiro de perto, do cônjuge e dos filhos ──
+function somarDias(dataStr, dias) {
+  const [y, m, d] = dataStr.split('-').map(Number);
+  const t = new Date(Date.UTC(y, m - 1, d + dias));
+  return t.toISOString().slice(0, 10);
+}
+function datasDaFicha(f) {
+  const nome = f.nome || 'Parceiro';
+  const out = [];
+  if (f.nascimento) out.push({ quem: nome, rel: '', nasc: f.nascimento });
+  if (f.conjuge && f.conjuge.nascimento) out.push({ quem: f.conjuge.nome || 'Cônjuge', rel: `cônjuge de ${nome}`, nasc: f.conjuge.nascimento });
+  (f.filhos || []).forEach((x) => { if (x && x.nascimento) out.push({ quem: x.nome || 'Filho(a)', rel: `filho(a) de ${nome}`, nasc: x.nascimento }); });
+  return out;
+}
+async function alertaFamilia(ctx) {
+  const hoje = hojeMaceio(ctx.now());
+  const ref = ctx.db.collection('system').doc('state');
+  const st = await ref.get();
+  const estado = st.exists ? st.data() : {};
+  if (estado.lastFamilyAlert === hoje) return; // já avisou hoje
+  const em7 = somarDias(hoje, 7);
+  const itens = [];
+  const fichas = await ctx.db.collection('parceiros_mensais').get();
+  for (const d of fichas.docs) {
+    const f = d.data();
+    for (const a of datasDaFicha(f)) {
+      const nasc = Number(a.nasc.slice(0, 4));
+      if (ehAniversarioHoje(a.nasc, hoje)) itens.push({ quando: 'hoje', quem: a.quem, rel: a.rel, idade: Number(hoje.slice(0, 4)) - nasc, parceiro: f });
+      else if (ehAniversarioHoje(a.nasc, em7)) itens.push({ quando: 'em 7 dias', quem: a.quem, rel: a.rel, idade: Number(em7.slice(0, 4)) - nasc, parceiro: f });
+    }
+  }
+  if (itens.length) {
+    const tpl = emails.familyBirthdays({ itens });
+    log(`aviso de aniversário para a família: ${itens.map((i) => i.quem).join(', ')}`);
+    try {
+      await ctx.sendMail({ to: SENDER.email, name: SENDER.name, subject: tpl.subject, html: tpl.html, text: tpl.text });
+    } catch (e) { log('  falhou o e-mail para a família: ' + e.message); return; }
+    const hojeNomes = itens.filter((i) => i.quando === 'hoje').map((i) => i.quem);
+    const em7Nomes = itens.filter((i) => i.quando !== 'hoje').map((i) => i.quem);
+    const corpo = [hojeNomes.length ? 'Hoje: ' + hojeNomes.join(', ') : '', em7Nomes.length ? 'Em 7 dias: ' + em7Nomes.join(', ') : ''].filter(Boolean).join(' · ');
+    await pushAdmins(ctx, { title: 'Aniversário de parceiro 🎂', body: corpo });
+  }
+  await ref.set({ lastFamilyAlert: hoje }, { merge: true });
 }
 
 async function oracoesDoMes(ctx) {
@@ -217,6 +290,7 @@ async function oracoesDoMes(ctx) {
 
 async function daily(ctx) {
   await aniversarios(ctx);
+  await alertaFamilia(ctx);
   await oracoesDoMes(ctx);
 }
 
@@ -227,20 +301,15 @@ async function teste(ctx, tipo) {
     'boas-vindas': () => emails.welcome({ nome: alvo.nome, genero: 'M' }),
     informativo: () => emails.news({ nome: alvo.nome, titulo: 'Quinto informativo', resumo: 'Exemplo de resumo do informativo, como vai aparecer no e-mail.' }),
     aniversario: () => emails.birthday({ nome: alvo.nome }),
+    'aniversario-parceiro': () => emails.familyBirthdays({ itens: [
+      { quando: 'hoje', quem: 'Maria Souza', rel: '', idade: 52, parceiro: { phone: '(82) 99999-0000', email: 'maria@exemplo.com', endereco: 'Rua das Flores, 10, Ponta Verde', cidade: 'Maceió, AL', valor: 'R$ 100', oracao: 'Saúde do marido e a faculdade do filho.', notas: 'Gosta de café e de livros.' } },
+      { quando: 'em 7 dias', quem: 'Pedro', rel: 'filho(a) de Maria Souza', idade: 9, parceiro: { phone: '(82) 99999-0000' } } ] }),
     oracoes: () => emails.prayers({ nome: alvo.nome, mes: MESES[ctx.now().getMonth()], itens: [
       { title: 'Direção clara', body: 'Pela confirmação do campo entre os povos não alcançados.' },
       { title: 'Nossa família', body: 'Pela saúde e pelo cuidado de cada um de nós.' } ] }),
   };
   if (tipo === 'push') {
-    const admins = await ctx.db.collection('profiles').where('admin', '==', true).get();
-    const uids = admins.docs.map((d) => d.id);
-    const tokens = [];
-    for (let i = 0; i < uids.length; i += 30) {
-      const t = await ctx.db.collection('pushTokens').where('uid', 'in', uids.slice(i, i + 30)).get();
-      t.docs.forEach((d) => tokens.push(d.id));
-    }
-    if (!tokens.length) { log('Nenhum aparelho de admin com notificação ativada.'); return; }
-    await pushPara(ctx, tokens, { title: 'Teste do Grão 🔔', body: 'Se você está vendo isto, as notificações funcionam.' });
+    await pushAdmins(ctx, { title: 'Teste do Grão 🔔', body: 'Se você está vendo isto, as notificações funcionam.' });
     return;
   }
   if (!exemplos[tipo]) throw new Error('Tipo de teste desconhecido: ' + tipo);
@@ -259,7 +328,7 @@ async function main() {
   else throw new Error('Uso: node run.js poll | daily | teste <tipo>');
 }
 
-module.exports = { poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, oracoesDoMes };
+module.exports = { poll, daily, teste, ehAniversarioHoje, hojeMaceio, aniversarios, alertaFamilia, oracoesDoMes };
 
 if (require.main === module) {
   main().then(() => process.exit(0)).catch((e) => { console.error('ERRO:', e.message); process.exit(1); });
