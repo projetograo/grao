@@ -111,6 +111,26 @@
   </div>
 </div>
 
+<!-- BOAS-VINDAS WHATSAPP (admin) -->
+<div id="waModal" style="display:none;position:fixed;inset:0;z-index:460;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeWa()">
+  <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.3rem;color:var(--text)" id="waTitle">Boas-vindas</div>
+        <div style="font-size:.75rem;color:var(--text3);margin-top:2px" id="waSub"></div>
+      </div>
+      <button onclick="closeWa()" style="background:none;border:none;color:var(--text3);font-size:1.5rem;cursor:pointer;line-height:1" aria-label="Fechar">×</button>
+    </div>
+    <div class="adform">
+      <div><label class="adlbl">1ª mensagem · boas-vindas</label><textarea class="adta" id="waMsg1" style="min-height:150px"></textarea></div>
+      <button class="adbtn" style="background:#25D366;color:#fff" onclick="sendWa(1)">Abrir WhatsApp com a mensagem 1</button>
+      <div><label class="adlbl">2ª mensagem · convite do grupo</label><textarea class="adta" id="waMsg2" style="min-height:90px"></textarea></div>
+      <button class="adbtn" style="background:rgba(37,211,102,.18);color:#25D366;border:1px solid #25D366" onclick="sendWa(2)">Abrir WhatsApp com a mensagem 2</button>
+      <p style="font-size:.72rem;color:var(--text3);line-height:1.6;margin:0">O texto fica salvo neste aparelho para as próximas pessoas. {nome} vira o primeiro nome de quem se cadastrou.</p>
+    </div>
+  </div>
+</div>
+
 <!-- FICHA DO PARCEIRO (admin) -->
 <div id="fichaModal" style="display:none;position:fixed;inset:0;z-index:450;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center" onclick="if(event.target===this)closeFicha()">
   <div style="background:var(--bg-deep);border-top:2px solid var(--accent);border-radius:24px 24px 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;padding:24px 24px 36px">
@@ -498,6 +518,9 @@
       </div>
       <div id="mensaisList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div>
     </div>
+
+    <div class="adsl">Dar boas-vindas no WhatsApp</div>
+    <div class="adcard"><div id="waPendingList"><p style="font-size:0.82rem;color:var(--text3)">Carregando...</p></div></div>
 
     <div class="adsl">Solicitações de acesso pendentes</div>
     <div class="adcard">

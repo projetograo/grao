@@ -1709,6 +1709,7 @@ function deleteParceiro(docId, nome, btn){
 }
 
 function loadPending(){
+  try{ loadWaPending(); }catch(e){}
   const el = document.getElementById('pendingList');
   if(!el) return;
   el.innerHTML = '<p style="font-size:0.82rem;color:var(--text3)">Carregando...</p>';
@@ -1761,6 +1762,7 @@ function approvePending(docId){
         loadPartnersFromFirebase();
         renderAdmin();
         toast('Aprovado! O e-mail de boas-vindas sai em até 15 minutos.');
+        if(d.whatsapp) openWa(docId,{...d});
       });
   })
   .catch(e=>toast('Erro: '+e.message));
@@ -2527,3 +2529,46 @@ function abrirPendentes(){
 }
 if(/[?&]aprovar=1/.test(location.search)){ window.__abrirPendentes=true; try{ history.replaceState(null,'',location.pathname); }catch(e){} }
 if('serviceWorker' in navigator){ navigator.serviceWorker.addEventListener('message',e=>{ if(e.data&&e.data.go==='aprovar') abrirPendentes(); }); }
+
+// ══ Boas-vindas pelo WhatsApp ══
+const WA_GRUPO='https://chat.whatsapp.com/EHJuSnCBgpb2MCVPlXPWdp';
+const WA_MSG1='Oi, {nome}! 🌱 Aqui é {eu}, do Projeto Grão.\n\nSua conta foi aprovada e estamos muito felizes por ter você caminhando junto com a gente! Cada passo desta jornada fica mais leve com parceiros como você.\n\nQualquer dúvida, é só me chamar por aqui. Um abraço da nossa família 🤍';
+const WA_MSG2='{nome}, para acompanhar as novidades e os pedidos de oração, entre no nosso grupo do WhatsApp: '+WA_GRUPO;
+let _waDoc=null;
+function waNumero(f){ let n=String(f||'').replace(/\D/g,''); if(n.length<=11) n='55'+n; return n; }
+function waTxt(t,d){
+  const eu=((me&&me.nome)||'Bruno').trim().split(/\s+/)[0], nome=String(d.nome||'').trim().split(/\s+/)[0]||'tudo bem';
+  return t.split('{nome}').join(nome).split('{eu}').join(eu);
+}
+function openWa(id,d){
+  _waDoc={id,d};
+  const m1=localStorage.getItem('grao_wa1')||WA_MSG1, m2=localStorage.getItem('grao_wa2')||WA_MSG2;
+  document.getElementById('waMsg1').value=waTxt(m1,d); document.getElementById('waMsg2').value=waTxt(m2,d);
+  document.getElementById('waTitle').textContent='Boas-vindas a '+(String(d.nome||'').split(/\s+/)[0]||'');
+  document.getElementById('waSub').textContent=d.whatsapp+(d.cidade?' · '+d.cidade:'');
+  const m=document.getElementById('waModal'); document.body.appendChild(m); m.style.display='flex';
+}
+function closeWa(){ document.getElementById('waModal').style.display='none'; }
+function sendWa(n){
+  if(!_waDoc) return;
+  const txt=document.getElementById('waMsg'+n).value;
+  // guarda o modelo (com {nome}/{eu} de volta) para as próximas pessoas
+  try{
+    const d=_waDoc.d, nome=String(d.nome||'').trim().split(/\s+/)[0], eu=((me&&me.nome)||'Bruno').trim().split(/\s+/)[0];
+    let modelo=txt; if(nome) modelo=modelo.split(nome).join('{nome}'); if(eu) modelo=modelo.split(eu).join('{eu}');
+    localStorage.setItem('grao_wa'+n, modelo);
+  }catch(e){}
+  window.open('https://wa.me/'+waNumero(_waDoc.d.whatsapp)+'?text='+encodeURIComponent(txt),'_blank');
+  if(n===1){ getDb().collection('profiles').doc(_waDoc.id).update({waWelcomeAt:new Date().toISOString()}).then(()=>loadWaPending()).catch(()=>{}); }
+}
+function loadWaPending(){
+  const el=document.getElementById('waPendingList'); if(!el) return;
+  getDb().collection('profiles').where('status','==','approved').get().then(snap=>{
+    const lista=snap.docs.map(x=>({id:x.id,...x.data()})).filter(p=>p.whatsapp && !p.waWelcomeAt && !p.admin)
+      .sort((a,b)=>String(b.approvedAt||'').localeCompare(String(a.approvedAt||'')));
+    window._waById={}; lista.forEach(p=>{ window._waById[p.id]=p; });
+    el.innerHTML = lista.length ? lista.map(p=>`<div class="adrow"><div class="adri"><div class="adrt">${esc(p.nome)}</div><div class="adrm">${esc(p.whatsapp)}${p.cidade?' · '+esc(p.cidade):''}</div></div>
+      <button class="adbtn" style="width:auto;padding:8px 14px;background:#25D366;color:#fff" onclick='openWa(${JSON.stringify(p.id)},window._waById[${JSON.stringify(p.id)}])'>Boas-vindas</button></div>`).join('')
+      : '<p style="font-size:.82rem;color:var(--text3)">Ninguém esperando boas-vindas. Quando você aceitar alguém, o botão aparece aqui.</p>';
+  }).catch(()=>{ el.innerHTML='<p style="font-size:.82rem;color:var(--red)">Não foi possível carregar.</p>'; });
+}
